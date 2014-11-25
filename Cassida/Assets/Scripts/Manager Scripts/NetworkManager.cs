@@ -8,6 +8,7 @@ public class NetworkManager : MonoBehaviour
     {
         PhotonNetwork.offlineMode = false;
         PhotonNetwork.ConnectUsingSettings("Cassida v0.0.1");
+        //PhotonNetwork.ConnectToBestCloudServer("Cassida v0.0.1");
     }
 
     void OnDisconnectedFromPhoton()

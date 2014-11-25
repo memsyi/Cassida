@@ -124,7 +124,7 @@ GameObject:
   - 4: {fileID: 128952096}
   - 114: {fileID: 128952097}
   m_Layer: 0
-  m_Name: Generator
+  m_Name: Generators
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -153,7 +153,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00d66fec795754342a9d00543e87bbb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _mapSize: {x: 5, y: 5}
+  _bottomEdgeLength: 7
+  _mapForm: 0
   _hexagonTile: {fileID: 400002, guid: 8807240de349afe48be2e38e01c8e401, type: 2}
 --- !u!1 &250766429
 GameObject:
@@ -421,14 +422,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _borderCrossingAction: 3
-  _leftMouseButtonAction: 0
+  _leftMouseButtonAction: 1
   _rightMouseButtonAction: 1
   _mousewheelAction: 2
-  _allowWasdAndKeyArrows: 0
-  _allowNumPad: 1
+  _allowWasdAndKeyArrows: 1
+  _allowNumPad: 0
   _allowOwnKeys: 1
   _allowMovement: 1
   _allowRotation: 1
+  _allowUpDownRotation: 0
   _ownForwardKey: w
   _ownLeftKey: a
   _ownBackwardKey: s
@@ -439,10 +441,16 @@ MonoBehaviour:
   _ownZoomOutKey: y
   _followObject: {fileID: 0}
   _lookAtObject: {fileID: 0}
+  _movementArea:
+    serializedVersion: 2
+    x: -5
+    y: -5
+    width: 10
+    height: 10
   _movementSpeed: 1
   _rotationSpeed: 1
-  _zoomSpeed: 1
-  _buttonSpeed: 2
+  _zoomSpeed: 2
+  _buttonSpeed: 1
   _minimumZoom: 20
   _maximumZoom: 3
   _zoomDownAngle: 20

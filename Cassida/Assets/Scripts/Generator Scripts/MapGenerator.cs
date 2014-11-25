@@ -4,10 +4,13 @@ using System.Collections;
 public class MapGenerator : MonoBehaviour
 {
     [SerializeField]
-    private Vector2 _mapSize;
+    private EdgeLength _bottomEdgeLength = EdgeLength.Fife;
 
     [SerializeField]
-    Transform _hexagonTile;
+    private MapForms _mapForm = MapForms.Hexagon;
+
+    [SerializeField]
+    Transform _hexagonTile = null;
 
     #region Variables
     private Transform HexagonTile
@@ -16,38 +19,61 @@ public class MapGenerator : MonoBehaviour
         set { _hexagonTile = value; }
     }
 
-    private Vector2 MapSize
+    private MapForms MapForm
     {
-        get { return _mapSize; }
-        set { _mapSize = value; }
-    } 
-	#endregion
+        get { return _mapForm; }
+        set { _mapForm = value; }
+    }
+
+    private int BottomEdgeLength
+    {
+        get { return (int)_bottomEdgeLength; }
+        set { _bottomEdgeLength = (EdgeLength)value; }
+    }
+    #endregion
+
+    private enum EdgeLength { Three = 3, Fife = 5, Seven = 7, Nine = 9, Eleven = 11, Thirteen = 13 }
+    private enum MapForms { Hexagon, CuttedDiamond, Diamond }
 
     private Transform[,] TileArray { get; set; }
 
     void GenerateMap()
     {
-        TileArray = new Transform[(int)MapSize.x, (int)MapSize.y];
-
-        for (int x = 0; x < MapSize.x; x++)
+        if (MapForm == MapForms.CuttedDiamond)
         {
-            for(int z = 0; z < MapSize.y; z++)
+            BottomEdgeLength = BottomEdgeLength - BottomEdgeLength / 2 + 1;
+        }
+        else if (MapForm == MapForms.Diamond)
+        {
+            BottomEdgeLength = BottomEdgeLength / 2 + 1;
+        }
+
+        TileArray = new Transform[BottomEdgeLength * 2 - 1, BottomEdgeLength * 2 - 1];
+
+        for (int x = -BottomEdgeLength + 1; x < BottomEdgeLength; x++)
+        {
+            for (int z = -BottomEdgeLength + 1; z < BottomEdgeLength; z++)
             {
-                InstantiateTile(new Vector3(x, 0, z), Vector3.zero);
+                if ((MapForm == MapForms.Hexagon && Mathf.Abs(x + z) < BottomEdgeLength)
+                 || (MapForm == MapForms.CuttedDiamond && Mathf.Abs(x + z) <= BottomEdgeLength * 2 - 4)
+                 || MapForm == MapForms.Diamond)
+                {
+                    InstantiateTile(new Vector3(x, 0, z));
+                }
             }
         }
     }
 
-    void InstantiateTile(Vector3 position, Vector3 positionInfo)
+    void InstantiateTile(Vector3 position)
     {
         Transform newTile = Instantiate(
             HexagonTile,
-            new Vector3(position.x + (position.z % 2 == 0 ? 0 : HexagonTile.localScale.z / 2) * 10, 0, position.z * HexagonTile.localScale.z * 10), 
+            new Vector3(position.x + (position.z * HexagonTile.localScale.z / 2) * 10, 0, position.z * HexagonTile.localScale.z * 10),
             HexagonTile.localRotation) as Transform;
 
-        newTile.name = positionInfo.ToString();
+        newTile.name = position.x + " " + position.z;
 
-        TileArray[(int)position.x, (int)position.z] = newTile;
+        TileArray[(int)position.x + BottomEdgeLength - 1, (int)position.z + BottomEdgeLength - 1] = newTile;
     }
 
     void Init()

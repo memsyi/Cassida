@@ -19,7 +19,8 @@ namespace Assets.Scripts
             _allowNumPad = true,
             _allowOwnKeys = false,
             _allowMovement = true,
-            _allowRotation = true;
+            _allowRotation = true,
+            _allowUpDownRotation = true;
 
         [SerializeField]
         private string
@@ -36,6 +37,9 @@ namespace Assets.Scripts
         private Transform
             _followObject = null,
             _lookAtObject = null;
+
+        [SerializeField]
+        Rect _movementArea = new Rect(-5, -5, 10, 10);
 
         [SerializeField]
         private float
@@ -104,6 +108,11 @@ namespace Assets.Scripts
             get { return _allowRotation; }
             set { _allowRotation = value; }
         }
+        public bool AllowUpDownRotation
+        {
+            get { return _allowUpDownRotation; }
+            set { _allowUpDownRotation = value; }
+        }
 
         public string OwnZoomOutKey
         {
@@ -161,6 +170,11 @@ namespace Assets.Scripts
         #endregion
 
         #region Controll Values
+        public Rect MovementArea
+        {
+            get { return _movementArea; }
+            set { _movementArea = value; }
+        }
         public float ZoomDownAngle
         {
             get { return _zoomDownAngle; }
@@ -418,7 +432,11 @@ namespace Assets.Scripts
             {
                 // Rotation
                 RotateRightOrLeft(-Input.GetAxis("Mouse X"));
-                RotateUpOrDown(-Input.GetAxis("Mouse Y"));
+
+                if (AllowUpDownRotation)
+                {
+                    RotateUpOrDown(-Input.GetAxis("Mouse Y"));
+                }
             }
         }
         #endregion
@@ -552,20 +570,46 @@ namespace Assets.Scripts
             transform.eulerAngles = rotation;
         }
 
+        private void CorrectPositionToMovementArea()
+        {
+            // Forward/ backward
+            if (transform.position.z < MovementArea.y)
+            {
+                transform.position = new Vector3(transform.position.x, transform.position.y, MovementArea.y);
+            }
+            else if (transform.position.z > MovementArea.y + MovementArea.height)
+            {
+                transform.position = new Vector3(transform.position.x, transform.position.y, MovementArea.y + MovementArea.height);
+            }
+
+            // Right/ left
+            if (transform.position.x < MovementArea.x)
+            {
+                transform.position = new Vector3(MovementArea.x, transform.position.y, transform.position.z);
+            }
+            else if (transform.position.x > MovementArea.x + MovementArea.width)
+            {
+                transform.position = new Vector3(MovementArea.x + MovementArea.width, transform.position.y, transform.position.z);
+            }
+        }
+
         #region Controlls
         /// <summary>
         /// <para> positive value for forward, negative value for backward </para>
         /// </summary>
         private void MoveForwardOrBackward(float movement)
         {
-            /* Since we don't want the camera height to change when moving, we have to
-             * save the starting height and reset it after moving.
+            /* If we don't want the camera height to change when moving, we have to
+             * save the start height and reset it after moving.
+             * Also we need to check whether we are out of movement area.
              */
             var startingHeight = transform.position.y;
 
             transform.position += transform.forward * MovementSpeed * GeneralMultiplier * HeightMultiplier * movement;
 
             transform.position = new Vector3(transform.position.x, startingHeight, transform.position.z);
+
+            CorrectPositionToMovementArea();
         }
 
         /// <summary>
@@ -573,7 +617,12 @@ namespace Assets.Scripts
         /// </summary>
         private void MoveRightOrLeft(float movement)
         {
+            /*
+             * We need to check whether we are out of movement area.
+             */
             transform.position += transform.right * MovementSpeed * GeneralMultiplier * HeightMultiplier * movement;
+
+            CorrectPositionToMovementArea();
         }
 
         /// <summary>
