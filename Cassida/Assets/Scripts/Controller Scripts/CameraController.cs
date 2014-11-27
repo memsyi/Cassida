@@ -14,6 +14,9 @@ namespace Assets.Scripts
             _mousewheelAction = KeyPressedActions.Rotation;
 
         [SerializeField]
+        private KeyResetActions _keyResetAction = KeyResetActions.Both;
+
+        [SerializeField]
         private bool
             _allowWasdAndKeyArrows = true,
             _allowNumPad = true,
@@ -58,6 +61,7 @@ namespace Assets.Scripts
 
         public enum BorderCrossingActions { Nothing, Movement, Rotation, Mixed }
         public enum KeyPressedActions { Nothing, Movement, Rotation }
+        public enum KeyResetActions { Nothing, Position, Rotation, Both }
 
         private const float GeneralMultiplier = 0.3f;
 
@@ -81,6 +85,11 @@ namespace Assets.Scripts
         {
             get { return _mousewheelAction; }
             set { _mousewheelAction = value; }
+        }
+        public KeyResetActions KeyResetAction
+        {
+            get { return _keyResetAction; }
+            set { _keyResetAction = value; }
         }
 
         public bool AllowOwnKeys
@@ -227,6 +236,7 @@ namespace Assets.Scripts
             private set { _heightMultiplier = value; }
         }
 
+        public Vector3 DefaultPosition { get; private set; }
         public Quaternion DefaultRotation { get; private set; }
 
         private void HandleUserInput()
@@ -258,7 +268,7 @@ namespace Assets.Scripts
         #region Keyboard Input
         private void HandleKeyboardInput()
         {
-            //Movement
+            // Movement
             #region Movement
             if (AllowMovement)
             {
@@ -382,11 +392,19 @@ namespace Assets.Scripts
             }
             #endregion
 
+            // Reset
+            #region Reset
+            // Position reset
+            if ((KeyResetAction == KeyResetActions.Both || KeyResetAction == KeyResetActions.Position) && Input.GetKey(KeyCode.Space))
+            {
+                transform.position = DefaultPosition;
+            }
             // Rotation reset
-            if (Input.GetKey(KeyCode.Backspace) || Input.GetKey(KeyCode.Keypad0))
+            if ((KeyResetAction == KeyResetActions.Both || KeyResetAction == KeyResetActions.Rotation) && (Input.GetKey(KeyCode.Backspace) || Input.GetKey(KeyCode.Keypad0)))
             {
                 transform.rotation = DefaultRotation;
-            }
+            } 
+            #endregion
         }
         #endregion
 
@@ -687,6 +705,7 @@ namespace Assets.Scripts
 
         private void Init()
         {
+            DefaultPosition = transform.position;
             DefaultRotation = transform.rotation;
         }
 

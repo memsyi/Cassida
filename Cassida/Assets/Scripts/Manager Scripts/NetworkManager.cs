@@ -3,25 +3,43 @@ using System.Collections;
 
 public class NetworkManager : MonoBehaviour
 {
-
-    void Connect()
+    public void ConnectToServer()
     {
         PhotonNetwork.offlineMode = false;
         PhotonNetwork.ConnectUsingSettings("Cassida v0.0.1");
-        //PhotonNetwork.ConnectToBestCloudServer("Cassida v0.0.1");
     }
 
-    void OnDisconnectedFromPhoton()
+    public void DisconnectFromServer()
+    {
+        PhotonNetwork.Disconnect();
+    }
+
+    public void JoinRandomRoom()
+    {
+        PhotonNetwork.JoinRandomRoom();
+    }
+
+    public void JoinRoom(string name)
+    {
+        PhotonNetwork.JoinOrCreateRoom(name, null, null);
+    }
+
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
+
+    private void OnDisconnectedFromPhoton()
     {
         PhotonNetwork.offlineMode = true;
     }
 
-    void OnPhotonRandomJoinFailed()
+    private void OnPhotonRandomJoinFailed()
     {
         PhotonNetwork.CreateRoom(null);
     }
 
-    void OnGUI()
+    private void OnGUI()
     {
         if (!PhotonNetwork.offlineMode)
         {
@@ -33,7 +51,7 @@ public class NetworkManager : MonoBehaviour
         {
             if (GUILayout.Button("Join Room"))
             {
-                PhotonNetwork.JoinRandomRoom();
+                JoinRandomRoom();
             }
         }
 
@@ -43,31 +61,31 @@ public class NetworkManager : MonoBehaviour
 
             if (GUILayout.Button("Leave Room"))
             {
-                PhotonNetwork.LeaveRoom();
+                LeaveRoom();
             }
         }
 
         if (!PhotonNetwork.offlineMode && GUILayout.Button("Go offline"))
         {
-            PhotonNetwork.Disconnect();
+            DisconnectFromServer();
         }
         else if (PhotonNetwork.offlineMode && GUILayout.Button("Go online"))
         {
-            Connect();
+            ConnectToServer();
         }
     }
 
-    void Init()
+    private void Init()
     {
         PhotonNetwork.offlineMode = true;
     }
 
-    void Start()
+    private void Start()
     {
         Init();
     }
 
-    void Update()
+    private void Update()
     {
 
     }

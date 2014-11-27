@@ -32,12 +32,15 @@ public class MapGenerator : MonoBehaviour
     }
     #endregion
 
+    // enums
     private enum EdgeLength { Three = 3, Fife = 5, Seven = 7, Nine = 9, Eleven = 11, Thirteen = 13 }
     private enum MapForms { Hexagon, CuttedDiamond, Diamond }
 
-    private Transform[,] TileArray { get; set; }
+    // map variables
+    private Transform Map { get; set; }
+    public Transform[,] TileArray { get; private set; }
 
-    void GenerateMap()
+    private void GenerateMap()
     {
         if (MapForm == MapForms.CuttedDiamond)
         {
@@ -48,6 +51,8 @@ public class MapGenerator : MonoBehaviour
             BottomEdgeLength = BottomEdgeLength / 2 + 1;
         }
 
+        // Set up map variables
+        Map = new GameObject("Map").transform;
         TileArray = new Transform[BottomEdgeLength * 2 - 1, BottomEdgeLength * 2 - 1];
 
         for (int x = -BottomEdgeLength + 1; x < BottomEdgeLength; x++)
@@ -56,7 +61,7 @@ public class MapGenerator : MonoBehaviour
             {
                 if ((MapForm == MapForms.Hexagon && Mathf.Abs(x + z) < BottomEdgeLength)
                  || (MapForm == MapForms.CuttedDiamond && Mathf.Abs(x + z) <= BottomEdgeLength * 2 - 4)
-                 || MapForm == MapForms.Diamond)
+                 ||  MapForm == MapForms.Diamond)
                 {
                     InstantiateTile(new Vector3(x, 0, z));
                 }
@@ -64,7 +69,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    void InstantiateTile(Vector3 position)
+    private void InstantiateTile(Vector3 position)
     {
         Transform newTile = Instantiate(
             HexagonTile,
@@ -72,21 +77,22 @@ public class MapGenerator : MonoBehaviour
             HexagonTile.localRotation) as Transform;
 
         newTile.name = position.x + " " + position.z;
+        newTile.SetParent(Map);
 
         TileArray[(int)position.x + BottomEdgeLength - 1, (int)position.z + BottomEdgeLength - 1] = newTile;
     }
 
-    void Init()
+    private void Init()
     {
         GenerateMap();
     }
 
-    void Start()
+    private void Start()
     {
         Init();
     }
 
-    void Update()
+    private void Update()
     {
 
     }

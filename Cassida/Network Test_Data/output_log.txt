@@ -1,4 +1,4 @@
-Initialize engine version: 4.6.0b20 (a3ecf55f1347)
+Initialize engine version: 4.6.0f3 (30840d631a27)
 GfxDevice: creating device client; threaded=1
 Direct3D:
     Version:  Direct3D 11.0 [level 11.0]
@@ -14,7 +14,7 @@ Platform assembly: C:\Users\chholtmann\Documents\GitHub\Cassida\Cassida\Network 
 Loading C:\Users\chholtmann\Documents\GitHub\Cassida\Cassida\Network Test_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
 Platform assembly: C:\Users\chholtmann\Documents\GitHub\Cassida\Cassida\Network Test_Data\Managed\Photon3Unity3D.dll (this message is harmless)
 Loading C:\Users\chholtmann\Documents\GitHub\Cassida\Cassida\Network Test_Data\Managed\Photon3Unity3D.dll into Unity Child Domain
-- Completed reload, in  0.062 seconds
+- Completed reload, in  0.067 seconds
 desktop: 1920x1080 60Hz; virtual: 3840x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
