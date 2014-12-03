@@ -259,6 +259,8 @@ namespace Assets.Scripts
                 return;
             }
 
+            CorrectPositionToMovementArea();
+
             if (LookAtObject)
             {
                 transform.LookAt(LookAtObject);
@@ -626,8 +628,6 @@ namespace Assets.Scripts
             transform.position += transform.forward * MovementSpeed * GeneralMultiplier * HeightMultiplier * movement;
 
             transform.position = new Vector3(transform.position.x, startingHeight, transform.position.z);
-
-            CorrectPositionToMovementArea();
         }
 
         /// <summary>
@@ -639,8 +639,6 @@ namespace Assets.Scripts
              * We need to check whether we are out of movement area.
              */
             transform.position += transform.right * MovementSpeed * GeneralMultiplier * HeightMultiplier * movement;
-
-            CorrectPositionToMovementArea();
         }
 
         /// <summary>
