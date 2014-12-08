@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<logicalClassDesignerModel xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm4="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm5="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/ModelStore" dslVersion="1.0.0.0" Id="3dd1e092-99c1-4b94-ade7-44e6616baa77" name="Cassida" linkedPackageId="0cfb0acd-de6b-4dd0-82df-ec396a6bf2f3" xmlns="http://schemas.microsoft.com/dsltools/LogicalClassDesigner">
+  <profileInstances>
+    <packageHasProfileInstances Id="43e6e92e-9ad1-4cf3-8a8c-36c1f9298595">
+      <profileInstance Id="d7e6adb0-c0c6-40d0-a59d-37e94e732e04" name="StandardProfileL2">
+        <elementDefinition Id="e34d544e-0fea-4ed6-ac5e-1b74119ac791" />
+      </profileInstance>
+      <elementDefinition Id="0caec977-1f8c-4ba3-a7db-8cc9ad9cc73b" />
+    </packageHasProfileInstances>
+    <packageHasProfileInstances Id="9622e843-5f71-4b55-82df-3521f66670d7">
+      <profileInstance Id="550842d0-9200-4285-a0a1-e394ad52f8cd" name="StandardProfileL3">
+        <elementDefinition Id="532ea607-fb19-44b8-8502-3351b05452be" />
+      </profileInstance>
+      <elementDefinition Id="29349502-908c-4fda-9054-c48619c59ed0" />
+    </packageHasProfileInstances>
+  </profileInstances>
+  <package Id="0cfb0acd-de6b-4dd0-82df-ec396a6bf2f3" name="CassidaClassdiagram">
+    <elementDefinition Id="92408e5b-ccf2-4a09-9a02-68e7cfbe8425" />
+  </package>
+</logicalClassDesignerModel>

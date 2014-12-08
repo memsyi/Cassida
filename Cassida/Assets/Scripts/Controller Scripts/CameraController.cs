@@ -29,7 +29,7 @@ public class CameraControlls
         _allowUpDownRotation = true;
 
     #region Controlls
-	public BorderCrossingActions BorderCrossingAction
+    public BorderCrossingActions BorderCrossingAction
     {
         get { return _borderCrossingAction; }
         set { _borderCrossingAction = value; }
@@ -84,8 +84,8 @@ public class CameraControlls
     {
         get { return _allowUpDownRotation; }
         set { _allowUpDownRotation = value; }
-    } 
-	#endregion
+    }
+    #endregion
 }
 
 [System.Serializable]
@@ -246,10 +246,10 @@ public class CameraSettings
 public class CameraController : MonoBehaviour
 {
     [SerializeField]
-    private CameraControlls _cameraControlls;    
+    private CameraControlls _cameraControlls;
 
     [SerializeField]
-    private CameraKeys _cameraKeys;    
+    private CameraKeys _cameraKeys;
 
     [SerializeField]
     private CameraExtras _cameraExtras;
@@ -257,7 +257,7 @@ public class CameraController : MonoBehaviour
     [SerializeField]
     private CameraSettings _cameraSettings;
 
-    private const float GeneralMultiplier = 0.3f;    
+    private const float GeneralMultiplier = 0.3f;
 
     public float HeightMultiplier
     {

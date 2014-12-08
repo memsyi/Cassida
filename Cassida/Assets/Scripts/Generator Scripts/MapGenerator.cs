@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
+
+// enums
+public enum EdgeLength { Three = 3, Fife = 5, Seven = 7, Nine = 9, Eleven = 11, Thirteen = 13 }
+public enum MapForms { Hexagon, CuttedDiamond, Diamond }
 
 public class MapGenerator : MonoBehaviour
 {
@@ -10,15 +14,24 @@ public class MapGenerator : MonoBehaviour
     private MapForms _mapForm = MapForms.Hexagon;
 
     [SerializeField]
-    Transform _hexagonTile = null;
+    private Transform
+        _hexagonBorder = null,
+        _emptyTerrain = null;
+
+    #region Terrains
+    public Transform HexagonBorder
+    {
+        get { return _hexagonBorder; }
+        set { _hexagonBorder = value; }
+    }
+    private Transform EmptyTerrain
+    {
+        get { return _emptyTerrain; }
+        set { _emptyTerrain = value; }
+    }
+    #endregion
 
     #region Variables
-    private Transform HexagonTile
-    {
-        get { return _hexagonTile; }
-        set { _hexagonTile = value; }
-    }
-
     private MapForms MapForm
     {
         get { return _mapForm; }
@@ -32,15 +45,7 @@ public class MapGenerator : MonoBehaviour
     }
     #endregion
 
-    // enums
-    private enum EdgeLength { Three = 3, Fife = 5, Seven = 7, Nine = 9, Eleven = 11, Thirteen = 13 }
-    private enum MapForms { Hexagon, CuttedDiamond, Diamond }
-
-    // map variables
-    private Transform Map { get; set; }
-    public Transform[,] TileArray { get; private set; }
-
-    private void GenerateMap()
+    public void GenerateMap(Dictionary<Vector2, Tile> tileDictonary)
     {
         if (MapForm == MapForms.CuttedDiamond)
         {
@@ -51,40 +56,89 @@ public class MapGenerator : MonoBehaviour
             BottomEdgeLength = BottomEdgeLength / 2 + 1;
         }
 
-        // Set up map variables
-        Map = new GameObject("Map").transform;
-        TileArray = new Transform[BottomEdgeLength * 2 - 1, BottomEdgeLength * 2 - 1];
-
         for (int x = -BottomEdgeLength + 1; x < BottomEdgeLength; x++)
         {
-            for (int z = -BottomEdgeLength + 1; z < BottomEdgeLength; z++)
+            for (int y = -BottomEdgeLength + 1; y < BottomEdgeLength; y++)
             {
-                if ((MapForm == MapForms.Hexagon && Mathf.Abs(x + z) < BottomEdgeLength)
-                 || (MapForm == MapForms.CuttedDiamond && Mathf.Abs(x + z) <= BottomEdgeLength * 2 - 4)
-                 ||  MapForm == MapForms.Diamond)
+                if ((MapForm == MapForms.Hexagon && Mathf.Abs(x + y) < BottomEdgeLength)
+                 || (MapForm == MapForms.CuttedDiamond && Mathf.Abs(x + y) <= BottomEdgeLength * 2 - 4)
+                 || MapForm == MapForms.Diamond)
                 {
-                    InstantiateTile(new Vector3(x, 0, z));
+                    tileDictonary.Add(new Vector2(x, y), new Tile(new Vector2(x, y), CalculateTerrainType(), CalculateObjectiveType(), null, null));
                 }
+            }
+        }
+
+        Transform Map = new GameObject("Map Objects").transform;
+
+        foreach (var tile in tileDictonary.Values)
+        {
+            InstantiateTileObject(tile.Position, HexagonBorder);
+
+            if (tile.Terrain != TerrainType.Empty)
+            {
+                tile.TerrainObject = InstantiateTileObject(tile.Position, GetTerrainModelByType(tile.Terrain));
+            }
+
+            if (tile.Objective != ObjectiveType.Empty)
+            {
+                tile.ObjectveObject = InstantiateTileObject(tile.Position, GetObjectiveModelByType(tile.Objective));
             }
         }
     }
 
-    private void InstantiateTile(Vector3 position)
+    private Transform InstantiateTileObject(Vector2 position, Transform model)
     {
-        Transform newTile = Instantiate(
-            HexagonTile,
-            new Vector3(position.x + (position.z * HexagonTile.localScale.z / 2) * 10, 0, position.z * HexagonTile.localScale.z * 10),
-            HexagonTile.localRotation) as Transform;
+        Transform tileObject = Instantiate(
+            model,
+            new Vector3(position.x * 1.75f + position.y * 0.875f, 0, position.y * model.localScale.z * 1.515f),
+            model.localRotation) as Transform;
 
-        newTile.name = position.x + " " + position.z;
-        newTile.SetParent(Map);
+        tileObject.name = position.x + " " + position.y;
+        tileObject.SetParent(GameObject.Find("Map Objects").transform);
 
-        TileArray[(int)position.x + BottomEdgeLength - 1, (int)position.z + BottomEdgeLength - 1] = newTile;
+        return tileObject;
+    }
+
+    private TerrainType CalculateTerrainType()
+    {
+        return TerrainType.Empty;
+    }
+
+    private ObjectiveType CalculateObjectiveType()
+    {
+        return ObjectiveType.Empty;
+    }
+
+    private Transform GetTerrainModelByType(TerrainType terrainType)
+    {
+        switch (terrainType)
+        {
+            case TerrainType.Empty:
+                return null;
+            case TerrainType.Whatever:
+                return null;
+            default:
+                return null;
+        }
+    }
+
+    private Transform GetObjectiveModelByType(ObjectiveType objectiveType)
+    {
+        switch (objectiveType)
+        {
+            case ObjectiveType.Empty:
+                return null;
+            case ObjectiveType.Foo:
+                return null;
+            default:
+                return null;
+        }
     }
 
     private void Init()
     {
-        GenerateMap();
+
     }
 
     private void Start()
