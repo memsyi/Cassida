@@ -15,14 +15,14 @@ public class MapGenerator : MonoBehaviour
 
     [SerializeField]
     private Transform
-        _hexagonBorder = null,
+        _tileBorder = null,
         _emptyTerrain = null;
 
     #region Terrains
-    public Transform HexagonBorder
+    public Transform TileBorder
     {
-        get { return _hexagonBorder; }
-        set { _hexagonBorder = value; }
+        get { return _tileBorder; }
+        set { _tileBorder = value; }
     }
     private Transform EmptyTerrain
     {
@@ -45,7 +45,7 @@ public class MapGenerator : MonoBehaviour
     }
     #endregion
 
-    public void GenerateMap(Dictionary<Vector2, Tile> tileDictonary)
+    public void GenerateMap(List<Tile> tileList)
     {
         if (MapForm == MapForms.CuttedDiamond)
         {
@@ -60,20 +60,20 @@ public class MapGenerator : MonoBehaviour
         {
             for (int y = -BottomEdgeLength + 1; y < BottomEdgeLength; y++)
             {
+                // Set tile in dependence on the map form
                 if ((MapForm == MapForms.Hexagon && Mathf.Abs(x + y) < BottomEdgeLength)
                  || (MapForm == MapForms.CuttedDiamond && Mathf.Abs(x + y) <= BottomEdgeLength * 2 - 4)
                  || MapForm == MapForms.Diamond)
                 {
-                    tileDictonary.Add(new Vector2(x, y), new Tile(new Vector2(x, y), CalculateTerrainType(), CalculateObjectiveType(), null, null));
+                    tileList.Add(new Tile(new Vector2(x, y), CalculateTerrainType(), CalculateObjectiveType()));
                 }
             }
         }
 
-        Transform Map = new GameObject("Map Objects").transform;
-
-        foreach (var tile in tileDictonary.Values)
+        // Instanciate all objects of every tile
+        foreach (var tile in tileList)
         {
-            InstantiateTileObject(tile.Position, HexagonBorder);
+            tile.TileBorder = InstantiateTileObject(tile.Position, TileBorder);
 
             if (tile.Terrain != TerrainType.Empty)
             {
@@ -89,13 +89,20 @@ public class MapGenerator : MonoBehaviour
 
     private Transform InstantiateTileObject(Vector2 position, Transform model)
     {
+        if(!model)
+        {
+            Debug.LogError("You need to assign all objects on the map generator.");
+        }
+
+        // Instantiate tile
         Transform tileObject = Instantiate(
             model,
+            // Calculate tile position
             new Vector3(position.x * 1.75f + position.y * 0.875f, 0, position.y * model.localScale.z * 1.515f),
             model.localRotation) as Transform;
 
-        tileObject.name = position.x + " " + position.y;
-        tileObject.SetParent(GameObject.Find("Map Objects").transform);
+        tileObject.name = position.ToString();
+        tileObject.SetParent(GameObject.FindGameObjectWithTag(Tags.Map).transform);
 
         return tileObject;
     }

@@ -10,4 +10,5 @@
     public const string CameraController = "CameraController";
     public const string Manager = "Manager";
     public const string Generators = "Generators";
+    public const string Map = "Map";
 }

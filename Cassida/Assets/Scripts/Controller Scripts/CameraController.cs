@@ -5,7 +5,7 @@ public enum KeyPressedActions { Nothing, Movement, Rotation }
 public enum KeyResetActions { Nothing, Position, Rotation, Both }
 
 [System.Serializable]
-public class CameraControlls
+public class SettingsCameraControlls
 {
     [SerializeField]
     private BorderCrossingActions _borderCrossingAction = BorderCrossingActions.Mixed;
@@ -89,7 +89,7 @@ public class CameraControlls
 }
 
 [System.Serializable]
-public class CameraKeys
+public class SettingsCameraKeys
 {
     [SerializeField]
     private string
@@ -147,7 +147,7 @@ public class CameraKeys
 }
 
 [System.Serializable]
-public class CameraExtras
+public class SettingsCameraExtras
 {
     [SerializeField]
     private Transform
@@ -186,7 +186,7 @@ public class CameraExtras
 }
 
 [System.Serializable]
-public class CameraSettings
+public class SettingsCameraSettings
 {
     [SerializeField]
     private float
@@ -246,16 +246,16 @@ public class CameraSettings
 public class CameraController : MonoBehaviour
 {
     [SerializeField]
-    private CameraControlls _cameraControlls;
+    private SettingsCameraControlls _cameraControlls;
 
     [SerializeField]
-    private CameraKeys _cameraKeys;
+    private SettingsCameraKeys _cameraKeys;
 
     [SerializeField]
-    private CameraExtras _cameraExtras;
+    private SettingsCameraExtras _cameraExtras;
 
     [SerializeField]
-    private CameraSettings _cameraSettings;
+    private SettingsCameraSettings _cameraSettings;
 
     private const float GeneralMultiplier = 0.3f;
 
@@ -272,22 +272,22 @@ public class CameraController : MonoBehaviour
     public Vector3 DefaultPosition { get; private set; }
     public Quaternion DefaultRotation { get; private set; }
 
-    public CameraControlls CameraControlls
+    public SettingsCameraControlls CameraControlls
     {
         get { return _cameraControlls; }
         set { _cameraControlls = value; }
     }
-    public CameraKeys CameraKeys
+    public SettingsCameraKeys CameraKeys
     {
         get { return _cameraKeys; }
         set { _cameraKeys = value; }
     }
-    public CameraExtras CameraExtras
+    public SettingsCameraExtras CameraExtras
     {
         get { return _cameraExtras; }
         set { _cameraExtras = value; }
     }
-    public CameraSettings CameraSettings
+    public SettingsCameraSettings CameraSettings
     {
         get { return _cameraSettings; }
         set { _cameraSettings = value; }
