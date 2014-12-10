@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public enum TerrainType
 {
@@ -35,6 +36,7 @@ public class MapController : MonoBehaviour
     public Tile NearestTileToMousePosition { get { return FindNearestTileToMousePosition(); } }
 
     private MouseController MouseController { get; set; }
+
     private WorldManager WorldManager { get; set; }
 
     private Tile FindNearestTileToMousePosition()
@@ -58,6 +60,19 @@ public class MapController : MonoBehaviour
         return nearestTile;
     }
 
+    public void GenerateMap(List<Tile> tileList)
+    {
+        var mapGenerator = GameObject.FindGameObjectWithTag(Tags.Generators).GetComponent<MapGenerator>();
+
+        if (!mapGenerator)
+        {
+            Debug.LogError("Add MapGenerator to Generators object");
+            return;
+        }
+
+        mapGenerator.GenerateMap(tileList);
+    }
+
     private void Init()
     {
         MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
@@ -65,6 +80,11 @@ public class MapController : MonoBehaviour
     }
 
     private void Start()
+    {
+        
+    }
+
+    private void Awake()
     {
         Init();
     }

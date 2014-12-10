@@ -6,6 +6,8 @@ public struct MouseclickInformation
     public Vector2 DownPosition { get; set; }
 }
 
+public delegate void MouseclickHandler(object sender);
+
 public class MouseController : MonoBehaviour
 {
     [SerializeField]
@@ -31,6 +33,14 @@ public class MouseController : MonoBehaviour
     private Transform Map { get; set; }
 
     private MouseclickInformation _mouseclickInformation = new MouseclickInformation();
+
+    #region Events
+    public event MouseclickHandler
+        LeftMousecklickEvent,
+        RightMouseclickEvent,
+        MiddleMouseclickEvent;
+        
+    #endregion
 
     private Vector2 GetMousePositionOnMap()
     {
@@ -65,7 +75,22 @@ public class MouseController : MonoBehaviour
                 && Time.time - _mouseclickInformation.DownTime < MouseclickTime
                 && Vector2.Distance(MousePositionOnMap, _mouseclickInformation.DownPosition) < MouseclickDistance)
             {
-                print(buttonName + " click!");
+                //print(buttonName + " click!");
+                switch (buttonName)
+                {
+                    case "Fire1":
+                        LeftMousecklickEvent(this);
+                        break;
+                    case "Fire2":
+                        RightMouseclickEvent(this);
+                        break;
+                    case "Fire3":
+                        MiddleMouseclickEvent(this);
+                        break;
+                    default:
+                        break;
+                }
+
             }
         }
     }
@@ -76,6 +101,11 @@ public class MouseController : MonoBehaviour
     }
 
     private void Start()
+    {
+        //Init();
+    }
+
+    private void Awake()
     {
         Init();
     }

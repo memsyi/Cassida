@@ -13,7 +13,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100002
 GameObject:
@@ -45,7 +45,7 @@ GameObject:
   m_TagString: Generators
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100006
 GameObject:
@@ -87,7 +87,7 @@ GameObject:
   m_TagString: Manager
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100014
 GameObject:
@@ -104,7 +104,7 @@ GameObject:
   m_TagString: GameController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100016
 GameObject:
@@ -383,7 +383,9 @@ MonoBehaviour:
   _tileSettings:
     _defaultColor: {r: 0, g: 1, b: 1, a: 1}
     _mouseOverColor: {r: 0, g: 0, b: 1, a: 1}
+    _mouseOverFleetColor: {r: 0, g: 0, b: 1, a: 1}
     _selectionColor: {r: 1, g: 1, b: 1, a: 1}
+    _mouseOverSelectionColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
