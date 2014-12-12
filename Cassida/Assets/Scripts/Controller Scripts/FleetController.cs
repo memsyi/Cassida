@@ -1,11 +1,22 @@
 ﻿using UnityEngine;
-using System.Collections;
+
+public enum FleetType
+{
+    Slow, 
+    Fast
+}
+
+public class Fleet
+{
+
+}
 
 public class FleetController : MonoBehaviour
 {
+
     private Vector3 _movementTarget;
 
-    public Vector3 MovementTarget
+    private Vector3 MovementTarget
     {
         get { return _movementTarget; }
         set
@@ -15,27 +26,33 @@ public class FleetController : MonoBehaviour
         }
     }
 
-    private Quaternion _turnTarget;
+    private Quaternion _rotationTarget;
 
-    private Quaternion TurnTarget
+    private Quaternion RotationTarget
     {
-        get { return _turnTarget; }
+        get { return _rotationTarget; }
         set 
         {
-            _turnTarget.eulerAngles += value.eulerAngles;
+            _rotationTarget.eulerAngles += value.eulerAngles;
             Turn = true;
         }
-    }
-
-    public void EraseTurnSteps(int turnDirection)
-    {
-        TurnTarget = Quaternion.AngleAxis(turnDirection * 60f, Vector3.up);
     }
 
     private bool Move { get; set; }
     private bool Turn { get; set; }
 
-    private void MoveToTarget()
+    public void MoveFleet(Vector3 target)
+    {
+        MovementTarget = target;
+    }
+
+    public void RotateFleet(int rotationDirection)
+    {
+        RotationTarget = Quaternion.AngleAxis(rotationDirection * 60f, Vector3.up);
+    }
+
+    #region Movement and Rotation per update
+		private void MoveToTarget()
     {
         if (!Move)
         {
@@ -51,21 +68,22 @@ public class FleetController : MonoBehaviour
         }
     }
 
-    private void TurnToTarget()
+    private void RotateToTarget()
     {
         if (!Turn)
         {
             return;
         }
 
-        transform.rotation = Quaternion.Slerp(transform.rotation, TurnTarget, Time.deltaTime * 3);
+        transform.rotation = Quaternion.Slerp(transform.rotation, RotationTarget, Time.deltaTime * 3);
 
-        if (Quaternion.Angle(transform.rotation, TurnTarget) < 0.01f)
+        if (Quaternion.Angle(transform.rotation, RotationTarget) < 0.01f)
         {
-            transform.rotation = TurnTarget;
+            transform.rotation = RotationTarget;
             Turn = false;
         }
-    }
+    } 
+	#endregion
 
     private void Init()
     {
@@ -80,6 +98,6 @@ public class FleetController : MonoBehaviour
     private void Update()
     {
         MoveToTarget();
-        TurnToTarget();
+        RotateToTarget();
     }
 }

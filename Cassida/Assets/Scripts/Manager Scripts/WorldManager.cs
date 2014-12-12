@@ -55,12 +55,11 @@ public class WorldManager : MonoBehaviour
     public List<Tile> TileList { get; private set; }
 
     private MapController MapController { get; set; }
-
     private MouseController MouseController { get; set; }
 
     private Tile CurrentHighlightedTile { get; set; }
-
     private Tile CurrentSelectedTile { get; set; }
+
 
     private void HighLightNearestTile()
     {
@@ -113,11 +112,6 @@ public class WorldManager : MonoBehaviour
         SelectTile(MapController.NearestTileToMousePosition);
     }
 
-    private void RotateFleet(FleetController fleet, bool turnRight = true)
-    {
-        fleet.EraseTurnSteps(turnRight ? 1 : -1);
-    }
-
     private void SelectTile(Tile tile)
     {
         if (CurrentSelectedTile != null)
@@ -141,18 +135,19 @@ public class WorldManager : MonoBehaviour
         var targetTile = MapController.NearestTileToMousePosition;
 
         if (CurrentSelectedTile == null)
-            //|| CurrentSelectedTile == targetTile)
         {
             return;
         }
 
         if (CurrentSelectedTile == targetTile)
         {
+            // Rotate Fleet
             RotateFleet(CurrentSelectedTile.Fleet, false);
             return;
         }
 
-        CurrentSelectedTile.Fleet.MovementTarget = targetTile.TileBorder.position;
+        // Move fleet
+        MoveFleet(CurrentSelectedTile.Fleet, targetTile.TileObject.position);
 
         targetTile.Fleet = CurrentSelectedTile.Fleet;
         CurrentSelectedTile.Fleet = null;
@@ -160,9 +155,19 @@ public class WorldManager : MonoBehaviour
         SelectTile(targetTile);
     }
 
+    private void RotateFleet(FleetController fleet, bool rotateRight = true)
+    {
+        fleet.RotateFleet(rotateRight ? 1 : -1);
+    }
+
+    private void MoveFleet(FleetController fleet, Vector3 target)
+    {
+        fleet.MoveFleet(target);
+    }
+
     private void SetTileBorderColor(Tile tile, Color color)
     {
-        tile.TileBorder.renderer.material.color = color;
+        tile.TileObject.renderer.material.color = color;
     }
 
     private void Init()
@@ -173,13 +178,16 @@ public class WorldManager : MonoBehaviour
 
     private void Start()
     {
+        // Generate map
         TileList = new List<Tile>();
         MapController.GenerateMap(TileList);
 
+        // Set events
         MouseController.LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);
         MouseController.RightMouseclickEvent += new MouseclickHandler(CheckFleetMovement);
 
-        TileSettings.DefaultColor = TileList[0].TileBorder.renderer.material.color;
+        // TODO Find current fleet in the sceen (remove when its possible to create fleets)
+        TileSettings.DefaultColor = TileList[0].TileObject.renderer.material.color;
         TileList.Find(t => t.Position == Vector2.zero).Fleet = GameObject.Find("Fleet").GetComponent<FleetController>();
         print(TileList.Find(t => t.Position == Vector2.zero).Fleet);
     }
@@ -191,6 +199,7 @@ public class WorldManager : MonoBehaviour
 
     private void Update()
     {
+        // Check highlighting
         HighLightNearestTile();
     }
 }

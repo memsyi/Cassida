@@ -4,30 +4,82 @@ using System.Collections.Generic;
 public enum TerrainType
 {
     Empty,
-    Whatever
+    Asteroids,
+    Nebula,
+    EnergyField,
+    BlackHole
 }
 
 public enum ObjectiveType
 {
     Empty,
-    Foo
+    Rubble,
+    Village,
+    Town,
+    TradingStation,
+    Outpost
 }
 
 public class Tile
 {
-    public Vector2 Position { get; private set; }
-    public Transform TileBorder { get; set; }
-    public TerrainType Terrain { get; private set; }
-    public ObjectiveType Objective { get; set; }
-    public FleetController Fleet { get; set; }
-    public Transform TerrainObject { get; set; }
-    public Transform ObjectveObject { get; set; }
+    private TerrainType _terrain;
+    private ObjectiveType _objective;
 
-    public Tile(Vector2 position, TerrainType terrain, ObjectiveType objective)
+    public Vector2 Position { get; private set; }
+    public Transform TileObject { get; private set; }
+    public TerrainType Terrain
+    {
+        get
+        {
+            return _terrain;
+        }
+        private set
+        {
+            _terrain = value;
+            SetCorrectTerrain();
+        }
+    }
+    public ObjectiveType Objective { get; set; }
+
+    public FleetController Fleet { get; set; }
+
+    public TerrainController TerrainController { get; private set; }
+    public ObjectiveController ObjectiveController { get; private set; }
+
+    public Tile(Vector2 position, Transform tileObject, TerrainType terrain, ObjectiveType objective)
     {
         Position = position;
+        TileObject = tileObject;
         Terrain = terrain;
         Objective = objective;
+    }
+
+    private void SetCorrectTerrain()
+    {
+        if (Terrain == TerrainType.Empty)
+        {
+            return;
+        }
+
+        TerrainController = TileObject.GetComponent<TerrainController>();
+        TerrainController.Type = Terrain;
+    }
+
+    private void SetCorrectObjective()
+    {
+        if (ObjectiveController)
+        {
+            ObjectiveController.DeletObjective();
+            ObjectiveController = null;
+        }
+
+        if (Objective == ObjectiveType.Empty)
+        {
+            return;
+        }
+
+        ObjectiveController = TileObject.GetComponent<ObjectiveController>();
+        ObjectiveController.Type = Objective;
     }
 }
 
@@ -44,13 +96,13 @@ public class MapController : MonoBehaviour
         var mousePosition = MouseController.MousePositionOnMap;
 
         var shortestDistance = 1000f;
-        Tile nearestTile = null;// new Tile(Vector2.zero, TerrainType.Empty, ObjectiveType.Empty);
+        Tile nearestTile = null;
 
-        foreach(var tile in WorldManager.TileList)
+        foreach (var tile in WorldManager.TileList)
         {
-            var distance = Vector2.Distance(mousePosition, new Vector2(tile.TileBorder.position.x, tile.TileBorder.position.z));
+            var distance = Vector2.Distance(mousePosition, new Vector2(tile.TileObject.position.x, tile.TileObject.position.z));
 
-            if(distance < shortestDistance)
+            if (distance < shortestDistance)
             {
                 shortestDistance = distance;
                 nearestTile = tile;
@@ -81,7 +133,7 @@ public class MapController : MonoBehaviour
 
     private void Start()
     {
-        
+
     }
 
     private void Awake()

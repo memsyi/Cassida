@@ -79,13 +79,22 @@ public class MouseController : MonoBehaviour
                 switch (buttonName)
                 {
                     case "Fire1":
-                        LeftMousecklickEvent(this);
+                        if (LeftMousecklickEvent != null)
+                        {
+                            LeftMousecklickEvent(this);
+                        }
                         break;
                     case "Fire2":
-                        RightMouseclickEvent(this);
+                        if (RightMouseclickEvent != null)
+                        {
+                            RightMouseclickEvent(this);
+                        }
                         break;
                     case "Fire3":
-                        MiddleMouseclickEvent(this);
+                        if (MiddleMouseclickEvent != null)
+                        {
+                            MiddleMouseclickEvent(this);
+                        }
                         break;
                     default:
                         break;

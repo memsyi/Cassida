@@ -65,29 +65,14 @@ public class MapGenerator : MonoBehaviour
                  || (MapForm == MapForms.CuttedDiamond && Mathf.Abs(x + y) <= BottomEdgeLength * 2 - 4)
                  || MapForm == MapForms.Diamond)
                 {
-                    tileList.Add(new Tile(new Vector2(x, y), CalculateTerrainType(), CalculateObjectiveType()));
+                    Vector2 position = new Vector2(x, y);
+                    tileList.Add(new Tile(position, InstantiateTileObject(position, TileBorder), CalculateTerrainType(), CalculateObjectiveType()));
                 }
-            }
-        }
-
-        // Instanciate all objects of every tile
-        foreach (var tile in tileList)
-        {
-            tile.TileBorder = InstantiateTileObject(tile.Position, TileBorder);
-
-            if (tile.Terrain != TerrainType.Empty)
-            {
-                tile.TerrainObject = InstantiateTileObject(tile.Position, GetTerrainModelByType(tile.Terrain));
-            }
-
-            if (tile.Objective != ObjectiveType.Empty)
-            {
-                tile.ObjectveObject = InstantiateTileObject(tile.Position, GetObjectiveModelByType(tile.Objective));
             }
         }
     }
 
-    private Transform InstantiateTileObject(Vector2 position, Transform model)
+    public Transform InstantiateTileObject(Vector2 position, Transform model)
     {
         if(!model)
         {
@@ -115,32 +100,6 @@ public class MapGenerator : MonoBehaviour
     private ObjectiveType CalculateObjectiveType()
     {
         return ObjectiveType.Empty;
-    }
-
-    private Transform GetTerrainModelByType(TerrainType terrainType)
-    {
-        switch (terrainType)
-        {
-            case TerrainType.Empty:
-                return null;
-            case TerrainType.Whatever:
-                return null;
-            default:
-                return null;
-        }
-    }
-
-    private Transform GetObjectiveModelByType(ObjectiveType objectiveType)
-    {
-        switch (objectiveType)
-        {
-            case ObjectiveType.Empty:
-                return null;
-            case ObjectiveType.Foo:
-                return null;
-            default:
-                return null;
-        }
     }
 
     private void Init()
