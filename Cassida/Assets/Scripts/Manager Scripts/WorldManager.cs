@@ -90,7 +90,7 @@ public class WorldManager : MonoBehaviour
             }
             else
             {
-                if (CurrentHighlightedTile.Fleet)
+                if (CurrentHighlightedTile.Fleet != null)
                 {
                     SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverFleetColor);
                 }
@@ -119,7 +119,7 @@ public class WorldManager : MonoBehaviour
             SetTileBorderColor(CurrentSelectedTile, TileSettings.DefaultColor);
         }
 
-        if (tile.Fleet)
+        if (tile.Fleet != null)
         {
             CurrentSelectedTile = tile;
             SetTileBorderColor(CurrentSelectedTile, TileSettings.MouseOverSelectionColor);
@@ -155,12 +155,12 @@ public class WorldManager : MonoBehaviour
         SelectTile(targetTile);
     }
 
-    private void RotateFleet(FleetController fleet, bool rotateRight = true)
+    private void RotateFleet(Fleet fleet, bool rotateRight = true)
     {
         fleet.RotateFleet(rotateRight ? 1 : -1);
     }
 
-    private void MoveFleet(FleetController fleet, Vector3 target)
+    private void MoveFleet(Fleet fleet, Vector3 target)
     {
         fleet.MoveFleet(target);
     }
@@ -188,8 +188,8 @@ public class WorldManager : MonoBehaviour
 
         // TODO Find current fleet in the sceen (remove when its possible to create fleets)
         TileSettings.DefaultColor = TileList[0].TileObject.renderer.material.color;
-        TileList.Find(t => t.Position == Vector2.zero).Fleet = GameObject.Find("Fleet").GetComponent<FleetController>();
-        print(TileList.Find(t => t.Position == Vector2.zero).Fleet);
+        Tile fleetTile = TileList.Find(t => t.Position == Vector2.zero);
+        fleetTile.Fleet = new Fleet(fleetTile.TileObject.position, GameObject.Find("Fleet").transform, FleetType.Slow, new Unit[6]);
     }
 
     private void Awake()

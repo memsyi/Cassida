@@ -3,6 +3,7 @@ using System.Collections;
 
 public class ObjectiveController : MonoBehaviour
 {
+    #region Object and Instantiation
     private ObjectiveType _type;
 
     public ObjectiveType Type
@@ -14,11 +15,13 @@ public class ObjectiveController : MonoBehaviour
         set
         {
             _type = value;
-            InstantiateObjectiveObject();
+            InstantiateObjective();
         }
     }
 
-    private void InstantiateObjectiveObject()
+    private Transform ObjectiveObject { get; set; }
+
+    private void InstantiateObjective()
     {
         switch (Type)
         {
@@ -37,10 +40,20 @@ public class ObjectiveController : MonoBehaviour
         }
     }
 
+    public void InstantiateObjectiveObject(Transform model)
+    {
+        // Instantiate objective
+        ObjectiveObject = Instantiate(model, transform.position, model.localRotation) as Transform;
+
+        ObjectiveObject.name = "Objective: " + Type;
+        ObjectiveObject.SetParent(transform);
+    }
+
     public void DeletObjective()
     {
         // TODO
-    }
+    } 
+    #endregion
 
     private void Init()
     {

@@ -16,7 +16,7 @@ public class MapGenerator : MonoBehaviour
     [SerializeField]
     private Transform
         _tileBorder = null,
-        _emptyTerrain = null;
+        _asteroidsTerrain = null;
 
     #region Terrains
     public Transform TileBorder
@@ -24,10 +24,10 @@ public class MapGenerator : MonoBehaviour
         get { return _tileBorder; }
         set { _tileBorder = value; }
     }
-    private Transform EmptyTerrain
+    public Transform AsteroidsTerrain
     {
-        get { return _emptyTerrain; }
-        set { _emptyTerrain = value; }
+        get { return _asteroidsTerrain; }
+        set { _asteroidsTerrain = value; }
     }
     #endregion
 
@@ -74,7 +74,7 @@ public class MapGenerator : MonoBehaviour
 
     public Transform InstantiateTileObject(Vector2 position, Transform model)
     {
-        if(!model)
+        if (!model)
         {
             Debug.LogError("You need to assign all objects on the map generator.");
         }
@@ -94,6 +94,13 @@ public class MapGenerator : MonoBehaviour
 
     private TerrainType CalculateTerrainType()
     {
+        // TODO not mirrowed!!!!!
+        int _randomValue = Random.Range(0, 4);
+        if (_randomValue == 0)
+        {
+            return TerrainType.Asteroids;
+        }
+
         return TerrainType.Empty;
     }
 

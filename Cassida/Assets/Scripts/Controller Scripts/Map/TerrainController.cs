@@ -3,6 +3,7 @@ using System.Collections;
 
 public class TerrainController : MonoBehaviour
 {
+    #region Object and Instantiation
     private TerrainType _type;
 
     public TerrainType Type
@@ -14,15 +15,20 @@ public class TerrainController : MonoBehaviour
         set
         {
             _type = value;
-            InstantiateTerrainObject();
+            InstantiateTerrain();
         }
     }
 
-    private void InstantiateTerrainObject()
+    private Transform TerrainObject { get; set; }
+
+    private MapGenerator MapGenerator { get; set; }
+
+    private void InstantiateTerrain()
     {
         switch (Type)
         {
             case TerrainType.Asteroids:
+                InstantiateTerrainObject(MapGenerator.AsteroidsTerrain);
                 break;
             case TerrainType.Nebula:
                 break;
@@ -35,12 +41,27 @@ public class TerrainController : MonoBehaviour
         }
     }
 
+    public void InstantiateTerrainObject(Transform model)
+    {
+        // Instantiate terrain
+        TerrainObject = Instantiate(model, transform.position, model.localRotation) as Transform;
+
+        TerrainObject.name = "Terrain: " + Type;
+        TerrainObject.SetParent(transform);
+    } 
+    #endregion
+
     private void Init()
     {
-
+        MapGenerator = GameObject.FindGameObjectWithTag(Tags.Generators).GetComponent<MapGenerator>();
     }
 
     private void Start()
+    {
+        
+    }
+
+    private void Awake()
     {
         Init();
     }

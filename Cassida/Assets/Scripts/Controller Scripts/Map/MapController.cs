@@ -27,7 +27,7 @@ public class Tile
 
     public Vector2 Position { get; private set; }
     public Transform TileObject { get; private set; }
-    public TerrainType Terrain
+    public TerrainType TerrainType
     {
         get
         {
@@ -39,9 +39,20 @@ public class Tile
             SetCorrectTerrain();
         }
     }
-    public ObjectiveType Objective { get; set; }
+    public ObjectiveType ObjectiveType
+    {
+        get
+        {
+            return _objective;
+        }
+        private set
+        {
+            _objective = value;
+            SetCorrectObjective();
+        }
+    }
 
-    public FleetController Fleet { get; set; }
+    public Fleet Fleet { get; set; }
 
     public TerrainController TerrainController { get; private set; }
     public ObjectiveController ObjectiveController { get; private set; }
@@ -50,19 +61,19 @@ public class Tile
     {
         Position = position;
         TileObject = tileObject;
-        Terrain = terrain;
-        Objective = objective;
+        TerrainType = terrain;
+        ObjectiveType = objective;
     }
 
     private void SetCorrectTerrain()
     {
-        if (Terrain == TerrainType.Empty)
+        if (TerrainType == TerrainType.Empty)
         {
             return;
         }
 
-        TerrainController = TileObject.GetComponent<TerrainController>();
-        TerrainController.Type = Terrain;
+        TerrainController = TileObject.gameObject.AddComponent<TerrainController>();
+        TerrainController.Type = TerrainType;
     }
 
     private void SetCorrectObjective()
@@ -73,13 +84,13 @@ public class Tile
             ObjectiveController = null;
         }
 
-        if (Objective == ObjectiveType.Empty)
+        if (ObjectiveType == ObjectiveType.Empty)
         {
             return;
         }
 
-        ObjectiveController = TileObject.GetComponent<ObjectiveController>();
-        ObjectiveController.Type = Objective;
+        ObjectiveController = TileObject.gameObject.AddComponent<ObjectiveController>();
+        ObjectiveController.Type = ObjectiveType;
     }
 }
 

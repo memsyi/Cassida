@@ -2,18 +2,131 @@
 
 public enum FleetType
 {
-    Slow, 
+    Slow,
     Fast
 }
 
 public class Fleet
 {
+    private FleetType _fleet;
 
+    private Vector3 _position;
+
+    public Vector3 Position
+    {
+        get
+        {
+            return _position;
+        }
+        set
+        {
+            _position = value;
+            FleetController.MoveFleet(value);
+        }
+    }
+    public Transform FleetObject { get; private set; }
+    public FleetType FleetType
+    {
+        get
+        {
+            return _fleet;
+        }
+        private set
+        {
+            _fleet = value;
+            SetCorrectType();
+        }
+    }
+    public Unit[] Units { get; set; }
+
+    public FleetController FleetController { get; private set; }
+
+    public Fleet(Vector3 position, Transform fleetObject, FleetType fleet, Unit[] units)
+    {
+        // Fleet object must be first, then type!
+        FleetObject = fleetObject;
+        FleetType = fleet;
+
+        Position = position;
+        Units = units;
+    }
+
+    public void MoveFleet(Vector3 target)
+    {
+        Position = target;
+    }
+    public void RotateFleet(int rotationDirection)
+    {
+        FleetController.RotateFleet(rotationDirection);
+
+        var newUnitPositions = Units;
+
+        for (int i = 0; i < newUnitPositions.Length; i++)
+        {
+            if (i < 5)
+            {
+                newUnitPositions[i] = Units[i + 1];
+            }
+            else
+            {
+                newUnitPositions[5] = Units[0];
+            }
+        }
+
+        Units = newUnitPositions;
+    }
+
+    private void SetCorrectType()
+    {
+        FleetController = FleetObject.gameObject.AddComponent<FleetController>();
+        FleetController.Type = FleetType;
+    }
 }
 
 public class FleetController : MonoBehaviour
 {
+    #region Object and Instantiation
+    FleetType _type;
 
+    public FleetType Type
+    {
+        get { return _type; }
+        set
+        {
+            _type = value;
+            InstantiateFleet();
+        }
+    }
+
+    private Transform UnitObject { get; set; }
+
+    private FleetManager FleetManager { get;  set; }
+
+    private void InstantiateFleet()
+    {
+        switch (Type)
+        {
+            case FleetType.Slow:
+                InstantiateFleetObject(FleetManager.Fleet);
+                break;
+            case FleetType.Fast:
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void InstantiateFleetObject(Transform model)
+    {
+        // Instantiate terrain
+        UnitObject = Instantiate(model, transform.position, model.localRotation) as Transform;
+
+        UnitObject.name = "Fleet: " + Type;
+        UnitObject.SetParent(GameObject.Find(Tags.Fleets).transform);
+    } 
+    #endregion
+
+    #region Movement and Rotation
     private Vector3 _movementTarget;
 
     private Vector3 MovementTarget
@@ -31,7 +144,7 @@ public class FleetController : MonoBehaviour
     private Quaternion RotationTarget
     {
         get { return _rotationTarget; }
-        set 
+        set
         {
             _rotationTarget.eulerAngles += value.eulerAngles;
             Turn = true;
@@ -51,8 +164,7 @@ public class FleetController : MonoBehaviour
         RotationTarget = Quaternion.AngleAxis(rotationDirection * 60f, Vector3.up);
     }
 
-    #region Movement and Rotation per update
-		private void MoveToTarget()
+    private void MoveToTarget()
     {
         if (!Move)
         {
@@ -82,15 +194,20 @@ public class FleetController : MonoBehaviour
             transform.rotation = RotationTarget;
             Turn = false;
         }
-    } 
-	#endregion
+    }
+    #endregion
 
     private void Init()
     {
-
+        FleetManager = GameObject.Find(Tags.Manager).GetComponent<FleetManager>();
     }
 
     private void Start()
+    {
+        
+    }
+
+    private void Awake()
     {
         Init();
     }
