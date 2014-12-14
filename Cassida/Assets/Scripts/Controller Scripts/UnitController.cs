@@ -8,26 +8,37 @@ public enum UnitType
 
 public class Unit
 {
-    private UnitType _unit;
     public int Position { get; private set; }
-    public Transform UnitObject { get; private set; }
-    public UnitType UnitType { get; private set; }
-    public int Strength { get; set; }
+    public Transform UnitParent { get; private set; }
+    public UnitValues UnitValues { get; set; } 
 
     public UnitController UnitController { get; private set; }
 
-    public Unit(int position, Transform unitObject, UnitType unit, int strength)
+    public Unit(int position, Transform unitParent, UnitValues unitValues)
     {
         Position = position;
-        UnitObject = unitObject;
-        UnitType = unit;
-        Strength = strength;
+        UnitParent = unitParent;
+        UnitValues = unitValues;
+
+        SetCorrectType();
     }
 
     private void SetCorrectType()
     {
-        UnitController = UnitObject.gameObject.AddComponent<UnitController>();
-        UnitController.Type = UnitType;
+        UnitController = UnitParent.gameObject.AddComponent<UnitController>();
+        UnitController.Type = UnitValues.UnitType;
+    }
+}
+
+public class UnitValues
+{
+    public UnitType UnitType { get; set; }
+    public int Strength { get; set; }
+
+    public UnitValues(UnitType unitType, int strength)
+    {
+        UnitType = unitType;
+        Strength = strength;
     }
 }
 
@@ -48,14 +59,17 @@ public class UnitController : MonoBehaviour
 
     private Transform UnitObject { get; set; }
 
+    private FleetManager FleetManager { get; set; }
+
     private void InstantiateUnit()
     {
         switch (Type)
         {
             case UnitType.Meele:
-                InstantiateUnitObject(null);
+                InstantiateUnitObject(FleetManager.UnitSettings.MeeleUnitObject);
                 break;
             case UnitType.Range:
+                InstantiateUnitObject(FleetManager.UnitSettings.RangeUnitObject);
                 break;
             default:
                 break;
@@ -64,20 +78,24 @@ public class UnitController : MonoBehaviour
 
     public void InstantiateUnitObject(Transform model)
     {
-        // Instantiate terrain
+        // Instantiate unit
         UnitObject = Instantiate(model, transform.position, model.localRotation) as Transform;
 
         UnitObject.name = "Unit: " + Type;
         UnitObject.SetParent(transform);
-    } 
+    }
     #endregion
 
     private void Init()
     {
-
+        FleetManager = GameObject.Find(Tags.Manager).GetComponent<FleetManager>();
     }
 
     private void Start()
+    {
+
+    }
+    private void Awake()
     {
         Init();
     }

@@ -761,12 +761,17 @@ public class CameraController : MonoBehaviour
         DefaultRotation = transform.rotation;
     }
 
-    void Start()
+    private void Start()
+    {
+        
+    }
+
+    private void Awake()
     {
         Init();
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         HandleUserInput();
     }

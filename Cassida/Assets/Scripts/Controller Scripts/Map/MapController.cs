@@ -26,7 +26,7 @@ public class Tile
     private ObjectiveType _objective;
 
     public Vector2 Position { get; private set; }
-    public Transform TileObject { get; private set; }
+    public Transform TileParent { get; private set; }
     public TerrainType TerrainType
     {
         get
@@ -57,10 +57,10 @@ public class Tile
     public TerrainController TerrainController { get; private set; }
     public ObjectiveController ObjectiveController { get; private set; }
 
-    public Tile(Vector2 position, Transform tileObject, TerrainType terrain, ObjectiveType objective)
+    public Tile(Vector2 position, Transform tileParent, TerrainType terrain, ObjectiveType objective)
     {
         Position = position;
-        TileObject = tileObject;
+        TileParent = tileParent;
         TerrainType = terrain;
         ObjectiveType = objective;
     }
@@ -72,7 +72,7 @@ public class Tile
             return;
         }
 
-        TerrainController = TileObject.gameObject.AddComponent<TerrainController>();
+        TerrainController = TileParent.gameObject.AddComponent<TerrainController>();
         TerrainController.Type = TerrainType;
     }
 
@@ -89,7 +89,7 @@ public class Tile
             return;
         }
 
-        ObjectiveController = TileObject.gameObject.AddComponent<ObjectiveController>();
+        ObjectiveController = TileParent.gameObject.AddComponent<ObjectiveController>();
         ObjectiveController.Type = ObjectiveType;
     }
 }
@@ -111,7 +111,7 @@ public class MapController : MonoBehaviour
 
         foreach (var tile in WorldManager.TileList)
         {
-            var distance = Vector2.Distance(mousePosition, new Vector2(tile.TileObject.position.x, tile.TileObject.position.z));
+            var distance = Vector2.Distance(mousePosition, new Vector2(tile.TileParent.position.x, tile.TileParent.position.z));
 
             if (distance < shortestDistance)
             {

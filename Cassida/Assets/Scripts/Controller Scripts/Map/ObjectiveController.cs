@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class ObjectiveController : MonoBehaviour
 {
@@ -61,6 +60,11 @@ public class ObjectiveController : MonoBehaviour
     }
 
     private void Start()
+    {
+        
+    }
+
+    private void Awake()
     {
         Init();
     }

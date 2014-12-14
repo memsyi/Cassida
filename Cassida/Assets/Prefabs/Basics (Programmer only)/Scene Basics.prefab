@@ -578,6 +578,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3948f205517253848855356bd0fbcf18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _fleetSettings:
+    _slowFleetObject: {fileID: 400002, guid: db744df7a6f473743949217f076427f1, type: 2}
+    _fastFleetObject: {fileID: 400002, guid: db744df7a6f473743949217f076427f1, type: 2}
+  _unitSettgins:
+    _meeleUnitObject: {fileID: 400000, guid: 8d7420edd65ff684581ad10491fb2eed, type: 2}
+    _rangeUnitObject: {fileID: 400000, guid: f9d0580f098646643a567abd14d7cbcb, type: 2}
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1

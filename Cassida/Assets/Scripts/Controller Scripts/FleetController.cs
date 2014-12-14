@@ -8,32 +8,29 @@ public enum FleetType
 
 public class Fleet
 {
-    private FleetType _fleet;
-
-    private Vector3 _position;
+    private FleetType _fleetType;
 
     public Vector3 Position
     {
         get
         {
-            return _position;
+            return FleetParent.position;
         }
         set
         {
-            _position = value;
             FleetController.MoveFleet(value);
         }
     }
-    public Transform FleetObject { get; private set; }
+    public Transform FleetParent { get; private set; }
     public FleetType FleetType
     {
         get
         {
-            return _fleet;
+            return _fleetType;
         }
         private set
         {
-            _fleet = value;
+            _fleetType = value;
             SetCorrectType();
         }
     }
@@ -41,13 +38,12 @@ public class Fleet
 
     public FleetController FleetController { get; private set; }
 
-    public Fleet(Vector3 position, Transform fleetObject, FleetType fleet, Unit[] units)
+    public Fleet(Transform fleetParent, FleetType fleetType, Unit[] units)
     {
-        // Fleet object must be first, then type!
-        FleetObject = fleetObject;
-        FleetType = fleet;
+        // Fleet object must be first, then type and units!
+        FleetParent = fleetParent;
+        FleetType = fleetType;
 
-        Position = position;
         Units = units;
     }
 
@@ -78,7 +74,7 @@ public class Fleet
 
     private void SetCorrectType()
     {
-        FleetController = FleetObject.gameObject.AddComponent<FleetController>();
+        FleetController = FleetParent.gameObject.AddComponent<FleetController>();
         FleetController.Type = FleetType;
     }
 }
@@ -100,16 +96,17 @@ public class FleetController : MonoBehaviour
 
     private Transform UnitObject { get; set; }
 
-    private FleetManager FleetManager { get;  set; }
+    private FleetManager FleetManager { get; set; }
 
     private void InstantiateFleet()
     {
         switch (Type)
         {
             case FleetType.Slow:
-                InstantiateFleetObject(FleetManager.Fleet);
+                InstantiateFleetObject(FleetManager.FleetSettings.SlowFleetObject);
                 break;
             case FleetType.Fast:
+                InstantiateFleetObject(FleetManager.FleetSettings.FastFleetObject);
                 break;
             default:
                 break;
@@ -118,12 +115,12 @@ public class FleetController : MonoBehaviour
 
     public void InstantiateFleetObject(Transform model)
     {
-        // Instantiate terrain
+        // Instantiate fleet
         UnitObject = Instantiate(model, transform.position, model.localRotation) as Transform;
 
-        UnitObject.name = "Fleet: " + Type;
-        UnitObject.SetParent(GameObject.Find(Tags.Fleets).transform);
-    } 
+        UnitObject.name = "Fleet Object: " + Type;
+        UnitObject.SetParent(transform);
+    }
     #endregion
 
     #region Movement and Rotation
@@ -204,7 +201,7 @@ public class FleetController : MonoBehaviour
 
     private void Start()
     {
-        
+
     }
 
     private void Awake()

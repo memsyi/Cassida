@@ -10,9 +10,15 @@ public class SettingsTileSettings
         _mouseOverColor = Color.cyan,
         _mouseOverFleetColor = Color.blue,
         _selectionColor = Color.white,
-        _mouseOverSelectionColor = Color.red;
+        _mouseOverSelectionColor = Color.red,
+        _mouseOverEnemyFleet = Color.magenta;
 
     #region Tiles
+    public Color MouseOverEnemyFleet
+    {
+        get { return _mouseOverEnemyFleet; }
+        set { _mouseOverEnemyFleet = value; }
+    }
     public Color MouseOverSelectionColor
     {
         get { return _mouseOverSelectionColor; }
@@ -60,7 +66,6 @@ public class WorldManager : MonoBehaviour
     private Tile CurrentHighlightedTile { get; set; }
     private Tile CurrentSelectedTile { get; set; }
 
-
     private void HighLightNearestTile()
     {
         if (CurrentHighlightedTile == MapController.NearestTileToMousePosition)
@@ -90,7 +95,11 @@ public class WorldManager : MonoBehaviour
             }
             else
             {
-                if (CurrentHighlightedTile.Fleet != null)
+                if (CurrentSelectedTile != null && CurrentHighlightedTile.Fleet != null)
+                {
+                    SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverEnemyFleet);
+                }
+                else if (CurrentHighlightedTile.Fleet != null)
                 {
                     SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverFleetColor);
                 }
@@ -146,8 +155,15 @@ public class WorldManager : MonoBehaviour
             return;
         }
 
+        if(CurrentSelectedTile != null && targetTile.Fleet != null)
+        {
+            // Attack Fleet
+            print("attack");
+            return;
+        }
+
         // Move fleet
-        MoveFleet(CurrentSelectedTile.Fleet, targetTile.TileObject.position);
+        MoveFleet(CurrentSelectedTile.Fleet, targetTile.TileParent.position);
 
         targetTile.Fleet = CurrentSelectedTile.Fleet;
         CurrentSelectedTile.Fleet = null;
@@ -167,7 +183,7 @@ public class WorldManager : MonoBehaviour
 
     private void SetTileBorderColor(Tile tile, Color color)
     {
-        tile.TileObject.renderer.material.color = color;
+        tile.TileParent.renderer.material.color = color;
     }
 
     private void Init()
@@ -186,10 +202,7 @@ public class WorldManager : MonoBehaviour
         MouseController.LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);
         MouseController.RightMouseclickEvent += new MouseclickHandler(CheckFleetMovement);
 
-        // TODO Find current fleet in the sceen (remove when its possible to create fleets)
-        TileSettings.DefaultColor = TileList[0].TileObject.renderer.material.color;
-        Tile fleetTile = TileList.Find(t => t.Position == Vector2.zero);
-        fleetTile.Fleet = new Fleet(fleetTile.TileObject.position, GameObject.Find("Fleet").transform, FleetType.Slow, new Unit[6]);
+        TileSettings.DefaultColor = TileList[0].TileParent.renderer.material.color;
     }
 
     private void Awake()
