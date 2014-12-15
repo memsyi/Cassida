@@ -1,0 +1,256 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SettingsCameraControlls">
+    <Position X="7.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAEGAAAQEEECAAAAAABQAEAACAAAACGABwAAACCA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\CameraController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SettingsCameraKeys" Collapsed="true">
+    <Position X="14.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACgACAQAAAQAQAAAAAAggAAAQAAAAIggwIAAAAgAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\CameraController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SettingsCameraExtras">
+    <Position X="12.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEAAAACABAAAABAAABAAAAAgAAAgAAAAEA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\CameraController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SettingsCameraSettings">
+    <Position X="0.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAACAECAAAAAAEIAEAARAAAgIAAAAAAAAAggAQII=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\CameraController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CameraController">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <NestedTypes>
+      <Enum Name="CameraController.MousePositionBorder" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\Controller Scripts\CameraController.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>IARAADIIAiAQBACNEAAAADwgAQAAAAAAAQACgMAAUkg=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\CameraController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fleet">
+    <Position X="12.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQgIAAAAgAAAAAAgAAAAAAAAAAAAAEAAEAAQAAAAAQA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\FleetController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FleetController">
+    <Position X="14.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAwoAgEAAKAAACQAAEACACAAAQAIgAAAAwACAAAAAEA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\FleetController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameController">
+    <Position X="5.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\GameController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tile">
+    <Position X="2.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAABACAAAAAAgAIAAAAAIAAAAAASABAACAAACAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\Map\MapController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MapController">
+    <Position X="2.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAAAAAAAAAAAAAIAAAAAAAABACgAABAEA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\Map\MapController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TerrainController">
+    <Position X="16.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAIAQAAAAAAAAAQAAEAAAAAQQCAAAAAEA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\Map\TerrainController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MouseController">
+    <Position X="5.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAgAEADQAAADIAAEAEAAEAIAAAAAAAAACAAAACEA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\MouseController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Unit">
+    <Position X="5.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAEABAAAAAAAAAAAAAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\UnitController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UnitValues">
+    <Position X="12" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAABABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\UnitController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UnitController">
+    <Position X="17" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAGAAAAQAAEAAAAAAAIAAAAAAAwACAAAAAEA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\UnitController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MapGenerator">
+    <Position X="19.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACQAAIEAACIAAABAABAAAAAAJAAAAAAEABICAAAAAAQ=</HashCode>
+      <FileName>Assets\Scripts\Generator Scripts\MapGenerator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Layer">
+    <Position X="17.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAAAAAAAAQAIAAAAAAgAAAAAAAAAAAAEAA=</HashCode>
+      <FileName>Assets\Scripts\Helpful Scripts\Layer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tags">
+    <Position X="10" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAgAAAAAAIAAAABEAABAAAABAAARACAAg=</HashCode>
+      <FileName>Assets\Scripts\Helpful Scripts\Tags.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FleetSettings">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Manager Scripts\FleetManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UnitSettings">
+    <Position X="9.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AYAAAAAAAAAAAAAAAgAAAAIAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Manager Scripts\FleetManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FleetManager">
+    <Position X="0.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAIIACAAACAAAAAAEAAAAAAQAAAAAAAiAAAAgEA=</HashCode>
+      <FileName>Assets\Scripts\Manager Scripts\FleetManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetworkManager">
+    <Position X="8" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQQAAAACAHBAAAAAAAAAAAAAgAAAAQAAAACCAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Manager Scripts\NetworkManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SettingsTileSettings">
+    <Position X="19.25" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgQBAAAAEAAAIAAAAAAEAwABAAAAAAIABgAAAAIAAA=</HashCode>
+      <FileName>Assets\Scripts\Manager Scripts\WorldManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WorldManager">
+    <Position X="14.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QBwIAAAEACAAAAACAAAIAAIAJAgAASAAABACgAAAQkA=</HashCode>
+      <FileName>Assets\Scripts\Manager Scripts\WorldManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="MouseclickInformation">
+    <Position X="0.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAIAAAAAAgAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\MouseController.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Enum Name="BorderCrossingActions">
+    <Position X="0.5" Y="11" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAKAABAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\CameraController.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="KeyPressedActions">
+    <Position X="12.5" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAIAABAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\CameraController.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="KeyResetActions">
+    <Position X="3.25" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAIAgAgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\CameraController.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="FleetType">
+    <Position X="12.25" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\FleetController.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="TerrainType">
+    <Position X="6" Y="12" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAAAAAAAAAAIAIAAAAAAAAAABAAAAAEAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\Map\MapController.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="ObjectiveType">
+    <Position X="8" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAggAAAAAAAIAAAAAAAAAgIAAAAAAAAIAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\Map\MapController.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="UnitType">
+    <Position X="6" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\UnitController.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="EdgeLength">
+    <Position X="10.5" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAABAAAAAAAAAEAAAAIAAAAAEBAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Generator Scripts\MapGenerator.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="MapForms">
+    <Position X="4" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAACAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Generator Scripts\MapGenerator.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Delegate Name="MouseclickHandler">
+    <Position X="10" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\Controller Scripts\MouseController.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

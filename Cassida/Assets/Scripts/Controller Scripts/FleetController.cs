@@ -55,21 +55,76 @@ public class Fleet
     {
         FleetController.RotateFleet(rotationDirection);
 
-        var newUnitPositions = Units;
+        var newUnitPositions = new Unit[6];
 
         for (int i = 0; i < newUnitPositions.Length; i++)
         {
-            if (i < 5)
+            if (rotationDirection < 0)
             {
-                newUnitPositions[i] = Units[i + 1];
+                if (i < 5)
+                {
+                    newUnitPositions[i] = Units[i + 1];
+                }
+                else
+                {
+                    newUnitPositions[5] = Units[0];
+                }
             }
             else
             {
-                newUnitPositions[5] = Units[0];
+                if (i > 0)
+                {
+                    newUnitPositions[i] = Units[i - 1];
+                }
+                else
+                {
+                    newUnitPositions[0] = Units[5];
+                }
             }
         }
 
         Units = newUnitPositions;
+
+        //foreach (var unit in Units)
+        //{
+        //    if (unit != null)
+        //        Debug.Log(unit.Position);
+        //}
+    }
+
+    public void AttackUnit(int unitPosition, int damage)
+    {
+        var attackedUnit = Units[unitPosition];
+
+        if (attackedUnit == null)
+        {
+            CheckWhetherFleetIsAlive();
+            return;
+        }
+
+        if(attackedUnit.UnitValues.Strength <= damage)
+        {
+            attackedUnit.UnitController.DestroyUnitObject();
+            Units[unitPosition] = null;
+
+            CheckWhetherFleetIsAlive();
+            return;
+        }
+
+        attackedUnit.UnitValues.Strength -= damage;
+    }
+
+    private void CheckWhetherFleetIsAlive()
+    {
+        foreach (var unit in Units)
+        {
+            if (unit != null)
+            {
+                return;
+            }
+
+            FleetController.DestroyFleetObject(this);
+        }
     }
 
     private void SetCorrectType()
@@ -94,7 +149,7 @@ public class FleetController : MonoBehaviour
         }
     }
 
-    private Transform UnitObject { get; set; }
+    private Transform FleetObject { get; set; }
 
     private FleetManager FleetManager { get; set; }
 
@@ -116,10 +171,10 @@ public class FleetController : MonoBehaviour
     public void InstantiateFleetObject(Transform model)
     {
         // Instantiate fleet
-        UnitObject = Instantiate(model, transform.position, model.localRotation) as Transform;
+        FleetObject = Instantiate(model, transform.position, model.localRotation) as Transform;
 
-        UnitObject.name = "Fleet Object: " + Type;
-        UnitObject.SetParent(transform);
+        FleetObject.name = "Fleet Object: " + Type;
+        FleetObject.SetParent(transform);
     }
     #endregion
 
@@ -193,6 +248,12 @@ public class FleetController : MonoBehaviour
         }
     }
     #endregion
+
+    public void DestroyFleetObject(Fleet fleet)
+    {
+        Destroy(this.gameObject);
+        FleetManager.FleetList.Remove(fleet);
+    }
 
     private void Init()
     {

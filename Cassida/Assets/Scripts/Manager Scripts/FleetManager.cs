@@ -83,18 +83,18 @@ public class FleetManager : MonoBehaviour
         {
             var unitParent = new GameObject("Unit: " + i).transform;
 
-            fleetParent.Rotate(Vector3.up * 30);
+            fleetParent.rotation = Quaternion.Euler(Vector3.up * (i * -60 - 30));
 
             unitParent.position = fleetTile.TileParent.position + Vector3.forward * 0.6f;
             unitParent.SetParent(fleetParent);
 
-            fleetParent.Rotate(Vector3.up * 30);
-
             if (unitValues[i] != null)
             {
-                units[i] = new Unit(i, unitParent, unitValues[i]);
+                units[i] = new Unit(unitParent, unitValues[i]);
             }
         }
+
+        fleetParent.rotation = Quaternion.identity;
         #endregion
 
         var newFleet = new Fleet(fleetParent, fleetType, units);
@@ -107,7 +107,7 @@ public class FleetManager : MonoBehaviour
     public void AddUnitToFleet(Fleet fleet, int position, UnitValues unitValues)
     {
         fleet.Units[position] =
-            new Unit(position, fleet.FleetParent.FindChild("Unit: " + position), unitValues);
+            new Unit(fleet.FleetParent.FindChild("Unit: " + position), unitValues);
     }
 
     private void Init()
@@ -121,11 +121,11 @@ public class FleetManager : MonoBehaviour
 
         var testUnit = new UnitValues(UnitType.Meele, 1);
 
-        var testUnits = new UnitValues[6] { null, new UnitValues(UnitType.Range, 1), testUnit, testUnit, testUnit, new UnitValues(UnitType.Range, 1) };
+        var testUnits = new UnitValues[6] { null, new UnitValues(UnitType.Range, 1), testUnit, testUnit, testUnit, null };
 
         // Instantiate one fleet at start
         InstantiateNewFleet(Vector2.zero, FleetType.Slow, testUnits);
-        InstantiateNewFleet(new Vector2(2, 2), FleetType.Slow, testUnits);
+        InstantiateNewFleet(new Vector2(2, 2), FleetType.Slow, new UnitValues[6]);
         InstantiateNewFleet(new Vector2(2, 1), FleetType.Slow, testUnits);
 
         AddUnitToFleet(FleetList[0], 0, testUnit);

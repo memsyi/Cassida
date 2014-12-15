@@ -11,13 +11,19 @@ public class SettingsTileSettings
         _mouseOverFleetColor = Color.blue,
         _selectionColor = Color.white,
         _mouseOverSelectionColor = Color.red,
-        _mouseOverEnemyFleet = Color.magenta;
+        _mouseOverEnemyFleetColor = Color.magenta,
+        _mouseOverCantMoveColor = Color.red;
 
     #region Tiles
-    public Color MouseOverEnemyFleet
+    public Color MouseOverCantMoveColor
     {
-        get { return _mouseOverEnemyFleet; }
-        set { _mouseOverEnemyFleet = value; }
+        get { return _mouseOverCantMoveColor; }
+        set { _mouseOverCantMoveColor = value; }
+    }
+    public Color MouseOverEnemyFleetColor
+    {
+        get { return _mouseOverEnemyFleetColor; }
+        set { _mouseOverEnemyFleetColor = value; }
     }
     public Color MouseOverSelectionColor
     {
@@ -66,6 +72,7 @@ public class WorldManager : MonoBehaviour
     private Tile CurrentHighlightedTile { get; set; }
     private Tile CurrentSelectedTile { get; set; }
 
+    #region Highlight tiles
     private void HighLightNearestTile()
     {
         if (CurrentHighlightedTile == MapController.NearestTileToMousePosition)
@@ -73,36 +80,44 @@ public class WorldManager : MonoBehaviour
             return;
         }
 
-        if (CurrentHighlightedTile != null)
-        {
-            if (CurrentHighlightedTile == CurrentSelectedTile)
-            {
-                SetTileBorderColor(CurrentHighlightedTile, TileSettings.SelectionColor);
-            }
-            else
-            {
-                SetTileBorderColor(CurrentHighlightedTile, TileSettings.DefaultColor);
-            }
-        }
+        ResetHighlightedTile();
 
         CurrentHighlightedTile = MapController.NearestTileToMousePosition;
 
+        HighlightTile();
+    }
+
+    private void HighlightTile()
+    {
+        // If mouse is over new tile
         if (CurrentHighlightedTile != null)
         {
+            // Selected tile
             if (CurrentHighlightedTile == CurrentSelectedTile)
             {
                 SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverSelectionColor);
             }
+            // Other tile
             else
             {
+                // Enemies fleet (own selected)
                 if (CurrentSelectedTile != null && CurrentHighlightedTile.Fleet != null)
                 {
-                    SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverEnemyFleet);
+                    if (CheckAttackEnemyFleet())
+                    {
+                        SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverEnemyFleetColor);
+                    }
+                    else
+                    {
+                        SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverCantMoveColor);
+                    }
                 }
+                // Other fleet
                 else if (CurrentHighlightedTile.Fleet != null)
                 {
                     SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverFleetColor);
                 }
+                // Default tile
                 else
                 {
                     SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverColor);
@@ -110,6 +125,25 @@ public class WorldManager : MonoBehaviour
             }
         }
     }
+
+    private void ResetHighlightedTile()
+    {
+        // If mouse is not over tile any more
+        if (CurrentHighlightedTile != null)
+        {
+            // Selected tile
+            if (CurrentHighlightedTile == CurrentSelectedTile)
+            {
+                SetTileBorderColor(CurrentHighlightedTile, TileSettings.SelectionColor);
+            }
+            // Default tile
+            else
+            {
+                SetTileBorderColor(CurrentHighlightedTile, TileSettings.DefaultColor);
+            }
+        }
+    }
+    #endregion
 
     private void CheckTileSelection(object sender)
     {
@@ -139,6 +173,7 @@ public class WorldManager : MonoBehaviour
         }
     }
 
+    #region Movement and Rotation
     private void CheckFleetMovement(object sender)
     {
         var targetTile = MapController.NearestTileToMousePosition;
@@ -155,10 +190,10 @@ public class WorldManager : MonoBehaviour
             return;
         }
 
-        if(CurrentSelectedTile != null && targetTile.Fleet != null)
+        if (CurrentSelectedTile != null && targetTile.Fleet != null)
         {
-            // Attack Fleet
-            print("attack");
+            // Attack 
+            AttackEnemyFleet();
             return;
         }
 
@@ -180,6 +215,102 @@ public class WorldManager : MonoBehaviour
     {
         fleet.MoveFleet(target);
     }
+    #endregion
+
+    #region Fight
+    private bool CheckAttackEnemyFleet()
+    {
+        var unitDirection = GetOwnUnitInDirection();
+
+        if (unitDirection < 0)
+        {
+            return false;
+        }
+
+        var ownUnit = CurrentSelectedTile.Fleet.Units[unitDirection];
+
+        if (ownUnit != null)
+        {
+            return ownUnit.UnitController != null;
+        }
+
+        return false;
+    }
+
+    private void AttackEnemyFleet()
+    {
+        if (!CheckAttackEnemyFleet())
+        {
+            return;
+        }
+
+        var ownUnitDirection = GetOwnUnitInDirection();
+        var enemyUnitDirection = ownUnitDirection < 3 ? ownUnitDirection + 3 : ownUnitDirection - 3;
+
+        var ownFleet = CurrentSelectedTile.Fleet;
+        var enemyFleet = CurrentHighlightedTile.Fleet;
+
+        var ownUnit = ownFleet.Units[ownUnitDirection];
+        var enemyUnit = enemyFleet.Units[enemyUnitDirection];
+
+        if (enemyUnit == null)
+        {
+            for (int i = 0; i < enemyFleet.Units.Length; i++)
+            {
+                enemyFleet.AttackUnit(i, ownUnit.UnitValues.Strength);
+            }
+        }
+        else
+        {
+            ownFleet.AttackUnit(ownUnitDirection, ownUnit.UnitValues.Strength);
+            enemyFleet.AttackUnit(enemyUnitDirection, enemyUnit.UnitValues.Strength);
+        }
+
+        ResetHighlightedTile();
+
+        if (!CurrentSelectedTile.Fleet.FleetParent)
+        {
+            CurrentSelectedTile = null;
+        }
+    }
+
+    private int GetOwnUnitInDirection()
+    {
+        if (CurrentHighlightedTile.Position.x == CurrentSelectedTile.Position.x)
+        {
+            if (CurrentHighlightedTile.Position.y > CurrentSelectedTile.Position.y)
+            {
+                return 0;
+            }
+
+            return 3;
+        }
+        else if (CurrentHighlightedTile.Position.y == CurrentSelectedTile.Position.y)
+        {
+            if (CurrentHighlightedTile.Position.x > CurrentSelectedTile.Position.x)
+            {
+                return 1;
+            }
+
+            return 4;
+        }
+        else
+        {
+            if (CurrentHighlightedTile.Position.x < CurrentSelectedTile.Position.x
+                && CurrentHighlightedTile.Position.y > CurrentSelectedTile.Position.y)
+            {
+                return 5;
+            }
+            else if (CurrentHighlightedTile.Position.x > CurrentSelectedTile.Position.x
+                && CurrentHighlightedTile.Position.y < CurrentSelectedTile.Position.y)
+            {
+                return 2;
+            }
+        }
+
+        return -1;
+    }
+    #endregion
 
     private void SetTileBorderColor(Tile tile, Color color)
     {

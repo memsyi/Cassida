@@ -8,15 +8,13 @@ public enum UnitType
 
 public class Unit
 {
-    public int Position { get; private set; }
     public Transform UnitParent { get; private set; }
     public UnitValues UnitValues { get; set; } 
 
     public UnitController UnitController { get; private set; }
 
-    public Unit(int position, Transform unitParent, UnitValues unitValues)
+    public Unit(Transform unitParent, UnitValues unitValues)
     {
-        Position = position;
         UnitParent = unitParent;
         UnitValues = unitValues;
 
@@ -79,12 +77,19 @@ public class UnitController : MonoBehaviour
     public void InstantiateUnitObject(Transform model)
     {
         // Instantiate unit
-        UnitObject = Instantiate(model, transform.position, model.localRotation) as Transform;
+        UnitObject = Instantiate(model, transform.position, model.rotation) as Transform;
 
         UnitObject.name = "Unit: " + Type;
         UnitObject.SetParent(transform);
+        UnitObject.localRotation = model.rotation;
     }
     #endregion
+
+    public void DestroyUnitObject()
+    {
+        Destroy(UnitObject.gameObject);
+        Destroy(this);
+    }
 
     private void Init()
     {

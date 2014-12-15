@@ -134,7 +134,8 @@ MonoBehaviour:
     _mouseOverFleetColor: {r: 0, g: 0, b: 1, a: 1}
     _selectionColor: {r: 1, g: 1, b: 1, a: 1}
     _mouseOverSelectionColor: {r: 1, g: 0, b: 0, a: 1}
-    _mouseOverEnemyFleet: {r: 1, g: 0, b: 1, a: 1}
+    _mouseOverEnemyFleetColor: {r: 1, g: 0, b: 1, a: 1}
+    _mouseOverCantMoveColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &42835957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3214,6 +3215,14 @@ Prefab:
       propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraControlls._leftMouseButtonAction
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraControlls._rightMouseButtonAction
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
   m_RootGameObject: {fileID: 383271712}
@@ -3481,8 +3490,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cameraControlls:
     _borderCrossingAction: 3
-    _leftMouseButtonAction: 0
-    _rightMouseButtonAction: 1
+    _leftMouseButtonAction: 1
+    _rightMouseButtonAction: 0
     _mousewheelAction: 2
     _keyResetAction: 3
     _allowWasdAndKeyArrows: 1
