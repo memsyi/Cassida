@@ -66,7 +66,7 @@ public class WorldManager : MonoBehaviour
 
     public List<Tile> TileList { get; private set; }
 
-    private MapController MapController { get; set; }
+    private MapManager MapManager { get; set; }
     private MouseController MouseController { get; set; }
 
     private Tile CurrentHighlightedTile { get; set; }
@@ -75,14 +75,14 @@ public class WorldManager : MonoBehaviour
     #region Highlight tiles
     private void HighLightNearestTile()
     {
-        if (CurrentHighlightedTile == MapController.NearestTileToMousePosition)
+        if (CurrentHighlightedTile == MapManager.NearestTileToMousePosition)
         {
             return;
         }
 
         ResetHighlightedTile();
 
-        CurrentHighlightedTile = MapController.NearestTileToMousePosition;
+        CurrentHighlightedTile = MapManager.NearestTileToMousePosition;
 
         HighlightTile();
     }
@@ -142,17 +142,19 @@ public class WorldManager : MonoBehaviour
                 SetTileBorderColor(CurrentHighlightedTile, TileSettings.DefaultColor);
             }
         }
+
+        CurrentHighlightedTile = null;
     }
     #endregion
 
     private void CheckTileSelection(object sender)
     {
-        if (CurrentSelectedTile == MapController.NearestTileToMousePosition)
+        if (CurrentSelectedTile == MapManager.NearestTileToMousePosition)
         {
             RotateFleet(CurrentSelectedTile.Fleet);
         }
 
-        SelectTile(MapController.NearestTileToMousePosition);
+        SelectTile(MapManager.NearestTileToMousePosition);
     }
 
     private void SelectTile(Tile tile)
@@ -176,7 +178,7 @@ public class WorldManager : MonoBehaviour
     #region Movement and Rotation
     private void CheckFleetMovement(object sender)
     {
-        var targetTile = MapController.NearestTileToMousePosition;
+        var targetTile = MapManager.NearestTileToMousePosition;
 
         if (CurrentSelectedTile == null)
         {
@@ -220,6 +222,11 @@ public class WorldManager : MonoBehaviour
     #region Fight
     private bool CheckAttackEnemyFleet()
     {
+        if (CurrentHighlightedTile.Fleet == null)
+        {
+            return false;
+        }
+
         var unitDirection = GetOwnUnitInDirection();
 
         if (unitDirection < 0)
@@ -250,28 +257,38 @@ public class WorldManager : MonoBehaviour
         var ownFleet = CurrentSelectedTile.Fleet;
         var enemyFleet = CurrentHighlightedTile.Fleet;
 
-        var ownUnit = ownFleet.Units[ownUnitDirection];
+        var ownUnitStrength = ownFleet.Units[ownUnitDirection].UnitValues.Strength;
         var enemyUnit = enemyFleet.Units[enemyUnitDirection];
 
         if (enemyUnit == null)
         {
             for (int i = 0; i < enemyFleet.Units.Length; i++)
             {
-                enemyFleet.AttackUnit(i, ownUnit.UnitValues.Strength);
+                enemyFleet.AttackUnit(i, ownUnitStrength);
+
+                if (!enemyFleet.CheckWhetherFleetIsAlive())
+                {
+                    CurrentHighlightedTile.Fleet = null;
+                    break;
+                }
             }
         }
         else
         {
-            ownFleet.AttackUnit(ownUnitDirection, ownUnit.UnitValues.Strength);
-            enemyFleet.AttackUnit(enemyUnitDirection, enemyUnit.UnitValues.Strength);
+            ownFleet.AttackUnit(ownUnitDirection, enemyUnit.UnitValues.Strength);
+            enemyFleet.AttackUnit(enemyUnitDirection, ownUnitStrength);
+
+            if (!ownFleet.CheckWhetherFleetIsAlive())
+            {
+                CurrentSelectedTile.Fleet = null;
+            }
+            if (!enemyFleet.CheckWhetherFleetIsAlive())
+            {
+                CurrentHighlightedTile.Fleet = null;
+            }
         }
 
         ResetHighlightedTile();
-
-        if (!CurrentSelectedTile.Fleet.FleetParent)
-        {
-            CurrentSelectedTile = null;
-        }
     }
 
     private int GetOwnUnitInDirection()
@@ -319,7 +336,7 @@ public class WorldManager : MonoBehaviour
 
     private void Init()
     {
-        MapController = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapController>();
+        MapManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<MapManager>();
         MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
     }
 
@@ -327,7 +344,7 @@ public class WorldManager : MonoBehaviour
     {
         // Generate map
         TileList = new List<Tile>();
-        MapController.GenerateMap(TileList);
+        MapManager.GenerateMap(TileList);
 
         // Set events
         MouseController.LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);

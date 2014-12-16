@@ -9,7 +9,7 @@ public enum UnitType
 public class Unit
 {
     public Transform UnitParent { get; private set; }
-    public UnitValues UnitValues { get; set; } 
+    public UnitValues UnitValues { get; set; }
 
     public UnitController UnitController { get; private set; }
 
@@ -19,6 +19,17 @@ public class Unit
         UnitValues = unitValues;
 
         SetCorrectType();
+    }
+
+    public bool CheckWhetherUnitIsAlive()
+    {
+        if (UnitValues.Strength > 0)
+        {
+            return true;
+        }
+
+        UnitController.DestroyUnitObject();
+        return false;
     }
 
     private void SetCorrectType()

@@ -87,7 +87,7 @@ public class MapGenerator : MonoBehaviour
             model.localRotation) as Transform;
 
         tileObject.name = position.ToString();
-        tileObject.SetParent(GameObject.FindGameObjectWithTag(Tags.Map).transform);
+        tileObject.SetParent(this.transform);
 
         return tileObject;
     }

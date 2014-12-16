@@ -31,22 +31,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
   m_IsActive: 1
---- !u!1 &100004
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 400004}
-  - 114: {fileID: 11400006}
-  m_Layer: 0
-  m_Name: Generators
-  m_TagString: Generators
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
-  m_IsActive: 1
 --- !u!1 &100006
 GameObject:
   m_ObjectHideFlags: 0
@@ -83,6 +67,7 @@ GameObject:
   - 114: {fileID: 11400002}
   - 114: {fileID: 11400004}
   - 114: {fileID: 11400024}
+  - 114: {fileID: 11400006}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Manager
@@ -153,7 +138,6 @@ Transform:
   - {fileID: 400006}
   - {fileID: 400008}
   - {fileID: 400014}
-  - {fileID: 400004}
   - {fileID: 400016}
   - {fileID: 400010}
   m_Father: {fileID: 0}
@@ -170,18 +154,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 400000}
   m_RootOrder: 0
---- !u!4 &400004
-Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100004}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 400000}
-  m_RootOrder: 4
 --- !u!4 &400006
 Transform:
   m_ObjectHideFlags: 1
@@ -217,7 +189,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
-  m_RootOrder: 6
+  m_RootOrder: 5
 --- !u!4 &400014
 Transform:
   m_ObjectHideFlags: 1
@@ -241,7 +213,7 @@ Transform:
   m_LocalScale: {x: 10, y: 1, z: 10}
   m_Children: []
   m_Father: {fileID: 400000}
-  m_RootOrder: 5
+  m_RootOrder: 4
 --- !u!20 &2000000
 Camera:
   m_ObjectHideFlags: 1
@@ -348,9 +320,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cameraControlls:
-    _borderCrossingAction: 3
-    _leftMouseButtonAction: 0
-    _rightMouseButtonAction: 1
+    _borderCrossingAction: 0
+    _leftMouseButtonAction: 1
+    _rightMouseButtonAction: 0
     _mousewheelAction: 2
     _keyResetAction: 3
     _allowWasdAndKeyArrows: 1
@@ -415,21 +387,19 @@ MonoBehaviour:
     _mouseOverFleetColor: {r: 0, g: 0, b: 1, a: 1}
     _selectionColor: {r: 1, g: 1, b: 1, a: 1}
     _mouseOverSelectionColor: {r: 1, g: 0, b: 0, a: 1}
+    _mouseOverEnemyFleetColor: {r: 1, g: 0, b: 1, a: 1}
+    _mouseOverCantMoveColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100004}
+  m_GameObject: {fileID: 100008}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00d66fec795754342a9d00543e87bbb1, type: 3}
+  m_Script: {fileID: 11500000, guid: 6261fb6bdbd8dea4e809080686a68530, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _bottomEdgeLength: 5
-  _mapForm: 0
-  _tileBorder: {fileID: 400002, guid: 8807240de349afe48be2e38e01c8e401, type: 2}
-  _asteroidsTerrain: {fileID: 400000, guid: 21487a1f37226e14789931fd6b2a48c1, type: 2}
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -553,9 +523,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 100016}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6261fb6bdbd8dea4e809080686a68530, type: 3}
+  m_Script: {fileID: 11500000, guid: 00d66fec795754342a9d00543e87bbb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _bottomEdgeLength: 5
+  _mapForm: 0
+  _tileBorder: {fileID: 400002, guid: 8807240de349afe48be2e38e01c8e401, type: 2}
+  _asteroidsTerrain: {fileID: 400000, guid: 21487a1f37226e14789931fd6b2a48c1, type: 2}
 --- !u!114 &11400022
 MonoBehaviour:
   m_ObjectHideFlags: 1

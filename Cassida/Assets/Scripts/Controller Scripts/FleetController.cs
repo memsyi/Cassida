@@ -98,33 +98,30 @@ public class Fleet
 
         if (attackedUnit == null)
         {
-            CheckWhetherFleetIsAlive();
-            return;
-        }
-
-        if(attackedUnit.UnitValues.Strength <= damage)
-        {
-            attackedUnit.UnitController.DestroyUnitObject();
-            Units[unitPosition] = null;
-
-            CheckWhetherFleetIsAlive();
             return;
         }
 
         attackedUnit.UnitValues.Strength -= damage;
+
+        if (!attackedUnit.CheckWhetherUnitIsAlive())
+        {
+            Units[unitPosition] = null;
+            return;
+        }
     }
 
-    private void CheckWhetherFleetIsAlive()
+    public bool CheckWhetherFleetIsAlive()
     {
         foreach (var unit in Units)
         {
             if (unit != null)
             {
-                return;
+                return true;
             }
-
-            FleetController.DestroyFleetObject(this);
         }
+
+        FleetController.DestroyFleetObject(this);
+        return false;
     }
 
     private void SetCorrectType()

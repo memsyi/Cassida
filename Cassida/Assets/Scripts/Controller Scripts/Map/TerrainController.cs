@@ -53,7 +53,7 @@ public class TerrainController : MonoBehaviour
 
     private void Init()
     {
-        MapGenerator = GameObject.FindGameObjectWithTag(Tags.Generators).GetComponent<MapGenerator>();
+        MapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
     }
 
     private void Start()

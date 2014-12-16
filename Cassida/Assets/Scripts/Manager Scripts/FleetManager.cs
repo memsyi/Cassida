@@ -110,6 +110,28 @@ public class FleetManager : MonoBehaviour
             new Unit(fleet.FleetParent.FindChild("Unit: " + position), unitValues);
     }
 
+    public void AddStartFleets()
+    {
+        if (PhotonNetwork.isMasterClient)
+        {
+            var testUnit = new UnitValues(UnitType.Meele, 1);
+
+            var testUnits = new UnitValues[6] { null, new UnitValues(UnitType.Range, 1), testUnit, testUnit, testUnit, null };
+
+            // Instantiate one fleet at start
+            InstantiateNewFleet(Vector2.zero, FleetType.Slow, testUnits);
+            InstantiateNewFleet(new Vector2(2, 2), FleetType.Slow, new UnitValues[6]);
+            InstantiateNewFleet(new Vector2(2, 1), FleetType.Slow, testUnits);
+
+            AddUnitToFleet(FleetList[0], 0, testUnit);
+        }
+    }
+
+    private void OnJoinedRoom()
+    {
+        //AddStartFleets();
+    }
+
     private void Init()
     {
         WorldManager = GameObject.Find(Tags.Manager).GetComponent<WorldManager>();
@@ -119,16 +141,7 @@ public class FleetManager : MonoBehaviour
     {
         FleetList = new List<Fleet>();
 
-        var testUnit = new UnitValues(UnitType.Meele, 1);
-
-        var testUnits = new UnitValues[6] { null, new UnitValues(UnitType.Range, 1), testUnit, testUnit, testUnit, null };
-
-        // Instantiate one fleet at start
-        InstantiateNewFleet(Vector2.zero, FleetType.Slow, testUnits);
-        InstantiateNewFleet(new Vector2(2, 2), FleetType.Slow, new UnitValues[6]);
-        InstantiateNewFleet(new Vector2(2, 1), FleetType.Slow, testUnits);
-
-        AddUnitToFleet(FleetList[0], 0, testUnit);
+        AddStartFleets();
     }
 
     private void Awake()
