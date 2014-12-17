@@ -334,23 +334,47 @@ public class WorldManager : MonoBehaviour
         tile.TileParent.renderer.material.color = color;
     }
 
+    private void AddMouseEvents()
+    {
+        // Add events
+        MouseController.LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);
+        MouseController.RightMouseclickEvent += new MouseclickHandler(CheckFleetMovement);
+    }
+
+    private void InitializeMap()
+    {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
+        // Generate map
+        MapManager.GenerateMap(TileList);
+
+        TileSettings.DefaultColor = TileList[0].TileParent.renderer.material.color;
+    }
+
+    public void InitializeWorld()
+    {
+        InitializeMap();
+
+        AddMouseEvents();
+    }
+
     private void Init()
     {
         MapManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<MapManager>();
         MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
+
+        if (!MapManager || !MouseController)
+        {
+            Debug.LogError("MissedComponents!");
+        }
     }
 
     private void Start()
     {
-        // Generate map
         TileList = new List<Tile>();
-        MapManager.GenerateMap(TileList);
-
-        // Set events
-        MouseController.LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);
-        MouseController.RightMouseclickEvent += new MouseclickHandler(CheckFleetMovement);
-
-        TileSettings.DefaultColor = TileList[0].TileParent.renderer.material.color;
     }
 
     private void Awake()

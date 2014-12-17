@@ -104,6 +104,11 @@ public class MapManager : MonoBehaviour
 
     private Tile FindNearestTileToMousePosition()
     {
+        if (WorldManager.TileList.Count == 0)
+        {
+            return null;
+        }
+
         var mousePosition = MouseController.MousePositionOnMap;
 
         var shortestDistance = 1000f;
@@ -129,7 +134,7 @@ public class MapManager : MonoBehaviour
 
         if (!mapGenerator)
         {
-            Debug.LogError("Add MapGenerator to Generators object");
+            Debug.LogError("Add MapGenerator to Map object");
             return;
         }
 
@@ -140,6 +145,11 @@ public class MapManager : MonoBehaviour
     {
         MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
         WorldManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<WorldManager>();
+
+        if (!MouseController || !WorldManager)
+        {
+            Debug.LogError("MissedComponents!");
+        }
     }
 
     private void Start()

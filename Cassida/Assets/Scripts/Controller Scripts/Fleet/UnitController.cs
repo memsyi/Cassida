@@ -88,11 +88,10 @@ public class UnitController : MonoBehaviour
     public void InstantiateUnitObject(Transform model)
     {
         // Instantiate unit
-        UnitObject = Instantiate(model, transform.position, model.rotation) as Transform;
+        UnitObject = Instantiate(model, transform.position, transform.rotation) as Transform;
 
-        UnitObject.name = "Unit: " + Type;
+        UnitObject.name = "Unit Object: " + Type;
         UnitObject.SetParent(transform);
-        UnitObject.localRotation = model.rotation;
     }
     #endregion
 
@@ -105,6 +104,11 @@ public class UnitController : MonoBehaviour
     private void Init()
     {
         FleetManager = GameObject.Find(Tags.Manager).GetComponent<FleetManager>();
+
+        if (!FleetManager)
+        {
+            Debug.LogError("MissedComponents!");
+        }
     }
 
     private void Start()

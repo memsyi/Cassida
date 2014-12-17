@@ -22,6 +22,8 @@ public class ObjectiveController : MonoBehaviour
 
     private void InstantiateObjective()
     {
+        var mapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
+
         switch (Type)
         {
             case ObjectiveType.Rubble:
@@ -39,10 +41,10 @@ public class ObjectiveController : MonoBehaviour
         }
     }
 
-    public void InstantiateObjectiveObject(Transform model)
+    public void InstantiateObjectiveObject(string modelName)
     {
         // Instantiate objective
-        ObjectiveObject = Instantiate(model, transform.position, model.localRotation) as Transform;
+        ObjectiveObject = PhotonNetwork.Instantiate("Objectives/" + modelName, transform.position, Quaternion.identity, 0).transform;
 
         ObjectiveObject.name = "Objective: " + Type;
         ObjectiveObject.SetParent(transform);
@@ -51,7 +53,7 @@ public class ObjectiveController : MonoBehaviour
     public void DeletObjective()
     {
         // TODO
-    } 
+    }
     #endregion
 
     private void Init()
@@ -61,7 +63,7 @@ public class ObjectiveController : MonoBehaviour
 
     private void Start()
     {
-        
+
     }
 
     private void Awake()

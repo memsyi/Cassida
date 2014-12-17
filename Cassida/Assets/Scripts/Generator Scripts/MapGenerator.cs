@@ -14,17 +14,17 @@ public class MapGenerator : MonoBehaviour
     private MapForms _mapForm = MapForms.Hexagon;
 
     [SerializeField]
-    private Transform
-        _tileBorder = null,
-        _asteroidsTerrain = null;
+    private string
+        //_tileBorder = null,
+        _asteroidsTerrain = "Asteroids Terrain";
 
     #region Terrains
-    public Transform TileBorder
-    {
-        get { return _tileBorder; }
-        set { _tileBorder = value; }
-    }
-    public Transform AsteroidsTerrain
+    //public Transform TileBorder
+    //{
+    //    get { return _tileBorder; }
+    //    set { _tileBorder = value; }
+    //}
+    public string AsteroidsTerrain
     {
         get { return _asteroidsTerrain; }
         set { _asteroidsTerrain = value; }
@@ -66,25 +66,25 @@ public class MapGenerator : MonoBehaviour
                  || MapForm == MapForms.Diamond)
                 {
                     Vector2 position = new Vector2(x, y);
-                    tileList.Add(new Tile(position, InstantiateTileObject(position, TileBorder), CalculateTerrainType(), CalculateObjectiveType()));
+                    tileList.Add(new Tile(position, InstantiateTileObject(position, "TileParent"), CalculateTerrainType(), CalculateObjectiveType()));
                 }
             }
         }
     }
 
-    public Transform InstantiateTileObject(Vector2 position, Transform model)
+    public Transform InstantiateTileObject(Vector2 position, string modelName)
     {
-        if (!model)
+        if (modelName.Length == 0)
         {
             Debug.LogError("You need to assign all objects on the map generator.");
         }
 
         // Instantiate tile
-        Transform tileObject = Instantiate(
-            model,
+        var tileObject = PhotonNetwork.Instantiate(
+            modelName,
             // Calculate tile position
-            new Vector3(position.x * 1.75f + position.y * 0.875f, 0, position.y * model.localScale.z * 1.515f),
-            model.localRotation) as Transform;
+            new Vector3(position.x * 1.75f + position.y * 0.875f, 0, position.y * 1.515f),
+            Quaternion.identity, 0).transform;
 
         tileObject.name = position.ToString();
         tileObject.SetParent(this.transform);

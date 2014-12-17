@@ -21,14 +21,14 @@ public class TerrainController : MonoBehaviour
 
     private Transform TerrainObject { get; set; }
 
-    private MapGenerator MapGenerator { get; set; }
-
     private void InstantiateTerrain()
     {
+        var mapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
+
         switch (Type)
         {
             case TerrainType.Asteroids:
-                InstantiateTerrainObject(MapGenerator.AsteroidsTerrain);
+                InstantiateTerrainObject(mapGenerator.AsteroidsTerrain);
                 break;
             case TerrainType.Nebula:
                 break;
@@ -41,24 +41,24 @@ public class TerrainController : MonoBehaviour
         }
     }
 
-    public void InstantiateTerrainObject(Transform model)
+    public void InstantiateTerrainObject(string modelName)
     {
         // Instantiate terrain
-        TerrainObject = Instantiate(model, transform.position, model.localRotation) as Transform;
+        TerrainObject = PhotonNetwork.Instantiate("Terrains/" + modelName, transform.position, Quaternion.identity, 0).transform;
 
         TerrainObject.name = "Terrain: " + Type;
         TerrainObject.SetParent(transform);
-    } 
+    }
     #endregion
 
     private void Init()
     {
-        MapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
+
     }
 
     private void Start()
     {
-        
+
     }
 
     private void Awake()

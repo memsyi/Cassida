@@ -6,8 +6,8 @@ public class FleetSettings
 {
     [SerializeField]
     private Transform
-        _slowFleetObject,
-        _fastFleetObject;
+        _slowFleetObject = null,
+        _fastFleetObject = null;
 
     public Transform SlowFleetObject
     {
@@ -27,8 +27,8 @@ public class UnitSettings
 {
     [SerializeField]
     private Transform
-        _meeleUnitObject,
-        _rangeUnitObject;
+        _meeleUnitObject = null,
+        _rangeUnitObject = null;
 
     public Transform MeeleUnitObject
     {
@@ -43,7 +43,7 @@ public class UnitSettings
     }
 }
 
-public class FleetManager : MonoBehaviour
+public class FleetManager : Photon.MonoBehaviour
 {
     [SerializeField]
     private FleetSettings _fleetSettings;
@@ -69,9 +69,23 @@ public class FleetManager : MonoBehaviour
 
     private void InstantiateNewFleet(Vector2 position, FleetType fleetType, UnitValues[] unitValues)
     {
+        photonView.RPC("InstantiateNewFleetOverNetwork", PhotonTargets.AllBuffered, position, fleetType.GetHashCode(), PhotonNetwork.player);
+
+        for(int i = 0; i < unitValues.Length; i++)
+        {
+            if (unitValues[i] != null)
+            {
+                photonView.RPC("AddUnitToFleetOverNetwork", PhotonTargets.AllBuffered, FleetList.Count - 1, i, unitValues[i].UnitType.GetHashCode(), unitValues[i].Strength);
+            }
+        }
+    }
+
+    [RPC]
+    private void InstantiateNewFleetOverNetwork(Vector2 position, int fleetType, PhotonPlayer player)
+    {
         var fleetTile = WorldManager.TileList.Find(t => t.Position == position);
 
-        var fleetParent = new GameObject("Fleet: ").transform; // player in namen eintragen ! TODO
+        var fleetParent = new GameObject("Fleet of: " + player).transform; // player in namen eintragen ! TODO
 
         fleetParent.position = fleetTile.TileParent.position;
         fleetParent.SetParent(GameObject.Find(Tags.Fleets).transform);
@@ -79,7 +93,7 @@ public class FleetManager : MonoBehaviour
         #region Instantiate units
         var units = new Unit[6];
 
-        for (int i = 0; i < unitValues.Length; i++)
+        for (int i = 0; i < units.Length; i++)
         {
             var unitParent = new GameObject("Unit: " + i).transform;
 
@@ -87,61 +101,55 @@ public class FleetManager : MonoBehaviour
 
             unitParent.position = fleetTile.TileParent.position + Vector3.forward * 0.6f;
             unitParent.SetParent(fleetParent);
-
-            if (unitValues[i] != null)
-            {
-                units[i] = new Unit(unitParent, unitValues[i]);
-            }
         }
 
         fleetParent.rotation = Quaternion.identity;
         #endregion
 
-        var newFleet = new Fleet(fleetParent, fleetType, units);
+        var newFleet = new Fleet(player, fleetParent, (FleetType)fleetType, units);
 
         FleetList.Add(newFleet);
 
         fleetTile.Fleet = newFleet;
     }
 
-    public void AddUnitToFleet(Fleet fleet, int position, UnitValues unitValues)
+    [RPC]
+    public void AddUnitToFleetOverNetwork(int fleetInListPosition, int position, int unitType, int strength)
     {
-        fleet.Units[position] =
-            new Unit(fleet.FleetParent.FindChild("Unit: " + position), unitValues);
+        var fleet = FleetList[fleetInListPosition];
+
+        fleet.Units[position] = new Unit(fleet.FleetParent.FindChild("Unit: " + position), new UnitValues((UnitType)unitType, strength));
     }
 
-    public void AddStartFleets()
+    public void InstantiateStartFleets()
     {
         if (PhotonNetwork.isMasterClient)
         {
             var testUnit = new UnitValues(UnitType.Meele, 1);
 
-            var testUnits = new UnitValues[6] { null, new UnitValues(UnitType.Range, 1), testUnit, testUnit, testUnit, null };
+            var testUnits = new UnitValues[] { testUnit, testUnit, null, null, null, null };
 
             // Instantiate one fleet at start
             InstantiateNewFleet(Vector2.zero, FleetType.Slow, testUnits);
-            InstantiateNewFleet(new Vector2(2, 2), FleetType.Slow, new UnitValues[6]);
             InstantiateNewFleet(new Vector2(2, 1), FleetType.Slow, testUnits);
 
-            AddUnitToFleet(FleetList[0], 0, testUnit);
+            //AddUnitToFleetOverNetwork(FleetList[0], 2, testUnit);
         }
-    }
-
-    private void OnJoinedRoom()
-    {
-        //AddStartFleets();
     }
 
     private void Init()
     {
         WorldManager = GameObject.Find(Tags.Manager).GetComponent<WorldManager>();
+
+        if (!WorldManager)
+        {
+            Debug.LogError("MissedComponents!");
+        }
     }
 
     private void Start()
     {
         FleetList = new List<Fleet>();
-
-        AddStartFleets();
     }
 
     private void Awake()

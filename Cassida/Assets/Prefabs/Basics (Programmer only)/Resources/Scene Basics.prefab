@@ -68,6 +68,7 @@ GameObject:
   - 114: {fileID: 11400004}
   - 114: {fileID: 11400024}
   - 114: {fileID: 11400006}
+  - 114: {fileID: 11400026}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Manager
@@ -528,8 +529,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _bottomEdgeLength: 5
   _mapForm: 0
-  _tileBorder: {fileID: 400002, guid: 8807240de349afe48be2e38e01c8e401, type: 2}
-  _asteroidsTerrain: {fileID: 400000, guid: 21487a1f37226e14789931fd6b2a48c1, type: 2}
+  _asteroidsTerrain: Asteroids Terrain
 --- !u!114 &11400022
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -554,10 +554,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _fleetSettings:
     _slowFleetObject: {fileID: 400002, guid: db744df7a6f473743949217f076427f1, type: 2}
-    _fastFleetObject: {fileID: 400002, guid: db744df7a6f473743949217f076427f1, type: 2}
+    _fastFleetObject: {fileID: 400002, guid: f28917b255eeb5042966bb9d78490456, type: 2}
   _unitSettgins:
     _meeleUnitObject: {fileID: 400000, guid: 8d7420edd65ff684581ad10491fb2eed, type: 2}
     _rangeUnitObject: {fileID: 400000, guid: f9d0580f098646643a567abd14d7cbcb, type: 2}
+--- !u!114 &11400026
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  subId: 0
+  ownerId: 0
+  group: 0
+  prefixBackup: -1
+  observed: {fileID: 0}
+  synchronization: 0
+  onSerializeTransformOption: 3
+  onSerializeRigidBodyOption: 2
+  instantiationId: 0
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1

@@ -21,7 +21,11 @@ public class Fleet
             FleetController.MoveFleet(value);
         }
     }
+
+    public PhotonPlayer Player { get; private set; }
+    
     public Transform FleetParent { get; private set; }
+    
     public FleetType FleetType
     {
         get
@@ -38,12 +42,13 @@ public class Fleet
 
     public FleetController FleetController { get; private set; }
 
-    public Fleet(Transform fleetParent, FleetType fleetType, Unit[] units)
+    public Fleet(PhotonPlayer player, Transform fleetParent, FleetType fleetType, Unit[] units)
     {
         // Fleet object must be first, then type and units!
         FleetParent = fleetParent;
         FleetType = fleetType;
 
+        Player = player;
         Units = units;
     }
 
@@ -84,12 +89,6 @@ public class Fleet
         }
 
         Units = newUnitPositions;
-
-        //foreach (var unit in Units)
-        //{
-        //    if (unit != null)
-        //        Debug.Log(unit.Position);
-        //}
     }
 
     public void AttackUnit(int unitPosition, int damage)
@@ -131,6 +130,7 @@ public class Fleet
     }
 }
 
+[RequireComponent(typeof (PhotonView))]
 public class FleetController : MonoBehaviour
 {
     #region Object and Instantiation
@@ -168,7 +168,7 @@ public class FleetController : MonoBehaviour
     public void InstantiateFleetObject(Transform model)
     {
         // Instantiate fleet
-        FleetObject = Instantiate(model, transform.position, model.localRotation) as Transform;
+        FleetObject = Instantiate(model, transform.position, transform.rotation) as Transform;
 
         FleetObject.name = "Fleet Object: " + Type;
         FleetObject.SetParent(transform);
@@ -255,6 +255,11 @@ public class FleetController : MonoBehaviour
     private void Init()
     {
         FleetManager = GameObject.Find(Tags.Manager).GetComponent<FleetManager>();
+
+        if (!FleetManager)
+        {
+            Debug.LogError("MissedComponents!");
+        }
     }
 
     private void Start()
