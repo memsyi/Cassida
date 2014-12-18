@@ -51,6 +51,7 @@ public class UnitValues
     }
 }
 
+[RequireComponent(typeof(PhotonView))]
 public class UnitController : MonoBehaviour
 {
     #region Object and Instantiation

@@ -41,10 +41,10 @@ public class ObjectiveController : MonoBehaviour
         }
     }
 
-    public void InstantiateObjectiveObject(string modelName)
+    public void InstantiateObjectiveObject(Transform model)
     {
         // Instantiate objective
-        ObjectiveObject = PhotonNetwork.Instantiate("Objectives/" + modelName, transform.position, Quaternion.identity, 0).transform;
+        ObjectiveObject = Instantiate(model, transform.position, Quaternion.identity) as Transform;
 
         ObjectiveObject.name = "Objective: " + Type;
         ObjectiveObject.SetParent(transform);

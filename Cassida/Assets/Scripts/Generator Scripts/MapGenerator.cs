@@ -5,7 +5,8 @@ using System.Collections.Generic;
 public enum EdgeLength { Three = 3, Fife = 5, Seven = 7, Nine = 9, Eleven = 11, Thirteen = 13 }
 public enum MapForms { Hexagon, CuttedDiamond, Diamond }
 
-public class MapGenerator : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class MapGenerator : Photon.MonoBehaviour
 {
     [SerializeField]
     private EdgeLength _bottomEdgeLength = EdgeLength.Fife;
@@ -14,22 +15,24 @@ public class MapGenerator : MonoBehaviour
     private MapForms _mapForm = MapForms.Hexagon;
 
     [SerializeField]
-    private string
-        //_tileBorder = null,
-        _asteroidsTerrain = "Asteroids Terrain";
+    private Transform
+        _tileParent = null,
+        _asteroidsTerrain = null;
 
     #region Terrains
-    //public Transform TileBorder
-    //{
-    //    get { return _tileBorder; }
-    //    set { _tileBorder = value; }
-    //}
-    public string AsteroidsTerrain
+    public Transform TileParent
+    {
+        get { return _tileParent; }
+        set { _tileParent = value; }
+    }
+    public Transform AsteroidsTerrain
     {
         get { return _asteroidsTerrain; }
         set { _asteroidsTerrain = value; }
     }
     #endregion
+
+    private WorldManager WorldManager { get; set; }
 
     #region Variables
     private MapForms MapForm
@@ -45,7 +48,7 @@ public class MapGenerator : MonoBehaviour
     }
     #endregion
 
-    public void GenerateMap(List<Tile> tileList)
+    public void GenerateMap()
     {
         if (MapForm == MapForms.CuttedDiamond)
         {
@@ -66,30 +69,27 @@ public class MapGenerator : MonoBehaviour
                  || MapForm == MapForms.Diamond)
                 {
                     Vector2 position = new Vector2(x, y);
-                    tileList.Add(new Tile(position, InstantiateTileObject(position, "TileParent"), CalculateTerrainType(), CalculateObjectiveType()));
+                    photonView.RPC("InstantiateTileParentObject", PhotonTargets.AllBufferedViaServer, position, CalculateTerrainType().GetHashCode(), CalculateObjectiveType().GetHashCode());
                 }
             }
         }
     }
 
-    public Transform InstantiateTileObject(Vector2 position, string modelName)
+    [RPC]
+    private void InstantiateTileParentObject(Vector2 position, int terrainType, int objectiveType)
     {
-        if (modelName.Length == 0)
-        {
-            Debug.LogError("You need to assign all objects on the map generator.");
-        }
-
         // Instantiate tile
-        var tileObject = PhotonNetwork.Instantiate(
-            modelName,
+        var tileObject = Instantiate(
+            TileParent,
             // Calculate tile position
             new Vector3(position.x * 1.75f + position.y * 0.875f, 0, position.y * 1.515f),
-            Quaternion.identity, 0).transform;
+            Quaternion.identity) as Transform;
 
         tileObject.name = position.ToString();
+        tileObject.renderer.material.color = WorldManager.TileSettings.DefaultColor;
         tileObject.SetParent(this.transform);
 
-        return tileObject;
+        WorldManager.TileList.Add(new Tile(position, tileObject, (TerrainType)terrainType, (ObjectiveType)objectiveType));
     }
 
     private TerrainType CalculateTerrainType()
@@ -111,10 +111,15 @@ public class MapGenerator : MonoBehaviour
 
     private void Init()
     {
-
+        WorldManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<WorldManager>();
     }
 
     private void Start()
+    {
+        
+    }
+
+    private void Awake()
     {
         Init();
     }

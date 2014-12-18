@@ -399,8 +399,8 @@ EllipsoidParticleEmitter:
   maxSize: 1
   minEnergy: 100000
   maxEnergy: 100000
-  minEmission: 200
-  maxEmission: 300
+  minEmission: 100
+  maxEmission: 200
   worldVelocity: {x: 0, y: 0, z: 0}
   localVelocity: {x: 0, y: 0, z: 0}
   rndVelocity: {x: .100000001, y: .100000001, z: .100000001}
@@ -426,8 +426,8 @@ EllipsoidParticleEmitter:
   maxSize: 1
   minEnergy: 100000
   maxEnergy: 100000
-  minEmission: 400
-  maxEmission: 500
+  minEmission: 300
+  maxEmission: 400
   worldVelocity: {x: 0, y: 0, z: 0}
   localVelocity: {x: 0, y: 0, z: 0}
   rndVelocity: {x: .100000001, y: .100000001, z: .100000001}
@@ -453,8 +453,8 @@ EllipsoidParticleEmitter:
   maxSize: 1
   minEnergy: 100000
   maxEnergy: 100000
-  minEmission: 400
-  maxEmission: 500
+  minEmission: 300
+  maxEmission: 400
   worldVelocity: {x: 0, y: 0, z: 0}
   localVelocity: {x: 0, y: 0, z: 0}
   rndVelocity: {x: .100000001, y: .100000001, z: .100000001}

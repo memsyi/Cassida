@@ -53,7 +53,8 @@ public class SettingsTileSettings
     #endregion
 }
 
-public class WorldManager : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class WorldManager : Photon.MonoBehaviour
 {
     [SerializeField]
     SettingsTileSettings _tileSettings;
@@ -115,7 +116,14 @@ public class WorldManager : MonoBehaviour
                 // Other fleet
                 else if (CurrentHighlightedTile.Fleet != null)
                 {
-                    SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverFleetColor);
+                    if (CurrentHighlightedTile.Fleet.Player == PhotonNetwork.player)
+                    {
+                        SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverFleetColor);
+                    }
+                    else
+                    {
+                        SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverEnemyFleetColor);
+                    }
                 }
                 // Default tile
                 else
@@ -147,11 +155,18 @@ public class WorldManager : MonoBehaviour
     }
     #endregion
 
-    private void CheckTileSelection(object sender)
+    private void CheckTileSelection()
     {
-        if (CurrentSelectedTile == MapManager.NearestTileToMousePosition)
+        var clickedTile = MapManager.NearestTileToMousePosition;
+
+        if (clickedTile == null)
         {
-            RotateFleet(CurrentSelectedTile.Fleet);
+            return;
+        }
+
+        if (CurrentSelectedTile == clickedTile)
+        {
+            RotateFleet(CurrentSelectedTile.Position);
         }
 
         SelectTile(MapManager.NearestTileToMousePosition);
@@ -164,7 +179,7 @@ public class WorldManager : MonoBehaviour
             SetTileBorderColor(CurrentSelectedTile, TileSettings.DefaultColor);
         }
 
-        if (tile.Fleet != null)
+        if (tile.Fleet != null && tile.Fleet.Player == PhotonNetwork.player)
         {
             CurrentSelectedTile = tile;
             SetTileBorderColor(CurrentSelectedTile, TileSettings.MouseOverSelectionColor);
@@ -176,11 +191,11 @@ public class WorldManager : MonoBehaviour
     }
 
     #region Movement and Rotation
-    private void CheckFleetMovement(object sender)
+    private void CheckFleetMovement()
     {
         var targetTile = MapManager.NearestTileToMousePosition;
 
-        if (CurrentSelectedTile == null)
+        if (targetTile == null || CurrentSelectedTile == null)
         {
             return;
         }
@@ -188,7 +203,7 @@ public class WorldManager : MonoBehaviour
         if (CurrentSelectedTile == targetTile)
         {
             // Rotate Fleet
-            RotateFleet(CurrentSelectedTile.Fleet, false);
+            RotateFleet(CurrentSelectedTile.Position, false);
             return;
         }
 
@@ -200,29 +215,47 @@ public class WorldManager : MonoBehaviour
         }
 
         // Move fleet
-        MoveFleet(CurrentSelectedTile.Fleet, targetTile.TileParent.position);
-
-        targetTile.Fleet = CurrentSelectedTile.Fleet;
-        CurrentSelectedTile.Fleet = null;
+        MoveFleet(CurrentSelectedTile.Position, targetTile.Position);
 
         SelectTile(targetTile);
     }
 
-    private void RotateFleet(Fleet fleet, bool rotateRight = true)
+    private void RotateFleet(Vector2 tilePositionOfFleet, bool rotateRight = true)
     {
+        photonView.RPC("RotateFleetOverNetwork", PhotonTargets.AllBuffered, tilePositionOfFleet, rotateRight);
+    }
+
+    [RPC]
+    private void RotateFleetOverNetwork(Vector2 tilePositionOfFleet, bool rotateRight)
+    {
+        var fleet = TileList.Find(t => t.Position == tilePositionOfFleet).Fleet;
+
         fleet.RotateFleet(rotateRight ? 1 : -1);
     }
 
-    private void MoveFleet(Fleet fleet, Vector3 target)
+    private void MoveFleet(Vector2 tilePositionOfFleet, Vector2 targetTilePosition)
     {
-        fleet.MoveFleet(target);
+        photonView.RPC("MoveFleetOverNetwork", PhotonTargets.AllBuffered, tilePositionOfFleet, targetTilePosition);
+    }
+
+    [RPC]
+    private void MoveFleetOverNetwork(Vector2 tilePositionOfFleet, Vector2 targetTilePosition)
+    {
+        var currentTile = TileList.Find(t => t.Position == tilePositionOfFleet);
+        var targetTile = TileList.Find(t => t.Position == targetTilePosition);
+        var fleet = currentTile.Fleet;
+
+        targetTile.Fleet = fleet;
+        currentTile.Fleet = null;
+
+        fleet.MoveFleet(targetTile.TileParent.position);
     }
     #endregion
 
     #region Fight
     private bool CheckAttackEnemyFleet()
     {
-        if (CurrentHighlightedTile.Fleet == null)
+        if (CurrentHighlightedTile == null || CurrentHighlightedTile.Fleet == null || CurrentHighlightedTile.Fleet.Player == PhotonNetwork.player)
         {
             return false;
         }
@@ -254,8 +287,11 @@ public class WorldManager : MonoBehaviour
         var ownUnitDirection = GetOwnUnitInDirection();
         var enemyUnitDirection = ownUnitDirection < 3 ? ownUnitDirection + 3 : ownUnitDirection - 3;
 
-        var ownFleet = CurrentSelectedTile.Fleet;
-        var enemyFleet = CurrentHighlightedTile.Fleet;
+        var ownFleetTile = CurrentSelectedTile;
+        var enemyFleetTile = CurrentHighlightedTile;
+
+        var ownFleet = ownFleetTile.Fleet;
+        var enemyFleet = enemyFleetTile.Fleet;
 
         var ownUnitStrength = ownFleet.Units[ownUnitDirection].UnitValues.Strength;
         var enemyUnit = enemyFleet.Units[enemyUnitDirection];
@@ -264,31 +300,41 @@ public class WorldManager : MonoBehaviour
         {
             for (int i = 0; i < enemyFleet.Units.Length; i++)
             {
-                enemyFleet.AttackUnit(i, ownUnitStrength);
-
-                if (!enemyFleet.CheckWhetherFleetIsAlive())
-                {
-                    CurrentHighlightedTile.Fleet = null;
-                    break;
-                }
+                AttackUnitOfFleet(enemyFleetTile.Position, i, ownUnitStrength);
             }
         }
         else
         {
-            ownFleet.AttackUnit(ownUnitDirection, enemyUnit.UnitValues.Strength);
-            enemyFleet.AttackUnit(enemyUnitDirection, ownUnitStrength);
-
-            if (!ownFleet.CheckWhetherFleetIsAlive())
-            {
-                CurrentSelectedTile.Fleet = null;
-            }
-            if (!enemyFleet.CheckWhetherFleetIsAlive())
-            {
-                CurrentHighlightedTile.Fleet = null;
-            }
+            AttackUnitOfFleet(ownFleetTile.Position, ownUnitDirection, enemyUnit.UnitValues.Strength);
+            AttackUnitOfFleet(enemyFleetTile.Position, enemyUnitDirection, ownUnitStrength);
         }
 
         ResetHighlightedTile();
+    }
+
+    private void AttackUnitOfFleet(Vector2 tilePositionOfFleet, int unitPosition, int strength)
+    {
+        photonView.RPC("AttackUnitOFFleetOverNetwork", PhotonTargets.AllBuffered, tilePositionOfFleet, unitPosition, strength);
+    }
+
+    [RPC]
+    private void AttackUnitOFFleetOverNetwork(Vector2 tilePositionOfFleet, int unitPosition, int strength)
+    {
+        var tileOfFleet = TileList.Find(t => t.Position == tilePositionOfFleet);
+        var fleet = tileOfFleet.Fleet;
+
+        if (fleet == null)
+        {
+            return;
+        }
+
+        fleet.AttackUnit(unitPosition, strength);
+
+        if (!fleet.CheckWhetherFleetIsAlive())
+        {
+            tileOfFleet.Fleet = null;
+            ResetHighlightedTile();
+        }
     }
 
     private int GetOwnUnitInDirection()
@@ -339,6 +385,9 @@ public class WorldManager : MonoBehaviour
         // Add events
         MouseController.LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);
         MouseController.RightMouseclickEvent += new MouseclickHandler(CheckFleetMovement);
+
+        MouseController.LeftMousecklickEvent += new MouseclickHandler(ResetHighlightedTile);
+        MouseController.RightMouseclickEvent += new MouseclickHandler(ResetHighlightedTile);
     }
 
     private void InitializeMap()
@@ -349,16 +398,12 @@ public class WorldManager : MonoBehaviour
         }
 
         // Generate map
-        MapManager.GenerateMap(TileList);
-
-        TileSettings.DefaultColor = TileList[0].TileParent.renderer.material.color;
+        MapManager.GenerateMap();
     }
 
     public void InitializeWorld()
     {
         InitializeMap();
-
-        AddMouseEvents();
     }
 
     private void Init()
@@ -375,6 +420,8 @@ public class WorldManager : MonoBehaviour
     private void Start()
     {
         TileList = new List<Tile>();
+
+        AddMouseEvents();
     }
 
     private void Awake()

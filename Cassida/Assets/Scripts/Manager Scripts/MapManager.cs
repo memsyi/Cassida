@@ -104,7 +104,7 @@ public class MapManager : MonoBehaviour
 
     private Tile FindNearestTileToMousePosition()
     {
-        if (WorldManager.TileList.Count == 0)
+        if (WorldManager.TileList == null || WorldManager.TileList.Count == 0)
         {
             return null;
         }
@@ -128,7 +128,7 @@ public class MapManager : MonoBehaviour
         return nearestTile;
     }
 
-    public void GenerateMap(List<Tile> tileList)
+    public void GenerateMap()
     {
         var mapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
 
@@ -138,7 +138,7 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        mapGenerator.GenerateMap(tileList);
+        mapGenerator.GenerateMap();
     }
 
     private void Init()

@@ -6,7 +6,7 @@ public struct MouseclickInformation
     public Vector2 DownPosition { get; set; }
 }
 
-public delegate void MouseclickHandler(object sender);
+public delegate void MouseclickHandler();
 
 public class MouseController : MonoBehaviour
 {
@@ -81,19 +81,19 @@ public class MouseController : MonoBehaviour
                     case "Fire1":
                         if (LeftMousecklickEvent != null)
                         {
-                            LeftMousecklickEvent(this);
+                            LeftMousecklickEvent();
                         }
                         break;
                     case "Fire2":
                         if (RightMouseclickEvent != null)
                         {
-                            RightMouseclickEvent(this);
+                            RightMouseclickEvent();
                         }
                         break;
                     case "Fire3":
                         if (MiddleMouseclickEvent != null)
                         {
-                            MiddleMouseclickEvent(this);
+                            MiddleMouseclickEvent();
                         }
                         break;
                     default:

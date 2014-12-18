@@ -41,10 +41,10 @@ public class TerrainController : MonoBehaviour
         }
     }
 
-    public void InstantiateTerrainObject(string modelName)
+    public void InstantiateTerrainObject(Transform model)
     {
         // Instantiate terrain
-        TerrainObject = PhotonNetwork.Instantiate("Terrains/" + modelName, transform.position, Quaternion.identity, 0).transform;
+        TerrainObject = Instantiate(model, transform.position, Quaternion.identity) as Transform;
 
         TerrainObject.name = "Terrain: " + Type;
         TerrainObject.SetParent(transform);
