@@ -69,6 +69,8 @@ GameObject:
   - 114: {fileID: 11400024}
   - 114: {fileID: 11400006}
   - 114: {fileID: 11400026}
+  - 114: {fileID: 11400032}
+  - 114: {fileID: 11400030}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Manager
@@ -357,6 +359,7 @@ MonoBehaviour:
     _rotationSpeed: 1
     _zoomSpeed: 1
     _buttonSpeed: 2
+    _mouseButtonSpeed: 2
     _minimumZoom: 20
     _maximumZoom: 3
     _zoomDownAngle: 20
@@ -383,14 +386,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a70c33740dc7db04dad81d9dc41f5257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tileSettings:
-    _defaultColor: {r: 0, g: .568627477, b: .745098054, a: .137254909}
-    _mouseOverColor: {r: 0, g: .568627477, b: .752941191, a: 1}
-    _mouseOverFleetColor: {r: 0, g: 0, b: 1, a: 1}
-    _selectionColor: {r: 1, g: 1, b: 1, a: .392156869}
-    _mouseOverSelectionColor: {r: 1, g: 1, b: 1, a: 1}
-    _mouseOverEnemyFleetColor: {r: 1, g: 0, b: 0, a: 1}
-    _mouseOverCantMoveColor: {r: 1, g: .393103421, b: 0, a: .392156869}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -600,6 +595,36 @@ MonoBehaviour:
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
   instantiationId: 0
+--- !u!114 &11400030
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62a0f9c068e8daf4b837791594eaf1fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _tileSettings:
+    _defaultColor: {r: .5, g: .5, b: .5, a: .137254909}
+    _mouseOverColor: {r: 0, g: 1, b: 1, a: .137254909}
+    _mouseOverFleetColor: {r: 0, g: 0, b: 1, a: .137254909}
+    _selectionColor: {r: 1, g: 1, b: 1, a: .196078435}
+    _mouseOverSelectionColor: {r: 1, g: 0, b: 0, a: .137254909}
+    _mouseOverEnemyFleetColor: {r: 1, g: 0, b: 1, a: .137254909}
+    _mouseOverCantMoveColor: {r: 1, g: 0, b: 0, a: .137254909}
+--- !u!114 &11400032
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0ba1f400a171e5468bb2ae6438375a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1

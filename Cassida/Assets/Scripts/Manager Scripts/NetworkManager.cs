@@ -38,6 +38,11 @@ public class NetworkManager : MonoBehaviour
         PhotonNetwork.CreateRoom(null);
     }
 
+    private void OnJoinedLobby()
+    {
+        JoinRandomRoom();
+    }
+
     private void OnGUI()
     {
         if (!PhotonNetwork.offlineMode)
@@ -48,10 +53,10 @@ public class NetworkManager : MonoBehaviour
 
         if (PhotonNetwork.connectionStateDetailed == PeerState.JoinedLobby)
         {
-            if (GUILayout.Button("Join Room"))
-            {
-                JoinRandomRoom();
-            }
+            //if (GUILayout.Button("Join Room"))
+            //{
+            //    JoinRandomRoom();
+            //}
         }
 
         if (PhotonNetwork.connectionStateDetailed == PeerState.Joined)
@@ -76,7 +81,10 @@ public class NetworkManager : MonoBehaviour
 
     private void Init()
     {
-        PhotonNetwork.offlineMode = true;
+        if (!PhotonNetwork.connected)
+        {
+            PhotonNetwork.offlineMode = true;
+        }
     }
 
     private void Start()

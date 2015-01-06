@@ -96,15 +96,20 @@ public class Tile
 
 public class MapManager : MonoBehaviour
 {
+    #region Variables
     public Tile NearestTileToMousePosition { get { return FindNearestTileToMousePosition(); } }
 
+    // Scripts
     private MouseController MouseController { get; set; }
+    private TileManager TileManager { get; set; } 
 
-    private WorldManager WorldManager { get; set; }
+    // Lists
+    private List<Tile> TileList { get { return TileManager.TileList; } }
+    #endregion
 
     private Tile FindNearestTileToMousePosition()
     {
-        if (WorldManager.TileList == null || WorldManager.TileList.Count == 0)
+        if (TileList == null || TileList.Count == 0)
         {
             return null;
         }
@@ -114,7 +119,7 @@ public class MapManager : MonoBehaviour
         var shortestDistance = 1000f;
         Tile nearestTile = null;
 
-        foreach (var tile in WorldManager.TileList)
+        foreach (var tile in TileList)
         {
             var distance = Vector2.Distance(mousePosition, new Vector2(tile.TileParent.position.x, tile.TileParent.position.z));
 
@@ -144,9 +149,9 @@ public class MapManager : MonoBehaviour
     private void Init()
     {
         MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
-        WorldManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<WorldManager>();
+        TileManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<TileManager>();
 
-        if (!MouseController || !WorldManager)
+        if (!MouseController || !TileManager)
         {
             Debug.LogError("MissedComponents!");
         }

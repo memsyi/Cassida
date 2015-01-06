@@ -32,7 +32,7 @@ public class MapGenerator : Photon.MonoBehaviour
     }
     #endregion
 
-    private WorldManager WorldManager { get; set; }
+    private TileManager TileManager { get; set; }
 
     #region Variables
     private MapForms MapForm
@@ -86,10 +86,10 @@ public class MapGenerator : Photon.MonoBehaviour
             Quaternion.identity) as Transform;
 
         tileObject.name = position.ToString();
-        tileObject.renderer.material.color = WorldManager.TileSettings.DefaultColor;
+        tileObject.renderer.material.color = TileManager.TileSettings.DefaultColor;
         tileObject.SetParent(this.transform);
 
-        WorldManager.TileList.Add(new Tile(position, tileObject, (TerrainType)terrainType, (ObjectiveType)objectiveType));
+        TileManager.TileList.Add(new Tile(position, tileObject, (TerrainType)terrainType, (ObjectiveType)objectiveType));
     }
 
     private TerrainType CalculateTerrainType()
@@ -111,12 +111,12 @@ public class MapGenerator : Photon.MonoBehaviour
 
     private void Init()
     {
-        WorldManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<WorldManager>();
+        TileManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<TileManager>();
     }
 
     private void Start()
     {
-        
+
     }
 
     private void Awake()

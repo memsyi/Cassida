@@ -194,6 +194,7 @@ public class SettingsCameraSettings
         _rotationSpeed = 1f,
         _zoomSpeed = 1f,
         _buttonSpeed = 2f,
+        _mouseButtonSpeed = 2f,
         _minimumZoom = 20f,
         _maximumZoom = 3f,
         _zoomDownAngle = 20f,
@@ -214,6 +215,11 @@ public class SettingsCameraSettings
     {
         get { return _maximumZoom; }
         set { _maximumZoom = value; }
+    }
+    public float MouseButtonSpeed
+    {
+        get { return _mouseButtonSpeed; }
+        set { _mouseButtonSpeed = value; }
     }
     public float ButtonSpeed
     {
@@ -332,11 +338,11 @@ public class CameraController : MonoBehaviour
             {
                 if (Input.GetButton("Vertical"))
                 {
-                    MoveForwardOrBackward(Input.GetAxis("Vertical") * CameraSettings.ButtonSpeed * GeneralMultiplier);
+                    MoveForwardOrBackward(Input.GetAxis("Vertical") * CameraSettings.ButtonSpeed);
                 }
                 if (Input.GetButton("Horizontal"))
                 {
-                    MoveRightOrLeft(Input.GetAxis("Horizontal") * CameraSettings.ButtonSpeed * GeneralMultiplier);
+                    MoveRightOrLeft(Input.GetAxis("Horizontal") * CameraSettings.ButtonSpeed);
                 }
             }
             if (CameraControlls.AllowNumPad)
@@ -499,17 +505,17 @@ public class CameraController : MonoBehaviour
         if (keyPressedAction == KeyPressedActions.Movement && CameraControlls.AllowMovement)
         {
             // Movement
-            MoveForwardOrBackward(-Input.GetAxis("Mouse Y"));
-            MoveRightOrLeft(-Input.GetAxis("Mouse X"));
+            MoveForwardOrBackward(-Input.GetAxis("Mouse Y") * CameraSettings.MouseButtonSpeed);
+            MoveRightOrLeft(-Input.GetAxis("Mouse X") * CameraSettings.MouseButtonSpeed);
         }
         else if (keyPressedAction == KeyPressedActions.Rotation && CameraControlls.AllowRotation)
         {
             // Rotation
-            RotateRightOrLeft(-Input.GetAxis("Mouse X"));
+            RotateRightOrLeft(-Input.GetAxis("Mouse X") * CameraSettings.MouseButtonSpeed);
 
             if (CameraControlls.AllowUpDownRotation)
             {
-                RotateUpOrDown(-Input.GetAxis("Mouse Y"));
+                RotateUpOrDown(-Input.GetAxis("Mouse Y") * CameraSettings.MouseButtonSpeed);
             }
         }
     }

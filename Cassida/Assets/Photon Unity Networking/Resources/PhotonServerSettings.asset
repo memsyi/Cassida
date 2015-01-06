@@ -36,4 +36,11 @@ MonoBehaviour:
   - MoveFleetOverNetwork
   - RotateFleetOverNetwork
   - AttackUnitOFFleetOverNetwork
+  - AttackUnitOfFleetOverNetwork
+  - NetworkAddFleetToWorld
+  - NetworkAddUnitToFleet
+  - NetworkAttackUnitOfFleet
+  - NetworkMoveFleet
+  - NetworkRotateFleet
+  - NetworkRotateFleetToPosition
   DisableAutoOpenWizard: 0

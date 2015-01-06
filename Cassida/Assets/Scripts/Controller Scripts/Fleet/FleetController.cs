@@ -10,6 +10,8 @@ public class Fleet
 {
     private FleetType _fleetType;
 
+    public int ID { get; private set; }
+
     public Vector3 Position
     {
         get
@@ -21,6 +23,8 @@ public class Fleet
             FleetController.MoveFleet(value);
         }
     }
+
+    //public int RotationPosition { get; private set; }
 
     public PhotonPlayer Player { get; private set; }
     
@@ -42,12 +46,13 @@ public class Fleet
 
     public FleetController FleetController { get; private set; }
 
-    public Fleet(PhotonPlayer player, Transform fleetParent, FleetType fleetType, Unit[] units)
+    public Fleet(int id, PhotonPlayer player, Transform fleetParent, FleetType fleetType, Unit[] units)
     {
         // Fleet object must be first, then type and units!
         FleetParent = fleetParent;
         FleetType = fleetType;
 
+        ID = id;
         Player = player;
         Units = units;
     }
@@ -89,7 +94,28 @@ public class Fleet
         }
 
         Units = newUnitPositions;
+
+        //RotationPosition += rotationDirection;
+        //if (RotationPosition > 5)
+        //{
+        //    RotationPosition = 0;
+        //}
     }
+
+    //public void RotateFleetToPosition(int rotationPosition)
+    //{
+    //    if (rotationPosition < 0)
+    //    {
+    //        rotationPosition = 5;
+    //    }
+
+    //    for (int i = 0; i <= RotationPosition + rotationPosition; i++)
+    //    {
+    //        RotateFleet(1);
+    //    }
+
+    //    RotationPosition = rotationPosition;
+    //}
 
     public void AttackUnit(int unitPosition, int damage)
     {
@@ -97,6 +123,7 @@ public class Fleet
 
         if (attackedUnit == null)
         {
+            CheckWhetherFleetIsAlive();
             return;
         }
 
@@ -109,7 +136,7 @@ public class Fleet
         }
     }
 
-    public bool CheckWhetherFleetIsAlive()
+    private bool CheckWhetherFleetIsAlive()
     {
         foreach (var unit in Units)
         {
@@ -119,7 +146,7 @@ public class Fleet
             }
         }
 
-        FleetController.DestroyFleetObject(this);
+        FleetController.DestroyFleet(this);
         return false;
     }
 
@@ -148,6 +175,7 @@ public class FleetController : MonoBehaviour
 
     private Transform FleetObject { get; set; }
 
+    // Scripts
     private FleetManager FleetManager { get; set; }
 
     private void InstantiateFleet()
@@ -246,10 +274,9 @@ public class FleetController : MonoBehaviour
     }
     #endregion
 
-    public void DestroyFleetObject(Fleet fleet)
+    public void DestroyFleet(Fleet fleet)
     {
-        Destroy(this.gameObject);
-        FleetManager.FleetList.Remove(fleet);
+        FleetManager.DestroyFleet(fleet);
     }
 
     private void Init()
