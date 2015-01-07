@@ -2,8 +2,8 @@
 
 public enum FleetType
 {
-    Slow,
-    Fast
+    Slow = 1,
+    Fast = 2
 }
 
 public class Fleet
@@ -23,6 +23,8 @@ public class Fleet
             FleetController.MoveFleet(value);
         }
     }
+
+    public int MovementPointsLeft { get; set; }
 
     //public int RotationPosition { get; private set; }
 
@@ -55,11 +57,15 @@ public class Fleet
         ID = id;
         Player = player;
         Units = units;
+
+        ResetMovementPoints();
     }
 
     public void MoveFleet(Vector3 target)
     {
         Position = target;
+
+        MovementPointsLeft--;
     }
     public void RotateFleet(int rotationDirection)
     {
@@ -116,6 +122,10 @@ public class Fleet
 
     //    RotationPosition = rotationPosition;
     //}
+    public void ResetMovementPoints()
+    {
+        MovementPointsLeft = FleetType.GetHashCode();
+    }
 
     public void AttackUnit(int unitPosition, int damage)
     {

@@ -28,6 +28,20 @@ public class GameController : MonoBehaviour
         Application.LoadLevel(Application.loadedLevelName);
     }
 
+    public void EndTurn()
+    {
+        FleetManager.ResetMovementOfAllFleets();
+        TileManager.ResetAllTiles();
+    }
+
+    private void OnGUI()
+    {
+        if (GUI.Button(new Rect(100, 0, 100, 20), "EndTurn"))
+        {
+            EndTurn();
+        }
+    }
+
     private void Init()
     {
         //WorldManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<WorldManager>();

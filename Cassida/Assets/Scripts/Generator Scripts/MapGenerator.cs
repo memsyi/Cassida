@@ -23,12 +23,12 @@ public class MapGenerator : Photon.MonoBehaviour
     public Transform TileParent
     {
         get { return _tileParent; }
-        set { _tileParent = value; }
+        private set { _tileParent = value; }
     }
     public Transform AsteroidsTerrain
     {
         get { return _asteroidsTerrain; }
-        set { _asteroidsTerrain = value; }
+        private set { _asteroidsTerrain = value; }
     }
     #endregion
 
@@ -86,7 +86,7 @@ public class MapGenerator : Photon.MonoBehaviour
             Quaternion.identity) as Transform;
 
         tileObject.name = position.ToString();
-        tileObject.renderer.material.color = TileManager.TileSettings.DefaultColor;
+        tileObject.renderer.material.color = TileManager.TileColor.DefaultColor;
         tileObject.SetParent(this.transform);
 
         TileManager.TileList.Add(new Tile(position, tileObject, (TerrainType)terrainType, (ObjectiveType)objectiveType));
