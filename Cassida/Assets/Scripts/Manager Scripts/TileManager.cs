@@ -453,6 +453,11 @@ public class TileManager : MonoBehaviour
 
     private void SetTileBorderColor(Tile tile, Color color)
     {
+        if (tile == null)
+        {
+            return;
+        }
+
         tile.TileParent.renderer.material.color = color;
     }
 

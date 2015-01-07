@@ -54,19 +54,16 @@ public class InputManager : Photon.MonoBehaviour
     #region Movement and Rotation
     private void CheckShowMovementArea()
     {
+        ResetMovementArea();
+
         if (CurrentSelectedTile == null)
         {
-            ResetMovementArea();
             return;
         }
 
         if (CurrentSelectedTile.Fleet.MovementPointsLeft > 0)
         {
             ShowMovementArea();
-        }
-        else
-        {
-            ResetMovementArea();
         }
     }
 
@@ -85,7 +82,7 @@ public class InputManager : Photon.MonoBehaviour
         }
     }
 
-    private void ResetMovementArea()
+    public void ResetMovementArea()
     {
         MoveableTileList.Clear();
 
@@ -208,7 +205,7 @@ public class InputManager : Photon.MonoBehaviour
         {
             for (int i = 0; i < enemyFleet.Units.Length; i++)
             {
-                AttackUnitOfFleet(enemyFleetTile.Fleet.ID, i, ownUnitStrength);
+                AttackUnitOfFleet(enemyFleet.ID, i, ownUnitStrength);
             }
         }
         else
