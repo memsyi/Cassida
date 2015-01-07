@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
-public class GameController : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class GameController : Photon.MonoBehaviour
 {
+    // Scripts
     //WorldManager WorldManager { get; set; }
-    TileManager TileManager { get; set; }
-    FleetManager FleetManager { get; set; }
+    private TileManager TileManager { get; set; }
+    private FleetManager FleetManager { get; set; }
+    private InputManager InputManager { get; set; }
 
     private void StartGame()
     {
@@ -18,10 +22,52 @@ public class GameController : MonoBehaviour
         StartGame();
     }
 
+    #region Player connect
+    private void OnPhotonPlayerConnected(PhotonPlayer player)
+    {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
+        FleetManager.InstatiateAllExistingFleetsAtPlayer(player);
+
+        var mapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
+        mapGenerator.InstatiateAllExistingTilesAtPlayer(player);
+    }
+    #endregion
+
+    #region Player disconnect
     private void OnPhotonPlayerDisconnected(PhotonPlayer player)
     {
-        FleetManager.DestroyAllFleetsOfPlayer(player);
+        print("disconnected " + player);
+
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
+        photonView.RPC("NetworkClearAndDestroyAllOfDisconnectedPlayers", PhotonTargets.All);
     }
+
+    void OnMasterClientSwitched(PhotonPlayer newMasterClient)
+    {
+        print("new master " + newMasterClient.ToString());
+        //if (newMasterClient != PhotonNetwork.player)
+        //{
+        //    return;
+        //}
+
+        //photonView.RPC("NetworkClearAndDestroyAllOfDisconnectedPlayers", PhotonTargets.All);
+    }
+
+    [RPC]
+    private void NetworkClearAndDestroyAllOfDisconnectedPlayers()
+    {
+        print("delet all objects");
+        FleetManager.DestroyAllFleetsOfDisconnectedPlayers();
+    }
+    #endregion
 
     private void OnLeftRoom()
     {
@@ -32,6 +78,7 @@ public class GameController : MonoBehaviour
     {
         FleetManager.ResetMovementOfAllFleets();
         TileManager.ResetAllTiles();
+        InputManager.ResetMovementArea();
     }
 
     private void OnGUI()
@@ -44,11 +91,12 @@ public class GameController : MonoBehaviour
 
     private void Init()
     {
-        //WorldManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<WorldManager>();
-        TileManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<TileManager>();
-        FleetManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<FleetManager>();
+        var managerObject = GameObject.FindGameObjectWithTag(Tags.Manager);
+        TileManager = managerObject.GetComponent<TileManager>();
+        FleetManager = managerObject.GetComponent<FleetManager>();
+        InputManager = managerObject.GetComponent<InputManager>();
 
-        if (!TileManager || !FleetManager)
+        if (!TileManager || !FleetManager || !InputManager)
         {
             Debug.LogError("MissedComponents!");
         }

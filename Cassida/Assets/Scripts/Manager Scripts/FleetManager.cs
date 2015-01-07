@@ -144,7 +144,23 @@ public class FleetManager : Photon.MonoBehaviour
             return;
         }
 
-        photonView.RPC("NetworkAddFleetToWorld", PhotonTargets.OthersBuffered, fleetID, position, fleetType, player);
+        photonView.RPC("NetworkAddFleetToWorld", PhotonTargets.Others, fleetID, position, fleetType, player);
+    }
+
+    public void InstatiateAllExistingFleetsAtPlayer(PhotonPlayer player)
+    {
+        foreach (var fleet in FleetList)
+        {
+            photonView.RPC("NetworkAddFleetToWorld", player, fleet.ID, TileList.Find(t => t.Fleet == fleet).Position, fleet.FleetType.GetHashCode(), fleet.Player);
+
+            for (int i = 0; i < fleet.Units.Length; i++)
+            {
+                if (fleet.Units[i] != null)
+                {
+                    photonView.RPC("NetworkAddUnitToFleet", player, TileList.Find(t => t.Fleet == fleet).Position, i, fleet.Units[i].UnitValues.UnitType.GetHashCode(), fleet.Units[i].UnitValues.Strength);
+                }
+            }
+        }
     }
 
     public void AddBufferedFleetsToWorld(BufferedFleet bufferedFleet)
@@ -190,6 +206,7 @@ public class FleetManager : Photon.MonoBehaviour
     {
         for (int i = 0; i < BufferedFleetList.Count; i++)
         {
+            print("fleet in order");
             if (TileList.Exists(t => t.Position == BufferedFleetList[i].Position))
             {
                 AddBufferedFleetsToWorld(BufferedFleetList[i]);
@@ -209,7 +226,7 @@ public class FleetManager : Photon.MonoBehaviour
             return;
         }
 
-        photonView.RPC("NetworkAddUnitToFleet", PhotonTargets.OthersBuffered, fleetPosition, position, unitType, strength);
+        photonView.RPC("NetworkAddUnitToFleet", PhotonTargets.Others, fleetPosition, position, unitType, strength);
     }
 
     private void AddBufferedUnitsToFleet(Fleet fleet, BufferedUnit bufferedUnit)
@@ -263,11 +280,34 @@ public class FleetManager : Photon.MonoBehaviour
         FleetList.Remove(fleet);
     }
 
-    public void DestroyAllFleetsOfPlayer(PhotonPlayer player)
+    [RPC]
+    public void DestroyAllFleetsOfDisconnectedPlayers()
     {
+        List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.playerList);
+
+        // TODO kommt im Spiel eigentlich nicht vor... so gibt es einen outofrange fehler bei löschen der flotte
+        //if (BufferedFleetList.Count > 0)
+        //{
+        //    for (int i = BufferedFleetList.Count - 1; i >= 0; i--)
+        //    {
+        //        if (!playerList.Exists(p => p == BufferedFleetList[i].Player))
+        //        {
+        //            for (int u = BufferedUnitList.Count - 1; i >= 0; i--)
+        //            {
+        //                if (BufferedUnitList[u].FleetPosition == BufferedFleetList[i].Position)
+        //                {
+        //                    BufferedUnitList.Remove(BufferedUnitList[u]);
+        //                }
+        //            }
+
+        //            BufferedFleetList.Remove(BufferedFleetList[i]); // HIER!!!
+        //        }
+        //    }
+        //}
+
         for (int i = FleetList.Count - 1; i >= 0; i--)
         {
-            if (FleetList[i].Player == player)
+            if (!playerList.Exists(p => p == FleetList[i].Player))
             {
                 DestroyFleet(FleetList[i]);
             }

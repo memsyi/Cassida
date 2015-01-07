@@ -69,9 +69,17 @@ public class MapGenerator : Photon.MonoBehaviour
                  || MapForm == MapForms.Diamond)
                 {
                     Vector2 position = new Vector2(x, y);
-                    photonView.RPC("InstantiateTileParentObject", PhotonTargets.AllBufferedViaServer, position, CalculateTerrainType().GetHashCode(), CalculateObjectiveType().GetHashCode());
+                    photonView.RPC("InstantiateTileParentObject", PhotonTargets.All, position, CalculateTerrainType().GetHashCode(), CalculateObjectiveType().GetHashCode());
                 }
             }
+        }
+    }
+
+    public void InstatiateAllExistingTilesAtPlayer(PhotonPlayer player)
+    {
+        foreach (var tile in TileManager.TileList)
+        {
+            photonView.RPC("InstantiateTileParentObject", player, tile.Position, tile.TerrainType.GetHashCode(), tile.ObjectiveType.GetHashCode());
         }
     }
 

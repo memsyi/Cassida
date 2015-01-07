@@ -131,7 +131,7 @@ public class InputManager : Photon.MonoBehaviour
 
     private void RotateFleet(int fleetID, bool rotateRight = true)
     {
-        photonView.RPC("NetworkRotateFleet", PhotonTargets.AllBuffered, fleetID, rotateRight);
+        photonView.RPC("NetworkRotateFleet", PhotonTargets.All, fleetID, rotateRight);
     }
 
     //private void RotateFleetToPosition(int fleetID, int rotationPosition)
@@ -159,7 +159,7 @@ public class InputManager : Photon.MonoBehaviour
     {
         ResetMovementArea();
 
-        photonView.RPC("NetworkMoveFleet", PhotonTargets.AllBuffered, fleetID, targetTilePosition);
+        photonView.RPC("NetworkMoveFleet", PhotonTargets.All, fleetID, targetTilePosition);
     }
 
     [RPC]
@@ -219,7 +219,7 @@ public class InputManager : Photon.MonoBehaviour
 
     private void AttackUnitOfFleet(int fleetID, int unitPosition, int strength)
     {
-        photonView.RPC("NetworkAttackUnitOfFleet", PhotonTargets.AllBuffered, fleetID, unitPosition, strength);
+        photonView.RPC("NetworkAttackUnitOfFleet", PhotonTargets.All, fleetID, unitPosition, strength);
     }
 
     [RPC]
@@ -245,9 +245,10 @@ public class InputManager : Photon.MonoBehaviour
     private void Init()
     {
         MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
-        FleetManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<FleetManager>();
-        MapManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<MapManager>();
-        TileManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<TileManager>();
+        var managerObject = GameObject.FindGameObjectWithTag(Tags.Manager);
+        FleetManager = managerObject.GetComponent<FleetManager>();
+        MapManager = managerObject.GetComponent<MapManager>();
+        TileManager = managerObject.GetComponent<TileManager>();
 
         if (!MouseController || !FleetManager || !MapManager || !TileManager)
         {
