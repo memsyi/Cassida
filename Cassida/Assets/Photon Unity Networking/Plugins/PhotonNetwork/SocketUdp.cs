@@ -73,12 +73,13 @@ namespace ExitGames.Client.Photon
                     try
                     {
                         this.sock.Close();
-                        this.sock = null;
                     }
                     catch (Exception ex)
                     {
                         this.EnqueueDebugReturn(DebugLevel.INFO, "Exception in Disconnect(): " + ex);
                     }
+
+                    this.sock = null;
                 }
             }
 

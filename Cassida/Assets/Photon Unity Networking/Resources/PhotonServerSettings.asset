@@ -16,7 +16,7 @@ MonoBehaviour:
   ServerAddress: 
   ServerPort: 5055
   PreferredRegion: 0
-  AppID: b6cb246b-a403-4ec5-80ab-5f2c48312bf3
+  AppID: 0d6f27ca-4d1d-43e7-80ee-81767d4067f4
   PingCloudServersOnAwake: 0
   RpcList:
   - Chat
@@ -28,12 +28,16 @@ MonoBehaviour:
   - NetworkAddUnitToFleet
   - NetworkAttackUnitOfFleet
   - NetworkClearAndDestroyAllOfDisconnectedPlayers
+  - NetworkEndTurn
   - NetworkMoveFleet
   - NetworkRotateFleet
+  - NetworkSetNewTurnOwner
+  - NetworkSetPlayerNumber
   - OnAwakeRPC
   - PickupItemInit
   - PunPickup
   - PunPickupSimple
   - PunRespawn
   - RequestForPickupTimes
+  - NetworkAddPlayerToPlayerList
   DisableAutoOpenWizard: 0

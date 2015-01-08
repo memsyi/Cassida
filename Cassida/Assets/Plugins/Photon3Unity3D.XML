@@ -91,7 +91,7 @@
             <summary> Maximum Transfer Unit to be used for UDP+TCP</summary>
         </member>
         <member name="F:ExitGames.Client.Photon.PeerBase.rhttpMinConnections">
-            <summary> (default=2)) Rhttp: minimum number of open connections </summary>
+            <summary> (default=2) Rhttp: minimum number of open connections </summary>
         </member>
         <member name="F:ExitGames.Client.Photon.PeerBase.rhttpMaxConnections">
             <summary> (default=6) Rhttp: maximum number of open connections, should be > rhttpMinConnections </summary>
@@ -1246,7 +1246,6 @@
             The ServerAddress can only be changed for HTTP connections (to replace one that goes through a Loadbalancer with a direct URL).
             </remarks>
         </member>
-        <!-- Badly formed XML comment ignored for member "P:ExitGames.Client.Photon.PhotonPeer.HttpUrlParameters" -->
         <member name="P:ExitGames.Client.Photon.PhotonPeer.UsedProtocol">
             <summary>The protocol this Peer uses to connect to Photon.</summary>
         </member>
@@ -1820,9 +1819,6 @@
         <member name="F:ExitGames.Client.Photon.ConnectionProtocol.Tcp">
             <summary>Use TCP to connect to Photon.</summary>
         </member>
-        <member name="F:ExitGames.Client.Photon.ConnectionProtocol.RHttp">
-            <summary>Use Realtime HTTP connections to connect a Photon Master (not available in regular Photon SDK).</summary>
-        </member>
         <member name="T:ExitGames.Client.Photon.DebugLevel">
             <summary>
             Level / amount of DebugReturn callbacks. Each debug level includes output for lower ones: OFF, ERROR, WARNING, INFO, ALL.
@@ -1843,25 +1839,11 @@
         <member name="F:ExitGames.Client.Photon.DebugLevel.ALL">
             <summary>Most complete workflow description (but lots of debug output), info, warnings and errors.</summary>
         </member>
-        <member name="T:ExitGames.Client.Photon.PingMono">
-            <summary>Uses C# Socket class from System.Net.Sockets (as Unity usually does).</summary>
-            <remarks>Incompatible with Windows 8 Store/Phone API.</remarks>
+        <member name="T:ExitGames.Client.Photon.PingNativeDynamic">
+            <summary>Uses dynamic linked native Photon socket library via DllImport("PhotonSocketPlugin") attribute (as done by Unity Android).</summary>
         </member>
-        <member name="T:ExitGames.Client.Photon.SerializeMethod">
-            <summary>
-            Type of serialization methods to add custom type support.
-            Use PhotonPeer.ReisterType() to register new types with serialization and deserialization methods.
-            </summary>
-            <param name="customObject">The method will get objects passed that were registered with it in RegisterType().</param>
-            <returns>Return a byte[] that resembles the object passed in. The framework will surround it with length and type info, so don't include it.</returns>
-        </member>
-        <member name="T:ExitGames.Client.Photon.DeserializeMethod">
-            <summary>
-            Type of deserialization methods to add custom type support.
-            Use PhotonPeer.RegisterType() to register new types with serialization and deserialization methods.
-            </summary>
-            <param name="serializedCustomObject">The framwork passes in the data it got by the associated SerializeMethod. The type code and length are stripped and applied before a DeserializeMethod is called.</param>
-            <returns>Return a object of the type that was associated with this method through RegisterType().</returns>
+        <member name="T:ExitGames.Client.Photon.PingNativeStatic">
+            <summary>Uses static linked native Photon socket library via DllImport("__Internal") attribute (as done by Unity iOS).</summary>
         </member>
         <member name="T:ExitGames.Client.Photon.OperationRequest">
             <summary>
@@ -1884,12 +1866,12 @@
             The indexer of this class actually provides access to the Parameters Dictionary.
             </summary>
             <remarks>
-            The OperationCode defines the type of operation called on Photon and in turn also the Parameters that 
+            The OperationCode defines the type of operation called on Photon and in turn also the Parameters that
             are set in the request. Those are provided as Dictionary with byte-keys.
-            There are pre-defined constants for various codes defined in the Lite application. Check: LiteOpCode, 
+            There are pre-defined constants for various codes defined in the Lite application. Check: LiteOpCode,
             LiteOpKey, etc.
             <para></para>
-            An operation's request is summarized by the ReturnCode: a short typed code for &quot;Ok&quot; or 
+            An operation's request is summarized by the ReturnCode: a short typed code for &quot;Ok&quot; or
             some different result. The code's meaning is specific per operation. An optional DebugMessage can be
             provided to simplify debugging.
             <para></para>
@@ -1928,7 +1910,7 @@
         </member>
         <member name="T:ExitGames.Client.Photon.EventData">
             <summary>
-            Contains all components of a Photon Event. 
+            Contains all components of a Photon Event.
             Event Parameters, like OperationRequests and OperationResults, consist of a Dictionary with byte-typed keys per value.
             </summary>
             <remarks>
@@ -2064,6 +2046,22 @@
               Null value don't have types.
             </summary>
         </member>
+        <member name="T:ExitGames.Client.Photon.SerializeMethod">
+            <summary>
+            Type of serialization methods to add custom type support.
+            Use PhotonPeer.ReisterType() to register new types with serialization and deserialization methods.
+            </summary>
+            <param name="customObject">The method will get objects passed that were registered with it in RegisterType().</param>
+            <returns>Return a byte[] that resembles the object passed in. The framework will surround it with length and type info, so don't include it.</returns>
+        </member>
+        <member name="T:ExitGames.Client.Photon.DeserializeMethod">
+            <summary>
+            Type of deserialization methods to add custom type support.
+            Use PhotonPeer.RegisterType() to register new types with serialization and deserialization methods.
+            </summary>
+            <param name="serializedCustomObject">The framwork passes in the data it got by the associated SerializeMethod. The type code and length are stripped and applied before a DeserializeMethod is called.</param>
+            <returns>Return a object of the type that was associated with this method through RegisterType().</returns>
+        </member>
         <member name="T:ExitGames.Client.Photon.Protocol">
             <summary>
             Provides tools for the Exit Games Protocol
@@ -2071,14 +2069,14 @@
         </member>
         <member name="M:ExitGames.Client.Photon.Protocol.Serialize(System.Object)">
             <summary>
-            Serialize creates a byte-array from the given object and returns it. 
+            Serialize creates a byte-array from the given object and returns it.
             </summary>
             <param name="obj">The object to serialize</param>
             <returns>The serialized byte-array</returns>
         </member>
         <member name="M:ExitGames.Client.Photon.Protocol.Deserialize(System.Byte[])">
             <summary>
-            Deserialize returns an object reassembled from the given byte-array. 
+            Deserialize returns an object reassembled from the given byte-array.
             </summary>
             <param name="serializedData">The byte-array to be Deserialized</param>
             <returns>The Deserialized object</returns>
@@ -2090,8 +2088,8 @@
         </member>
         <member name="M:ExitGames.Client.Photon.Protocol.Serialize(System.Int16,System.Byte[],System.Int32@)">
             <summary>
-            Serializes a short typed value into a byte-array (target) starting at the also given targetOffset. 
-            The altered offset is known to the caller, because it is given via a referenced parameter. 
+            Serializes a short typed value into a byte-array (target) starting at the also given targetOffset.
+            The altered offset is known to the caller, because it is given via a referenced parameter.
             </summary>
             <param name="value">The short value to be serialized</param>
             <param name="target">The byte-array to serialize the short to</param>
@@ -2099,8 +2097,8 @@
         </member>
         <member name="M:ExitGames.Client.Photon.Protocol.Serialize(System.Int32,System.Byte[],System.Int32@)">
             <summary>
-            Serializes an int typed value into a byte-array (target) starting at the also given targetOffset. 
-            The altered offset is known to the caller, because it is given via a referenced parameter. 
+            Serializes an int typed value into a byte-array (target) starting at the also given targetOffset.
+            The altered offset is known to the caller, because it is given via a referenced parameter.
             </summary>
             <param name="value">The int value to be serialized</param>
             <param name="target">The byte-array to serialize the short to</param>
@@ -2108,8 +2106,8 @@
         </member>
         <member name="M:ExitGames.Client.Photon.Protocol.Serialize(System.Single,System.Byte[],System.Int32@)">
             <summary>
-            Serializes an float typed value into a byte-array (target) starting at the also given targetOffset. 
-            The altered offset is known to the caller, because it is given via a referenced parameter. 
+            Serializes an float typed value into a byte-array (target) starting at the also given targetOffset.
+            The altered offset is known to the caller, because it is given via a referenced parameter.
             </summary>
             <param name="value">The float value to be serialized</param>
             <param name="target">The byte-array to serialize the short to</param>
@@ -2117,9 +2115,9 @@
         </member>
         <member name="M:ExitGames.Client.Photon.Protocol.Deserialize(System.Int16@,System.Byte[],System.Int32@)">
             <summary>
-            Deserialize fills the given short typed value with the given byte-array (source) starting at the also given offset. 
-            The result is placed in a variable (value). There is no need to return a value because the parameter value is given by reference. 
-            The altered offset is this way also known to the caller. 
+            Deserialize fills the given short typed value with the given byte-array (source) starting at the also given offset.
+            The result is placed in a variable (value). There is no need to return a value because the parameter value is given by reference.
+            The altered offset is this way also known to the caller.
             </summary>
             <param name="value">The short value to deserialized into</param>
             <param name="source">The byte-array to deserialize from</param>
@@ -2127,14 +2125,14 @@
         </member>
         <member name="M:ExitGames.Client.Photon.Protocol.DeserializeInteger(System.IO.MemoryStream)">
             <summary>
-            DeserializeInteger returns an Integer typed value from the given Memorystream. 
+            DeserializeInteger returns an Integer typed value from the given Memorystream.
             </summary>
         </member>
         <member name="M:ExitGames.Client.Photon.Protocol.Deserialize(System.Int32@,System.Byte[],System.Int32@)">
             <summary>
-            Deserialize fills the given int typed value with the given byte-array (source) starting at the also given offset. 
-            The result is placed in a variable (value). There is no need to return a value because the parameter value is given by reference. 
-            The altered offset is this way also known to the caller. 
+            Deserialize fills the given int typed value with the given byte-array (source) starting at the also given offset.
+            The result is placed in a variable (value). There is no need to return a value because the parameter value is given by reference.
+            The altered offset is this way also known to the caller.
             </summary>
             <param name="value">The int value to deserialize into</param>
             <param name="source">The byte-array to deserialize from</param>
@@ -2142,32 +2140,19 @@
         </member>
         <member name="M:ExitGames.Client.Photon.Protocol.Deserialize(System.Single@,System.Byte[],System.Int32@)">
             <summary>
-            Deserialize fills the given float typed value with the given byte-array (source) starting at the also given offset. 
-            The result is placed in a variable (value). There is no need to return a value because the parameter value is given by reference. 
-            The altered offset is this way also known to the caller. 
+            Deserialize fills the given float typed value with the given byte-array (source) starting at the also given offset.
+            The result is placed in a variable (value). There is no need to return a value because the parameter value is given by reference.
+            The altered offset is this way also known to the caller.
             </summary>
             <param name="value">The float value to deserialize</param>
             <param name="source">The byte-array to deserialize from</param>
             <param name="offset">The offset in the byte-array</param>
         </member>
-        <member name="T:ExitGames.Client.Photon.SocketTcp">
-            <summary>
-            Internal class to encapsulate the network i/o functionality for the realtime libary.
-            </summary>
-        </member>
-        <member name="M:ExitGames.Client.Photon.SocketTcp.Send(System.Byte[],System.Int32)">
-            <summary>
-            used by TPeer*
-            </summary>
-        </member>
-        <member name="T:ExitGames.Client.Photon.SocketUdp">
-            <summary> Internal class to encapsulate the network i/o functionality for the realtime libary.</summary>
-        </member>
-        <member name="M:ExitGames.Client.Photon.SocketUdp.Send(System.Byte[],System.Int32)">
+        <member name="M:ExitGames.Client.Photon.SocketUdpNativeDynamic.Send(System.Byte[],System.Int32)">
             <summary>used by PhotonPeer*</summary>
         </member>
-        <member name="M:ExitGames.Client.Photon.SocketUdp.ReceiveLoop">
-            <summary>Endless loop, run in Receive Thread.</summary>
+        <member name="M:ExitGames.Client.Photon.SocketUdpNativeStatic.Send(System.Byte[],System.Int32)">
+            <summary>used by PhotonPeer*</summary>
         </member>
         <member name="T:ExitGames.Client.Photon.SupportClass">
             <summary>
@@ -2260,42 +2245,6 @@
             <summary>
             Class to wrap static access to the random.Next() call in a thread safe manner.
             </summary>
-        </member>
-        <member name="F:ExitGames.Client.Photon.TPeer.TCP_HEADER_BYTES">
-            <summary>TCP "Package" header: 7 bytes</summary>
-        </member>
-        <member name="F:ExitGames.Client.Photon.TPeer.MSG_HEADER_BYTES">
-            <summary>TCP "Message" header: 2 bytes</summary>
-        </member>
-        <member name="F:ExitGames.Client.Photon.TPeer.ALL_HEADER_BYTES">
-            <summary>TCP header combined: 9 bytes</summary>
-        </member>
-        <member name="M:ExitGames.Client.Photon.TPeer.DispatchIncomingCommands">
-            <summary>
-            Checks the incoming queue and Dispatches received data if possible. Returns if a Dispatch happened or
-            not, which shows if more Dispatches might be needed.
-            </summary>
-        </member>
-        <member name="M:ExitGames.Client.Photon.TPeer.SendOutgoingCommands">
-            <summary>
-            gathers commands from all (out)queues until udp-packet is full and sends it!
-            </summary>
-        </member>
-        <member name="M:ExitGames.Client.Photon.TPeer.SendAcksOnly">
-            <summary>Sends a ping in intervals to keep connection alive (server will timeout connection if nothing is sent).</summary>
-            <returns>Always false in this case (local queues are ignored. true would be: "call again to send remaining data").</returns>
-        </member>
-        <member name="M:ExitGames.Client.Photon.TPeer.SerializeOperationToMessage(System.Byte,System.Collections.Generic.Dictionary{System.Byte,System.Object},ExitGames.Client.Photon.PeerBase.EgMessageType,System.Boolean)">
-            <summary> Returns the UDP Payload starting with Magic Number for binary protocol </summary>
-        </member>
-        <member name="M:ExitGames.Client.Photon.TPeer.EnqueueMessageAsPayload(System.Boolean,System.Byte[],System.Byte)">
-            <summary>enqueues serialized operations to be sent as tcp stream / package</summary>
-        </member>
-        <member name="M:ExitGames.Client.Photon.TPeer.SendPing">
-            <summary>Sends a ping and modifies this.lastPingResult to avoid another ping for a while.</summary>
-        </member>
-        <member name="M:ExitGames.Client.Photon.TPeer.ReceiveIncomingCommands(System.Byte[],System.Int32)">
-            <summary>reads incoming tcp-packages to create and queue incoming commands*</summary>
         </member>
         <member name="T:ExitGames.Client.Photon.TrafficStatsGameLevel">
             <summary>
@@ -2409,42 +2358,6 @@
         </member>
         <member name="P:ExitGames.Client.Photon.TrafficStats.TimestampOfLastReliableCommand">
             <summary>Timestamp of last incoming reliable command (every second we expect a PING).</summary>
-        </member>
-        <member name="T:ExitGames.Client.Photon.HttpBase3">
-             <summary>
-             Class to handle Http based connections to a Photon server.
-             Requests are done asynchronous and not queued at all.
-            
-             All responses are put into the game's thread-context and 
-             all results and state changes are done within calls of
-             Service() or DispatchIncomingCommands().
-             </summary>
-        </member>
-        <member name="F:ExitGames.Client.Photon.HttpBase3._rnd">
-            TODO: ask how to setup this parameters
-        </member>
-        <member name="M:ExitGames.Client.Photon.HttpBase3.Request(System.Byte[],System.String)">
-            <summary>
-            The initial request uses "?init" as UrlParameters and the binary data is the app-id (binary in up to 32 bytes).
-            Init returns a GUID for use in following requests as UrlParameters "?pid=GUID".
-            </summary>
-            <param name="data"></param>
-            <param name="urlParamter">The url paramters to append to the server adress uri.</param>
-        </member>
-        <!-- Badly formed XML comment ignored for member "M:ExitGames.Client.Photon.HttpBase3.Request(System.Byte[],System.String,ExitGames.Client.Photon.HttpBase3.MessageType)" -->
-        <member name="M:ExitGames.Client.Photon.HttpBase3.EnqueueErrorDisconnect(ExitGames.Client.Photon.StatusCode)">
-            <summary>
-            Called internally when some error (or timeout) causes a disconnect. this takes care state is set and callbacks are done (once)
-            </summary>
-        </member>
-        <member name="P:ExitGames.Client.Photon.HttpBase3.PeerID">
-            <summary>
-            The *pid* for this peer, which is assigned by the server on connect (init).
-            Initially this is Guid.Empty.
-            </summary>
-        </member>
-        <member name="F:ExitGames.Client.Photon.HttpBase3.AsyncRequestState.restarting">
-            how many times we have rererequested this request already
         </member>
     </members>
 </doc>

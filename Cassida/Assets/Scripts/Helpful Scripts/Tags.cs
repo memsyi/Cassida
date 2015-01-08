@@ -1,4 +1,4 @@
-﻿public class Tags
+﻿public struct Tags
 {
     public const string Untagged = "Untagged";
     public const string Respawn = "Respawn";

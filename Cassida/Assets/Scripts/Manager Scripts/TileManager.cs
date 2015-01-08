@@ -205,14 +205,6 @@ public class TileManager : MonoBehaviour
             selectionObject.renderer.material.color = TileColor.MouseOverColor;
             selectionObject.gameObject.SetActive(true);
         }
-
-        //if (tile.Fleet.MovePoints > 0)
-        //{
-
-        //    // show moveable tiles around the selected fleet if the fleet got movement Points
-        //    TileList.Equals(tile);
-        //    var list = TileList.FindAll(t => Vector3.Distance(t.TileParent.position, tile.TileParent.position) <= 2f);
-        //Debug.Log(list.Count);
     }
 
     private void RemoveCurrentSelectionAnimation()
@@ -403,11 +395,29 @@ public class TileManager : MonoBehaviour
             return false;
         }
 
-        var ownUnit = CurrentSelectedTile.Fleet.Units[unitDirection];
+        var ownFleet = CurrentSelectedTile.Fleet;
+        var enemyFleet = CurrentHighlightedTile.Fleet;
+        var ownUnit = ownFleet.Units[unitDirection];
 
         if (ownUnit != null)
         {
-            return ownUnit.UnitController != null;
+            if (ownUnit.UnitController == null)// || ownUnit.AllowAttack == false) FUNktionier nicht nicht.. Angriffe funktionieren nicht mehr!!
+            {
+                return false;
+            }
+
+            var distanceBetweenFleets = Vector3.Distance(ownFleet.Position, enemyFleet.Position);
+
+            if (ownUnit.UnitValues.UnitType == UnitType.Meele
+                && distanceBetweenFleets <= 2)
+            {
+                return true;
+            }
+            else if (ownUnit.UnitValues.UnitType == UnitType.Range
+                && distanceBetweenFleets > 2 && distanceBetweenFleets <= 4)
+            {
+                return true;
+            }
         }
 
         return false;
@@ -415,18 +425,21 @@ public class TileManager : MonoBehaviour
 
     public int GetOwnUnitInDirection()
     {
-        if (CurrentHighlightedTile.Position.x == CurrentSelectedTile.Position.x)
+        var ownFleetPosition = CurrentSelectedTile.Position;
+        var enemyFleetPosition = CurrentHighlightedTile.Position;
+
+        if (enemyFleetPosition.x == ownFleetPosition.x)
         {
-            if (CurrentHighlightedTile.Position.y > CurrentSelectedTile.Position.y)
+            if (enemyFleetPosition.y > ownFleetPosition.y)
             {
                 return 0;
             }
 
             return 3;
         }
-        else if (CurrentHighlightedTile.Position.y == CurrentSelectedTile.Position.y)
+        else if (enemyFleetPosition.y == ownFleetPosition.y)
         {
-            if (CurrentHighlightedTile.Position.x > CurrentSelectedTile.Position.x)
+            if (enemyFleetPosition.x > ownFleetPosition.x)
             {
                 return 1;
             }
@@ -435,13 +448,15 @@ public class TileManager : MonoBehaviour
         }
         else
         {
-            if (CurrentHighlightedTile.Position.x < CurrentSelectedTile.Position.x
-                && CurrentHighlightedTile.Position.y > CurrentSelectedTile.Position.y)
+            if (enemyFleetPosition.x < ownFleetPosition.x
+                && enemyFleetPosition.y > ownFleetPosition.y
+                && (enemyFleetPosition.x - ownFleetPosition.x) - (enemyFleetPosition.y - ownFleetPosition.y) == 0)
             {
                 return 5;
             }
-            else if (CurrentHighlightedTile.Position.x > CurrentSelectedTile.Position.x
-                && CurrentHighlightedTile.Position.y < CurrentSelectedTile.Position.y)
+            else if (enemyFleetPosition.x > ownFleetPosition.x
+                && enemyFleetPosition.y < ownFleetPosition.y
+                && (enemyFleetPosition.x + ownFleetPosition.x) - (enemyFleetPosition.y + ownFleetPosition.y) == 0)
             {
                 return 2;
             }

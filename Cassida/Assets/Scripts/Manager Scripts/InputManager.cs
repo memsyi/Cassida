@@ -42,7 +42,7 @@ public class InputManager : Photon.MonoBehaviour
 
         if (CurrentSelectedTile == clickedTile)
         {
-            RotateFleet(CurrentSelectedTile.Fleet.ID);
+            RotateFleet(CurrentSelectedTile.Fleet);
             return;
         }
 
@@ -106,8 +106,7 @@ public class InputManager : Photon.MonoBehaviour
         if (CurrentSelectedTile == targetTile)
         {
             // Rotate Fleet
-            RotateFleet(CurrentSelectedTile.Fleet.ID, false);
-            //RotateFleetToPosition(CurrentSelectedTile.Fleet.ID, CurrentSelectedTile.Fleet.RotationPosition - 1);
+            RotateFleet(CurrentSelectedTile.Fleet, false);
             return;
         }
 
@@ -129,15 +128,15 @@ public class InputManager : Photon.MonoBehaviour
         }
     }
 
-    private void RotateFleet(int fleetID, bool rotateRight = true)
+    private void RotateFleet(Fleet fleet, bool rotateRight = true)
     {
-        photonView.RPC("NetworkRotateFleet", PhotonTargets.All, fleetID, rotateRight);
-    }
+        if (!fleet.AllowRotation)
+        {
+            return;
+        }
 
-    //private void RotateFleetToPosition(int fleetID, int rotationPosition)
-    //{
-    //    photonView.RPC("NetworkRotateFleetToPosition", PhotonTargets.All, fleetID, rotationPosition);
-    //}
+        photonView.RPC("NetworkRotateFleet", PhotonTargets.All, fleet.ID, rotateRight);
+    }
 
     [RPC]
     private void NetworkRotateFleet(int fleetID, bool rotateRight)
@@ -146,14 +145,6 @@ public class InputManager : Photon.MonoBehaviour
 
         fleet.RotateFleet(rotateRight ? 1 : -1);
     }
-
-    //[RPC]
-    //private void NetworkRotateFleetToPosition(int fleetID, int rotationPosition)
-    //{
-    //    var fleet = FleetList.Find(f => f.ID == fleetID);
-
-    //    fleet.RotateFleetToPosition(rotationPosition);
-    //}
 
     private void MoveFleet(int fleetID, Vector2 targetTilePosition)
     {
@@ -198,7 +189,8 @@ public class InputManager : Photon.MonoBehaviour
         var ownFleet = ownFleetTile.Fleet;
         var enemyFleet = enemyFleetTile.Fleet;
 
-        var ownUnitStrength = ownFleet.Units[ownUnitDirection].UnitValues.Strength;
+        var ownUnit = ownFleet.Units[ownUnitDirection];
+        var ownUnitStrength = ownUnit.UnitValues.Strength;
         var enemyUnit = enemyFleet.Units[enemyUnitDirection];
 
         if (enemyUnit == null)
@@ -210,9 +202,20 @@ public class InputManager : Photon.MonoBehaviour
         }
         else
         {
-            AttackUnitOfFleet(ownFleetTile.Fleet.ID, ownUnitDirection, enemyUnit.UnitValues.Strength);
+            // damage to own
+            if (ownUnit.UnitValues.UnitType == enemyUnit.UnitValues.UnitType)
+            {
+                AttackUnitOfFleet(ownFleetTile.Fleet.ID, ownUnitDirection, enemyUnit.UnitValues.Strength);
+            }
+
+            // damage to enemy
             AttackUnitOfFleet(enemyFleetTile.Fleet.ID, enemyUnitDirection, ownUnitStrength);
         }
+
+        ownFleet.MovementPointsLeft = 0;
+        ResetMovementArea();
+        ownFleet.AllowRotation = false;
+        ownUnit.AllowAttack = false;
 
         TileManager.ResetHighlightedTile();
     }
@@ -235,11 +238,18 @@ public class InputManager : Photon.MonoBehaviour
     }
     #endregion
 
-    private void AddMouseEvents()
+    public void AddMouseEvents()
     {
         // Add events
         MouseController.LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);
         MouseController.RightMouseclickEvent += new MouseclickHandler(CheckFleetMovement);
+    }
+
+    public void RemoveMouseEvents()
+    {
+        // Remove events
+        MouseController.LeftMousecklickEvent -= new MouseclickHandler(CheckTileSelection);
+        MouseController.RightMouseclickEvent -= new MouseclickHandler(CheckFleetMovement);
     }
 
     private void Init()
@@ -260,8 +270,6 @@ public class InputManager : Photon.MonoBehaviour
     {
         MoveableTileList = new List<Tile>();
         MoveableTileObjectList = new List<Transform>();
-
-        AddMouseEvents();
     }
 
     private void Awake()

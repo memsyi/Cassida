@@ -11,12 +11,13 @@ GameObject:
   - 15: {fileID: 1500000}
   - 26: {fileID: 2600000}
   - 12: {fileID: 1200000}
+  - 76: {fileID: 7600000}
   m_Layer: 0
   m_Name: Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &400000
 Transform:
@@ -73,20 +74,20 @@ EllipsoidParticleEmitter:
   maxSize: 1
   minEnergy: 100000
   maxEnergy: 100000
-  minEmission: 500
-  maxEmission: 500
+  minEmission: 300
+  maxEmission: 400
   worldVelocity: {x: 0, y: 0, z: 0}
   localVelocity: {x: 0, y: 0, z: 0}
   rndVelocity: {x: .100000001, y: .100000001, z: .100000001}
   emitterVelocityScale: 0
   tangentVelocity: {x: 0, y: 0, z: 0}
-  angularVelocity: 0
-  rndAngularVelocity: 15
+  angularVelocity: -10
+  rndAngularVelocity: 8
   rndRotation: 1
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
 --- !u!26 &2600000
 ParticleRenderer:
   m_ObjectHideFlags: 1
@@ -117,6 +118,19 @@ ParticleRenderer:
     x Tile: 1
     y Tile: 1
     cycles: 1
+--- !u!76 &7600000
+WorldParticleCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

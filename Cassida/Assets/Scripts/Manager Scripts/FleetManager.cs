@@ -110,7 +110,7 @@ public class FleetManager : Photon.MonoBehaviour
     private List<BufferedUnit> BufferedUnitList { get; set; }
 
     // Scripts
-    private TileManager TileManager { get; set; } 
+    private TileManager TileManager { get; set; }
     #endregion
 
     private void InstantiateNewFleet(Vector2 position, FleetType fleetType, UnitValues[] unitValues)
@@ -212,7 +212,7 @@ public class FleetManager : Photon.MonoBehaviour
                 AddBufferedFleetsToWorld(BufferedFleetList[i]);
             }
         }
-    } 
+    }
     #endregion
 
     #region Add units to fleets
@@ -236,7 +236,7 @@ public class FleetManager : Photon.MonoBehaviour
             return;
         }
 
-        fleet.Units[bufferedUnit.Position] = new Unit(fleet.FleetParent.FindChild("Unit: " + bufferedUnit.Position), new UnitValues(bufferedUnit.UnitType, bufferedUnit.Strength));
+        fleet.Units[bufferedUnit.Position] = new Unit(fleet.Player, fleet.FleetParent.FindChild("Unit: " + bufferedUnit.Position), new UnitValues(bufferedUnit.UnitType, bufferedUnit.Strength));
 
         BufferedUnitList.Remove(bufferedUnit);
     }
@@ -256,7 +256,7 @@ public class FleetManager : Photon.MonoBehaviour
 
             AddBufferedUnitsToFleet(fleet, BufferedUnitList[i]);
         }
-    } 
+    }
     #endregion
 
     #region Destroy or reset fleets
@@ -264,7 +264,7 @@ public class FleetManager : Photon.MonoBehaviour
     {
         foreach (var fleet in FleetList)
         {
-            fleet.ResetMovementPoints();
+            fleet.ResetMovementRotationAndAttack();
         }
     }
 
@@ -281,10 +281,8 @@ public class FleetManager : Photon.MonoBehaviour
     }
 
     [RPC]
-    public void DestroyAllFleetsOfDisconnectedPlayers()
+    public void DestroyAllFleetsOfDisconnectedPlayers(PhotonPlayer player)
     {
-        List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.playerList);
-
         // TODO kommt im Spiel eigentlich nicht vor... so gibt es einen outofrange fehler bei löschen der flotte
         //if (BufferedFleetList.Count > 0)
         //{
@@ -307,27 +305,29 @@ public class FleetManager : Photon.MonoBehaviour
 
         for (int i = FleetList.Count - 1; i >= 0; i--)
         {
-            if (!playerList.Exists(p => p == FleetList[i].Player))
+            if (FleetList[i].Player == player)
             {
                 DestroyFleet(FleetList[i]);
             }
         }
-    } 
+    }
     #endregion
 
     public void InstantiateStartFleets()
     {
-        var testUnit = new UnitValues(UnitType.Meele, 1);
+        var testUnit = new UnitValues(UnitType.Meele, 2);
 
-        var testUnits = new UnitValues[] { testUnit, testUnit, null, null, null, null };
+        var testUnits = new UnitValues[] { testUnit, new UnitValues(UnitType.Range, 1), null, null, null, null };
 
         // Instantiate one fleet at start
         //InstantiateNewFleet(Vector2.zero, FleetType.Slow, testUnits);
         for (int i = 0; i < 2; i++)
         {
-            InstantiateNewFleet(new Vector2(Random.Range(-2, 2), Random.Range(-3, 3)), FleetType.Slow, testUnits);
+            var position = new Vector2(Random.Range(-2, 2), Random.Range(-3, 3));
+
+            InstantiateNewFleet(position, FleetType.Slow, testUnits);
         }
-        InstantiateNewFleet(new Vector2(Random.Range(-2, 2), Random.Range(-3, 3)), FleetType.Fast, testUnits);
+        //InstantiateNewFleet(new Vector2(Random.Range(-2, 2), Random.Range(-3, 3)), FleetType.Fast, testUnits);
     }
 
     private void Init()

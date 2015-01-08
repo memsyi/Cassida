@@ -9,6 +9,8 @@ using System.Collections;
 using UnityEditor;
 using Debug = UnityEngine.Debug;
 
+
+
 [CustomEditor(typeof(ServerSettings))]
 public class ServerSettingsInspector : Editor
 {
@@ -40,17 +42,28 @@ public class ServerSettingsInspector : Editor
                 break;
 
             case ServerSettings.HostingOption.SelfHosted:
-                if (settings.Protocol == ConnectionProtocol.Udp && settings.ServerPort == 4530)
+                bool hidePort = false;
+                if (settings.Protocol == ConnectionProtocol.Udp && (settings.ServerPort == 4530 || settings.ServerPort == 0))
                 {
                     settings.ServerPort = 5055;
                 }
-                else if (settings.Protocol == ConnectionProtocol.Tcp && settings.ServerPort == 5055)
+                else if (settings.Protocol == ConnectionProtocol.Tcp && (settings.ServerPort == 5055 || settings.ServerPort == 0))
                 {
                     settings.ServerPort = 4530;
                 }
+                #if RHTTP
+                if (settings.Protocol == ConnectionProtocol.RHttp)
+                {
+                    settings.ServerPort = 0;
+                    hidePort = true;
+                }
+                #endif
                 settings.ServerAddress = EditorGUILayout.TextField("Server Address", settings.ServerAddress);
                 settings.ServerAddress = settings.ServerAddress.Trim();
-                settings.ServerPort = EditorGUILayout.IntField("Server Port", settings.ServerPort);
+                if (!hidePort)
+                {
+                    settings.ServerPort = EditorGUILayout.IntField("Server Port", settings.ServerPort);
+                }
                 settings.Protocol = (ConnectionProtocol)EditorGUILayout.EnumPopup("Protocol", settings.Protocol);
                 settings.AppID = EditorGUILayout.TextField("AppId", settings.AppID);
                 break;

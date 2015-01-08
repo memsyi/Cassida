@@ -91,7 +91,7 @@ GameObject:
   m_TagString: Fleets
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100014
 GameObject:
@@ -567,7 +567,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subId: 0
   ownerId: 0
   group: 0
   prefixBackup: -1
@@ -575,7 +574,12 @@ MonoBehaviour:
   synchronization: 0
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
-  instantiationId: 0
+  ownershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 0}
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 0
+  instantiationId: -1
 --- !u!114 &11400028
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -587,7 +591,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subId: 0
   ownerId: 0
   group: 0
   prefixBackup: -1
@@ -595,7 +598,12 @@ MonoBehaviour:
   synchronization: 0
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
-  instantiationId: 0
+  ownershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 0}
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 0
+  instantiationId: -1
 --- !u!114 &11400030
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -645,7 +653,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subId: 0
   ownerId: 0
   group: 0
   prefixBackup: -1
@@ -653,7 +660,12 @@ MonoBehaviour:
   synchronization: 0
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
-  instantiationId: 0
+  ownershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 0}
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 0
+  instantiationId: -1
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1

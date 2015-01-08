@@ -8,17 +8,35 @@ public enum UnitType
 
 public class Unit
 {
+    private PhotonPlayer _player;
+
+    public PhotonPlayer Player
+    {
+        get { return _player; }
+        private set
+        {
+            _player = value;
+            var color = (Vector3)Player.customProperties[PlayerProperties.Color];
+            UnitController.Color = new Color(color.x, color.y, color.z);
+        }
+    }
+
+    public bool AllowAttack { get; set; }
+
     public Transform UnitParent { get; private set; }
     public UnitValues UnitValues { get; set; }
 
     public UnitController UnitController { get; private set; }
 
-    public Unit(Transform unitParent, UnitValues unitValues)
+    public Unit(PhotonPlayer player, Transform unitParent, UnitValues unitValues)
     {
+        // Fleet object and controller must be first!
         UnitParent = unitParent;
-        UnitValues = unitValues;
+        UnitController = UnitParent.gameObject.AddComponent<UnitController>();
 
-        SetCorrectType();
+        UnitValues = unitValues; // Values befor type
+        UnitController.Type = UnitValues.UnitType; // Type befor player
+        Player = player;
     }
 
     public bool CheckWhetherUnitIsAlive()
@@ -30,12 +48,6 @@ public class Unit
 
         UnitController.DestroyUnitObject();
         return false;
-    }
-
-    private void SetCorrectType()
-    {
-        UnitController = UnitParent.gameObject.AddComponent<UnitController>();
-        UnitController.Type = UnitValues.UnitType;
     }
 }
 
@@ -51,7 +63,6 @@ public class UnitValues
     }
 }
 
-[RequireComponent(typeof(PhotonView))]
 public class UnitController : MonoBehaviour
 {
     #region Object and Instantiation
@@ -64,6 +75,18 @@ public class UnitController : MonoBehaviour
         {
             _type = value;
             InstantiateUnit();
+        }
+    }
+
+    private Color _color;
+
+    public Color Color
+    {
+        get { return _color; }
+        set
+        {
+            _color = value;
+            SetColorOfUnit();
         }
     }
 
@@ -93,6 +116,11 @@ public class UnitController : MonoBehaviour
 
         UnitObject.name = "Unit Object: " + Type;
         UnitObject.SetParent(transform);
+    }
+
+    private void SetColorOfUnit()
+    {
+        UnitObject.GetChild(0).renderer.material.color = Color;
     }
     #endregion
 

@@ -8,6 +8,19 @@ public enum FleetType
 
 public class Fleet
 {
+    private PhotonPlayer _player;
+
+    public PhotonPlayer Player
+    {
+        get { return _player; }
+        private set
+        {
+            _player = value;
+            var color = (Vector3)Player.customProperties[PlayerProperties.Color];
+            FleetController.Color = new Color(color.x, color.y, color.z);
+        }
+    }
+
     private FleetType _fleetType;
 
     public int ID { get; private set; }
@@ -26,10 +39,8 @@ public class Fleet
 
     public int MovementPointsLeft { get; set; }
 
-    //public int RotationPosition { get; private set; }
+    public bool AllowRotation { get; set; }
 
-    public PhotonPlayer Player { get; private set; }
-    
     public Transform FleetParent { get; private set; }
     
     public FleetType FleetType
@@ -41,7 +52,7 @@ public class Fleet
         private set
         {
             _fleetType = value;
-            SetCorrectType();
+            FleetController.Type = FleetType;
         }
     }
     public Unit[] Units { get; set; }
@@ -50,25 +61,37 @@ public class Fleet
 
     public Fleet(int id, PhotonPlayer player, Transform fleetParent, FleetType fleetType, Unit[] units)
     {
-        // Fleet object must be first, then type and units!
+        // Fleet object and controller must be first!
         FleetParent = fleetParent;
-        FleetType = fleetType;
+        FleetController = FleetParent.gameObject.AddComponent<FleetController>();
 
         ID = id;
+        FleetType = fleetType; // Type befor player
         Player = player;
         Units = units;
 
-        ResetMovementPoints();
+        ResetMovementRotationAndAttack();
+        AllowRotation = true;
     }
 
     public void MoveFleet(Vector3 target)
     {
+        if (MovementPointsLeft == 0)
+        {
+            return;
+        }
+
         Position = target;
 
         MovementPointsLeft--;
     }
     public void RotateFleet(int rotationDirection)
     {
+        if (!AllowRotation)
+        {
+            return;
+        }
+
         FleetController.RotateFleet(rotationDirection);
 
         var newUnitPositions = new Unit[6];
@@ -100,31 +123,20 @@ public class Fleet
         }
 
         Units = newUnitPositions;
-
-        //RotationPosition += rotationDirection;
-        //if (RotationPosition > 5)
-        //{
-        //    RotationPosition = 0;
-        //}
     }
 
-    //public void RotateFleetToPosition(int rotationPosition)
-    //{
-    //    if (rotationPosition < 0)
-    //    {
-    //        rotationPosition = 5;
-    //    }
-
-    //    for (int i = 0; i <= RotationPosition + rotationPosition; i++)
-    //    {
-    //        RotateFleet(1);
-    //    }
-
-    //    RotationPosition = rotationPosition;
-    //}
-    public void ResetMovementPoints()
+    public void ResetMovementRotationAndAttack()
     {
         MovementPointsLeft = FleetType.GetHashCode();
+        AllowRotation = true;
+
+        foreach (var unit in Units)
+        {
+            if (unit != null)
+            {
+                unit.AllowAttack = true;
+            }
+        }
     }
 
     public void AttackUnit(int unitPosition, int damage)
@@ -142,6 +154,7 @@ public class Fleet
         if (!attackedUnit.CheckWhetherUnitIsAlive())
         {
             Units[unitPosition] = null;
+            CheckWhetherFleetIsAlive();
             return;
         }
     }
@@ -159,19 +172,12 @@ public class Fleet
         FleetController.DestroyFleet(this);
         return false;
     }
-
-    private void SetCorrectType()
-    {
-        FleetController = FleetParent.gameObject.AddComponent<FleetController>();
-        FleetController.Type = FleetType;
-    }
 }
 
-[RequireComponent(typeof (PhotonView))]
 public class FleetController : MonoBehaviour
 {
     #region Object and Instantiation
-    FleetType _type;
+    private FleetType _type;
 
     public FleetType Type
     {
@@ -180,6 +186,18 @@ public class FleetController : MonoBehaviour
         {
             _type = value;
             InstantiateFleet();
+        }
+    }
+
+    private Color _color;
+
+    public Color Color
+    {
+        get {return _color;}
+        set
+        {
+            _color = value;
+            SetColorOfFleet();
         }
     }
 
@@ -203,13 +221,18 @@ public class FleetController : MonoBehaviour
         }
     }
 
-    public void InstantiateFleetObject(Transform model)
+    private void InstantiateFleetObject(Transform model)
     {
         // Instantiate fleet
         FleetObject = Instantiate(model, transform.position, transform.rotation) as Transform;
 
         FleetObject.name = "Fleet Object: " + Type;
         FleetObject.SetParent(transform);
+    }
+
+    private void SetColorOfFleet()
+    {
+        FleetObject.GetChild(0).renderer.material.color = Color;
     }
     #endregion
 

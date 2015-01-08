@@ -12,7 +12,7 @@ public class ShowInfoOfPlayer : Photon.MonoBehaviour
 {
     private GameObject textGo;
     private TextMesh tm;
-    private const int FontSize3D = 0;  // could be a variable, too
+    public float CharacterSize = 0;
 
     public Font font;
     public bool DisableOnOwnObjects;
@@ -32,7 +32,7 @@ public class ShowInfoOfPlayer : Photon.MonoBehaviour
         if (tm == null)
         {
             textGo = new GameObject("3d text");
-            textGo.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            //textGo.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
             textGo.transform.parent = this.gameObject.transform;
             textGo.transform.localPosition = Vector3.zero;
 
@@ -40,58 +40,34 @@ public class ShowInfoOfPlayer : Photon.MonoBehaviour
             mr.material = font.material;
             tm = textGo.AddComponent<TextMesh>();
             tm.font = font;
-            tm.fontSize = FontSize3D;
             tm.anchor = TextAnchor.MiddleCenter;
-        }
-
-        if (!DisableOnOwnObjects && this.photonView.isMine)
-        {
-            // this script runs on an object that this client owns. skip the label (but you could modify it here, too)
-            this.enabled = false;   // stop Update() calls
+            if (this.CharacterSize > 0)
+            {
+                tm.characterSize = this.CharacterSize;
+            }
         }
     }
 
-    void OnEnable()
-    {
-        if (textGo != null) textGo.SetActive(true);
-    }
-    void OnDisable()
-    {
-        if (textGo != null) textGo.SetActive(false);
-    }
-    
     void Update()
     {
-        if (DisableOnOwnObjects)
+        bool showInfo = !this.DisableOnOwnObjects || this.photonView.isMine;
+        if (textGo != null)
         {
-            this.enabled = false;
-            if (textGo != null) textGo.SetActive(false);
+            textGo.SetActive(showInfo);
+        }
+        if (!showInfo)
+        {
             return;
         }
 
+        
         PhotonPlayer owner = this.photonView.owner;
         if (owner != null)
         {
-            tm.text = (string.IsNullOrEmpty(owner.name)) ? "n/a" : owner.name;
+            tm.text = (string.IsNullOrEmpty(owner.name)) ? "player"+owner.ID : owner.name;
         }
         else if (this.photonView.isSceneView)
         {
-            if (!DisableOnOwnObjects && this.photonView.isMine)
-            {
-                // On a room's Master Client, isMine includes game objects owned by the scene.
-                // If the Master Client leaves, the next will take over control.
-                // If this client became the Master Client somehow, we can now drop the labels.
-                this.enabled = false;   // stop Update() calls
-                
-                #if UNITY_3_5
-                textGo.active = false;  // hide 3d label
-                #else
-                textGo.SetActive(false);
-                #endif
-
-                return;
-            }
-
             tm.text = "scn";
         }
         else

@@ -11,12 +11,13 @@ GameObject:
   - 15: {fileID: 1500000}
   - 26: {fileID: 2600000}
   - 12: {fileID: 1200000}
+  - 76: {fileID: 7600002}
   m_Layer: 0
   m_Name: Violet Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100002
 GameObject:
@@ -29,12 +30,13 @@ GameObject:
   - 15: {fileID: 1500002}
   - 26: {fileID: 2600002}
   - 12: {fileID: 1200002}
+  - 76: {fileID: 7600004}
   m_Layer: 0
   m_Name: Red Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100004
 GameObject:
@@ -47,12 +49,13 @@ GameObject:
   - 15: {fileID: 1500004}
   - 26: {fileID: 2600004}
   - 12: {fileID: 1200004}
+  - 76: {fileID: 7600000}
   m_Layer: 0
   m_Name: Green Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100006
 GameObject:
@@ -65,12 +68,13 @@ GameObject:
   - 15: {fileID: 1500006}
   - 26: {fileID: 2600006}
   - 12: {fileID: 1200006}
+  - 76: {fileID: 7600008}
   m_Layer: 0
   m_Name: Blue Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100008
 GameObject:
@@ -85,7 +89,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100010
 GameObject:
@@ -98,12 +102,49 @@ GameObject:
   - 15: {fileID: 1500008}
   - 26: {fileID: 2600008}
   - 12: {fileID: 1200008}
+  - 76: {fileID: 7600006}
   m_Layer: 0
   m_Name: Yellow Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
+  m_IsActive: 1
+--- !u!1 &100012
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 400012}
+  - 33: {fileID: 3300000}
+  - 135: {fileID: 13500000}
+  - 54: {fileID: 5400000}
+  m_Layer: 8
+  m_Name: ColliderSphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 4294967295
+  m_IsActive: 1
+--- !u!1 &100014
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 400014}
+  - 33: {fileID: 3300002}
+  - 64: {fileID: 6400000}
+  - 54: {fileID: 5400002}
+  m_Layer: 8
+  m_Name: InsideColliderBox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &400000
 Transform:
@@ -168,6 +209,8 @@ Transform:
   - {fileID: 400002}
   - {fileID: 400000}
   - {fileID: 400004}
+  - {fileID: 400014}
+  - {fileID: 400012}
   m_Father: {fileID: 0}
   m_RootOrder: 0
 --- !u!4 &400010
@@ -182,6 +225,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 400008}
   m_RootOrder: 1
+--- !u!4 &400012
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100012}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 25, y: 25, z: 25}
+  m_Children: []
+  m_Father: {fileID: 400008}
+  m_RootOrder: 6
+--- !u!4 &400014
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100014}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_Children: []
+  m_Father: {fileID: 400008}
+  m_RootOrder: 5
 --- !u!12 &1200000
 ParticleAnimator:
   m_ObjectHideFlags: 1
@@ -358,7 +425,7 @@ EllipsoidParticleEmitter:
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
 --- !u!15 &1500002
 EllipsoidParticleEmitter:
   m_ObjectHideFlags: 1
@@ -385,7 +452,7 @@ EllipsoidParticleEmitter:
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
 --- !u!15 &1500004
 EllipsoidParticleEmitter:
   m_ObjectHideFlags: 1
@@ -412,7 +479,7 @@ EllipsoidParticleEmitter:
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
 --- !u!15 &1500006
 EllipsoidParticleEmitter:
   m_ObjectHideFlags: 1
@@ -439,7 +506,7 @@ EllipsoidParticleEmitter:
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
 --- !u!15 &1500008
 EllipsoidParticleEmitter:
   m_ObjectHideFlags: 1
@@ -466,7 +533,7 @@ EllipsoidParticleEmitter:
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
 --- !u!26 &2600000
 ParticleRenderer:
   m_ObjectHideFlags: 1
@@ -617,6 +684,140 @@ ParticleRenderer:
     x Tile: 1
     y Tile: 1
     cycles: 1
+--- !u!33 &3300000
+MeshFilter:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100012}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!33 &3300002
+MeshFilter:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100014}
+  m_Mesh: {fileID: 4300000, guid: f28b62af7ab5d0843be526fda4c253bf, type: 3}
+--- !u!54 &5400000
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100012}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: .0500000007
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
+--- !u!54 &5400002
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100014}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: .0500000007
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
+--- !u!64 &6400000
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100014}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_SmoothSphereCollisions: 0
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: f28b62af7ab5d0843be526fda4c253bf, type: 3}
+--- !u!76 &7600000
+WorldParticleCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100004}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
+--- !u!76 &7600002
+WorldParticleCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
+--- !u!76 &7600004
+WorldParticleCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100002}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
+--- !u!76 &7600006
+WorldParticleCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100010}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
+--- !u!76 &7600008
+WorldParticleCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100006}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
+--- !u!135 &13500000
+SphereCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100012}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: .5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
