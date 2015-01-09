@@ -155,7 +155,7 @@ public class SettingsCameraExtras
         _lookAtObject = null;
 
     [SerializeField]
-    Rect _movementArea = new Rect(-5, -5, 10, 10);
+    Rect _movementArea = new Rect(-50, -50, 100, 100);
 
     [SerializeField]
     [Range(0, 100)]
@@ -190,15 +190,15 @@ public class SettingsCameraSettings
 {
     [SerializeField]
     private float
-        _movementSpeed = 1f,
-        _rotationSpeed = 1f,
+        _movementSpeed = 0.2f,
+        _rotationSpeed = 0.5f,
         _zoomSpeed = 1f,
-        _buttonSpeed = 2f,
-        _mouseButtonSpeed = 2f,
+        _buttonSpeed = 1f,
+        _mouseButtonSpeed = 1f,
         _minimumZoom = 20f,
-        _maximumZoom = 3f,
-        _zoomDownAngle = 20f,
-        _heightMultiplier = 1.3f;
+        _maximumZoom = 0.75f,
+        _zoomDownAngle = 40f,
+        _heightMultiplier = 1f;
 
     #region Settings
     public float ZoomDownAngle

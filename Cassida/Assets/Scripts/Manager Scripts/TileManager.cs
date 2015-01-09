@@ -106,7 +106,18 @@ public class SettingsTileAnimation
         set { _smothAnimation = value; }
     }
 
-    public bool BackwardAnimation { get; set; }
+    private bool _backwardAnimation;
+
+    public bool BackwardAnimation 
+    { 
+        get 
+        {
+            if (!SmothAnimation) return false;
+
+            return _backwardAnimation;
+        }
+        set { _backwardAnimation = value; }
+    }
     public List<Transform> SelectionObjects { get; set; }
 
     public SettingsTileAnimation()
@@ -205,14 +216,6 @@ public class TileManager : MonoBehaviour
             selectionObject.renderer.material.color = TileColor.MouseOverColor;
             selectionObject.gameObject.SetActive(true);
         }
-
-        //if (tile.Fleet.MovePoints > 0)
-        //{
-
-        //    // show moveable tiles around the selected fleet if the fleet got movement Points
-        //    TileList.Equals(tile);
-        //    var list = TileList.FindAll(t => Vector3.Distance(t.TileParent.position, tile.TileParent.position) <= 2f);
-        //Debug.Log(list.Count);
     }
 
     private void RemoveCurrentSelectionAnimation()
@@ -225,21 +228,30 @@ public class TileManager : MonoBehaviour
 
     private void AnimateSelection()
     {
-        if (TileAnimation.SelectionObjects.Count == 0 || TileAnimation.AnimationRange == 0)
+        if (TileAnimation.SelectionObjects.Count == 0 || TileAnimation.AnimationRange == 0 || !TileAnimation.AllowAnimation)
         {
             return;
         }
 
-        var currentAnimatedObjectPosition = TileAnimation.SelectionObjects[0].position.y;
+        float currentAnimatedObjectPosition = TileAnimation.SelectionObjects[0].position.y;
 
         currentAnimatedObjectPosition += Time.deltaTime * TileAnimation.AnimationSpeed * 0.1f * (!TileAnimation.BackwardAnimation ? 1 : -1);
 
         if (currentAnimatedObjectPosition > TileAnimation.AnimationRange / 10
             || currentAnimatedObjectPosition < 0)
         {
-            if (TileAnimation.SmothAnimation)
+            if (TileAnimation.SmothAnimation && currentAnimatedObjectPosition > TileAnimation.AnimationRange / 10)
             {
-                TileAnimation.BackwardAnimation = !TileAnimation.BackwardAnimation;
+                TileAnimation.BackwardAnimation = true;
+            }
+            else if (TileAnimation.SmothAnimation && currentAnimatedObjectPosition < 0)
+            {
+                TileAnimation.BackwardAnimation = false;
+                foreach (var selectionObject in TileAnimation.SelectionObjects)
+                {
+                    selectionObject.position = CurrentSelectedTile.TileParent.position;
+                    selectionObject.transform.renderer.material.color = TileColor.MouseOverColor;
+                }
             }
             else
             {
@@ -252,16 +264,6 @@ public class TileManager : MonoBehaviour
 
             return;
         }
-        //else if (TileAnimation.BackwardAnimation & currentAnimatedObjectPosition < 0)
-        //{
-        //    TileAnimation.BackwardAnimation = false;
-
-        //    foreach (var selectionObject in TileAnimation.SelectionObjects)
-        //    {
-        //        selectionObject.position.Set(selectionObject.position.x, 0, selectionObject.position.z);
-        //        selectionObject.renderer.material.color = TileColor.MouseOverColor;
-        //    }
-        //}
 
         for (int i = 0; i < TileAnimation.SelectionObjects.Count; i++)
         {
@@ -270,32 +272,19 @@ public class TileManager : MonoBehaviour
             selectionObject.position = new Vector3(selectionObject.position.x, currentAnimatedObjectPosition * (i % 2 == 0 ? 1 : -1), selectionObject.position.z);
         }
 
-        //SelectionOne.transform.position = new Vector3(SelectionOne.transform.position.x, curentAnimationPosition.y, SelectionOne.transform.position.z);
-        //SelectionTwo.transform.position = new Vector3(SelectionOne.transform.position.x, -curentAnimationPosition.y, SelectionOne.transform.position.z);
-
         if (TileAnimation.BackwardAnimation)
         {
             foreach (var selectionObject in TileAnimation.SelectionObjects)
             {
-                //selectionObject.renderer.material.color = Color.Lerp(selectionObject.renderer.material.color, TileColor.MouseOverColor, Time.deltaTime);
-                //selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 + TileAnimation.AnimationFadeOut / 25);
-                selectionObject.transform.renderer.material.color *= TileColor.MouseOverColor * 1 / currentAnimatedObjectPosition / TileAnimation.AnimationRange;
+                selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 + (currentAnimatedObjectPosition / TileAnimation.AnimationRange) * TileAnimation.AnimationFadeOut);
             }
-
-            //SelectionOne.transform.renderer.material.color *= new Color(1, 1, 1, 1 + animationFadeOut / 25);
-            //SelectionTwo.transform.renderer.material.color *= new Color(1, 1, 1, 1 + animationFadeOut / 25);
         }
         else
         {
             foreach (var selectionObject in TileAnimation.SelectionObjects)
             {
-                //selectionObject.renderer.material.color = Color.Lerp(selectionObject.renderer.material.color, Color.clear, Time.deltaTime);
-                selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 - currentAnimatedObjectPosition / TileAnimation.AnimationRange);
-                //selectionObject.transform.renderer.material.color *= Color.clear * currentAnimatedObjectPosition / TileAnimation.AnimationRange;
+                selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 - (currentAnimatedObjectPosition / TileAnimation.AnimationRange) *TileAnimation.AnimationFadeOut);
             }
-
-            //SelectionOne.transform.renderer.material.color *= new Color(1, 1, 1, 1 - animationFadeOut / 25);
-            //SelectionTwo.transform.renderer.material.color *= new Color(1, 1, 1, 1 - animationFadeOut / 25);
         }
     }
     #endregion
@@ -504,6 +493,14 @@ public class TileManager : MonoBehaviour
         if (CurrentSelectedTile != null)
         {
             AnimateSelection();
+            if (!TileAnimation.AllowAnimation && TileAnimation.SelectionObjects[0].gameObject.activeSelf) RemoveCurrentSelectionAnimation();
+            else if (TileAnimation.AllowAnimation && !TileAnimation.SelectionObjects[0].gameObject.activeSelf)
+            {
+                foreach (var selectionObject in TileAnimation.SelectionObjects)
+                {
+                    selectionObject.gameObject.SetActive(true);
+                }
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ public class NetworkManager : MonoBehaviour
     public void ConnectToServer()
     {
         PhotonNetwork.offlineMode = false;
-        PhotonNetwork.ConnectUsingSettings("Cassida v0.0.2 chris");
+        PhotonNetwork.ConnectUsingSettings("Cassida v0.0.2");
     }
 
     public void DisconnectFromServer()

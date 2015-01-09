@@ -206,10 +206,10 @@ MonoBehaviour:
   _tileAnimation:
     _allowAnimation: 1
     _smothAnimation: 1
-    _animationSpeed: 1
-    _animationRange: 1
-    _animationFadeOut: 1
-    _animatedObjectCount: 4
+    _animationSpeed: 2.5
+    _animationRange: 1.5
+    _animationFadeOut: 2
+    _animatedObjectCount: 2
 --- !u!114 &42835961
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1116,21 +1116,21 @@ MonoBehaviour:
     _lookAtObject: {fileID: 0}
     _movementArea:
       serializedVersion: 2
-      x: -5
-      y: -5
-      width: 10
-      height: 10
+      x: -50
+      y: -50
+      width: 100
+      height: 100
     _borderStrength: 5
   _cameraSettings:
-    _movementSpeed: 1
-    _rotationSpeed: 1
+    _movementSpeed: .200000003
+    _rotationSpeed: .5
     _zoomSpeed: 1
-    _buttonSpeed: 2
-    _mouseButtonSpeed: 2
+    _buttonSpeed: 1
+    _mouseButtonSpeed: 1
     _minimumZoom: 20
-    _maximumZoom: 3
-    _zoomDownAngle: 20
-    _heightMultiplier: 1.29999995
+    _maximumZoom: .75
+    _zoomDownAngle: 40
+    _heightMultiplier: 1
 --- !u!114 &1871906018
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1458,6 +1458,70 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11400028, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
       propertyPath: subId
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._movementSpeed
+      value: .200000003
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._rotationSpeed
+      value: .5
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._buttonSpeed
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._mouseButtonSpeed
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._maximumZoom
+      value: .75
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._zoomDownAngle
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._heightMultiplier
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraExtras._movementArea.width
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraExtras._movementArea.height
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraExtras._movementArea.y
+      value: -50
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraExtras._movementArea.x
+      value: -50
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400030, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _tileAnimation._smothAnimation
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400030, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _tileAnimation._animatedObjectCount
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400030, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _tileAnimation._animationSpeed
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400030, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _tileAnimation._animationRange
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400030, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _tileAnimation._animationFadeOut
       value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
