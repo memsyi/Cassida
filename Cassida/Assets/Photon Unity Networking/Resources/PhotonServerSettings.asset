@@ -40,4 +40,9 @@ MonoBehaviour:
   - PunRespawn
   - RequestForPickupTimes
   - NetworkAddPlayerToPlayerList
+  - SendNumber
+  - AddNewFleet
+  - AddNewUnit
+  - AskForNewFleet
+  - AskForNewUnit
   DisableAutoOpenWizard: 0

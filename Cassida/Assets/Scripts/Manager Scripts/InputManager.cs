@@ -31,226 +31,226 @@ public class InputManager : Photon.MonoBehaviour
     private Tile CurrentSelectedTile { get { return TileManager.CurrentSelectedTile; } }
     #endregion
 
-    private void CheckTileSelection()
-    {
-        var clickedTile = MapManager.NearestTileToMousePosition;
+    //private void CheckTileSelection()
+    //{
+    //    var clickedTile = MapManager.NearestTileToMousePosition;
 
-        if (clickedTile == null)
-        {
-            return;
-        }
+    //    if (clickedTile == null)
+    //    {
+    //        return;
+    //    }
 
-        if (CurrentSelectedTile == clickedTile)
-        {
-            RotateFleet(CurrentSelectedTile.Fleet);
-            return;
-        }
+    //    if (CurrentSelectedTile == clickedTile)
+    //    {
+    //        RotateFleet(CurrentSelectedTile.Fleet);
+    //        return;
+    //    }
 
-        TileManager.SelectTile(MapManager.NearestTileToMousePosition);
+    //    TileManager.SelectTile(MapManager.NearestTileToMousePosition);
 
-        CheckShowMovementArea();
-    }
+    //    CheckShowMovementArea();
+    //}
 
-    #region Movement and Rotation
-    private void CheckShowMovementArea()
-    {
-        ResetMovementArea();
+    //#region Movement and Rotation
+    //private void CheckShowMovementArea()
+    //{
+    //    ResetMovementArea();
 
-        if (CurrentSelectedTile == null)
-        {
-            return;
-        }
+    //    if (CurrentSelectedTile == null)
+    //    {
+    //        return;
+    //    }
 
-        if (CurrentSelectedTile.Fleet.MovementPointsLeft > 0)
-        {
-            ShowMovementArea();
-        }
-    }
+    //    if (CurrentSelectedTile.Fleet.MovementPointsLeft > 0)
+    //    {
+    //        ShowMovementArea();
+    //    }
+    //}
 
-    private void ShowMovementArea()
-    {
-        if (CurrentSelectedTile.Fleet.MovementPointsLeft == 0)
-        {
-            return;
-        }
+    //private void ShowMovementArea()
+    //{
+    //    if (CurrentSelectedTile.Fleet.MovementPointsLeft == 0)
+    //    {
+    //        return;
+    //    }
 
-        MoveableTileList = TileList.FindAll(t => Vector3.Distance(CurrentSelectedTile.TileParent.position, t.TileParent.position) <= 2f);
+    //    MoveableTileList = TileList.FindAll(t => Vector3.Distance(CurrentSelectedTile.TileParent.position, t.TileParent.position) <= 2f);
 
-        foreach (var tile in MoveableTileList)
-        {
-            MoveableTileObjectList.Add(Instantiate(MoveableTileObject, tile.TileParent.position, tile.TileParent.rotation) as Transform);
-        }
-    }
+    //    foreach (var tile in MoveableTileList)
+    //    {
+    //        MoveableTileObjectList.Add(Instantiate(MoveableTileObject, tile.TileParent.position, tile.TileParent.rotation) as Transform);
+    //    }
+    //}
 
-    public void ResetMovementArea()
-    {
-        MoveableTileList.Clear();
+    //public void ResetMovementArea()
+    //{
+    //    MoveableTileList.Clear();
 
-        foreach (var tileObject in MoveableTileObjectList)
-        {
-            Destroy(tileObject.gameObject);
-        }
+    //    foreach (var tileObject in MoveableTileObjectList)
+    //    {
+    //        Destroy(tileObject.gameObject);
+    //    }
 
-        MoveableTileObjectList.Clear();
-    }
+    //    MoveableTileObjectList.Clear();
+    //}
 
-    private void CheckFleetMovement()
-    {
-        var targetTile = MapManager.NearestTileToMousePosition;
+    //private void CheckFleetMovement()
+    //{
+    //    var targetTile = MapManager.NearestTileToMousePosition;
 
-        if (targetTile == null || CurrentSelectedTile == null)
-        {
-            return;
-        }
+    //    if (targetTile == null || CurrentSelectedTile == null)
+    //    {
+    //        return;
+    //    }
 
-        if (CurrentSelectedTile == targetTile)
-        {
-            // Rotate Fleet
-            RotateFleet(CurrentSelectedTile.Fleet, false);
-            return;
-        }
+    //    if (CurrentSelectedTile == targetTile)
+    //    {
+    //        // Rotate Fleet
+    //        RotateFleet(CurrentSelectedTile.Fleet, false);
+    //        return;
+    //    }
 
-        if (CurrentSelectedTile != null && targetTile.Fleet != null)
-        {
-            // Attack 
-            AttackEnemyFleet();
-            return;
-        }
+    //    if (CurrentSelectedTile != null && targetTile.Fleet != null)
+    //    {
+    //        // Attack 
+    //        AttackEnemyFleet();
+    //        return;
+    //    }
 
-        // Move fleet
-        if (MoveableTileList.Exists(t => t == targetTile))
-        {
-            MoveFleet(CurrentSelectedTile.Fleet.ID, targetTile.Position);
+    //    // Move fleet
+    //    if (MoveableTileList.Exists(t => t == targetTile))
+    //    {
+    //        MoveFleet(CurrentSelectedTile.Fleet.ID, targetTile.Position);
 
-            TileManager.SelectTile(targetTile);
+    //        TileManager.SelectTile(targetTile);
 
-            CheckShowMovementArea();
-        }
-    }
+    //        CheckShowMovementArea();
+    //    }
+    //}
 
-    private void RotateFleet(Fleet fleet, bool rotateRight = true)
-    {
-        if (!fleet.AllowRotation)
-        {
-            return;
-        }
+    //private void RotateFleet(Fleet fleet, bool rotateRight = true)
+    //{
+    //    if (!fleet.AllowRotation)
+    //    {
+    //        return;
+    //    }
 
-        photonView.RPC("NetworkRotateFleet", PhotonTargets.All, fleet.ID, rotateRight);
-    }
+    //    photonView.RPC("NetworkRotateFleet", PhotonTargets.All, fleet.ID, rotateRight);
+    //}
 
-    [RPC]
-    private void NetworkRotateFleet(int fleetID, bool rotateRight)
-    {
-        var fleet = FleetList.Find(f => f.ID == fleetID);
+    //[RPC]
+    //private void NetworkRotateFleet(int fleetID, bool rotateRight)
+    //{
+    //    var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        fleet.RotateFleet(rotateRight ? 1 : -1);
-    }
+    //    fleet.RotateFleet(rotateRight ? 1 : -1);
+    //}
 
-    private void MoveFleet(int fleetID, Vector2 targetTilePosition)
-    {
-        ResetMovementArea();
+    //private void MoveFleet(int fleetID, Vector2 targetTilePosition)
+    //{
+    //    ResetMovementArea();
 
-        photonView.RPC("NetworkMoveFleet", PhotonTargets.All, fleetID, targetTilePosition);
-    }
+    //    photonView.RPC("NetworkMoveFleet", PhotonTargets.All, fleetID, targetTilePosition);
+    //}
 
-    [RPC]
-    private void NetworkMoveFleet(int fleetID, Vector2 targetTilePosition)
-    {
-        var fleet = FleetList.Find(f => f.ID == fleetID);
-        if (fleet == null)
-        {
-            return;
-        }
+    //[RPC]
+    //private void NetworkMoveFleet(int fleetID, Vector2 targetTilePosition)
+    //{
+    //    var fleet = FleetList.Find(f => f.ID == fleetID);
+    //    if (fleet == null)
+    //    {
+    //        return;
+    //    }
 
-        var currentTile = TileList.Find(t => t.Fleet == fleet);
-        var targetTile = TileList.Find(t => t.Position == targetTilePosition);
+    //    var currentTile = TileList.Find(t => t.Fleet == fleet);
+    //    var targetTile = TileList.Find(t => t.Position == targetTilePosition);
 
-        targetTile.Fleet = fleet;
-        currentTile.Fleet = null;
+    //    targetTile.Fleet = fleet;
+    //    currentTile.Fleet = null;
 
-        fleet.MoveFleet(targetTile.TileParent.position);
-    }
-    #endregion
+    //    fleet.MoveFleet(targetTile.TileParent.position);
+    //}
+    //#endregion
 
-    #region Fight
-    private void AttackEnemyFleet()
-    {
-        if (!TileManager.CheckAttackEnemyFleet())
-        {
-            return;
-        }
+    //#region Fight
+    //private void AttackEnemyFleet()
+    //{
+    //    if (!TileManager.CheckAttackEnemyFleet())
+    //    {
+    //        return;
+    //    }
 
-        var ownUnitDirection = TileManager.GetOwnUnitInDirection();
-        var enemyUnitDirection = ownUnitDirection < 3 ? ownUnitDirection + 3 : ownUnitDirection - 3;
+    //    var ownUnitDirection = TileManager.GetOwnUnitInDirection();
+    //    var enemyUnitDirection = ownUnitDirection < 3 ? ownUnitDirection + 3 : ownUnitDirection - 3;
 
-        var ownFleetTile = CurrentSelectedTile;
-        var enemyFleetTile = CurrentHighlightedTile;
+    //    var ownFleetTile = CurrentSelectedTile;
+    //    var enemyFleetTile = CurrentHighlightedTile;
 
-        var ownFleet = ownFleetTile.Fleet;
-        var enemyFleet = enemyFleetTile.Fleet;
+    //    var ownFleet = ownFleetTile.Fleet;
+    //    var enemyFleet = enemyFleetTile.Fleet;
 
-        var ownUnit = ownFleet.Units[ownUnitDirection];
-        var ownUnitStrength = ownUnit.UnitValues.Strength;
-        var enemyUnit = enemyFleet.Units[enemyUnitDirection];
+    //    var ownUnit = ownFleet.Units[ownUnitDirection];
+    //    var ownUnitStrength = ownUnit.UnitValues.Strength;
+    //    var enemyUnit = enemyFleet.Units[enemyUnitDirection];
 
-        if (enemyUnit == null)
-        {
-            for (int i = 0; i < enemyFleet.Units.Length; i++)
-            {
-                AttackUnitOfFleet(enemyFleet.ID, i, ownUnitStrength);
-            }
-        }
-        else
-        {
-            // damage to own
-            if (ownUnit.UnitValues.UnitType == enemyUnit.UnitValues.UnitType)
-            {
-                AttackUnitOfFleet(ownFleetTile.Fleet.ID, ownUnitDirection, enemyUnit.UnitValues.Strength);
-            }
+    //    if (enemyUnit == null)
+    //    {
+    //        for (int i = 0; i < enemyFleet.Units.Length; i++)
+    //        {
+    //            AttackUnitOfFleet(enemyFleet.ID, i, ownUnitStrength);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        // damage to own
+    //        if (ownUnit.UnitValues.UnitType == enemyUnit.UnitValues.UnitType)
+    //        {
+    //            AttackUnitOfFleet(ownFleetTile.Fleet.ID, ownUnitDirection, enemyUnit.UnitValues.Strength);
+    //        }
 
-            // damage to enemy
-            AttackUnitOfFleet(enemyFleetTile.Fleet.ID, enemyUnitDirection, ownUnitStrength);
-        }
+    //        // damage to enemy
+    //        AttackUnitOfFleet(enemyFleetTile.Fleet.ID, enemyUnitDirection, ownUnitStrength);
+    //    }
 
-        ownFleet.MovementPointsLeft = 0;
-        ResetMovementArea();
-        ownFleet.AllowRotation = false;
-        ownUnit.AllowAttack = false;
+    //    ownFleet.MovementPointsLeft = 0;
+    //    ResetMovementArea();
+    //    ownFleet.AllowRotation = false;
+    //    ownUnit.AllowAttack = false;
 
-        TileManager.ResetHighlightedTile();
-    }
+    //    TileManager.ResetHighlightedTile();
+    //}
 
-    private void AttackUnitOfFleet(int fleetID, int unitPosition, int strength)
-    {
-        photonView.RPC("NetworkAttackUnitOfFleet", PhotonTargets.All, fleetID, unitPosition, strength);
-    }
+    //private void AttackUnitOfFleet(int fleetID, int unitPosition, int strength)
+    //{
+    //    photonView.RPC("NetworkAttackUnitOfFleet", PhotonTargets.All, fleetID, unitPosition, strength);
+    //}
 
-    [RPC]
-    private void NetworkAttackUnitOfFleet(int fleetID, int unitPosition, int strength)
-    {
-        var fleet = FleetList.Find(f => f.ID == fleetID);
-        if (fleet == null)
-        {
-            return;
-        }
+    //[RPC]
+    //private void NetworkAttackUnitOfFleet(int fleetID, int unitPosition, int strength)
+    //{
+    //    var fleet = FleetList.Find(f => f.ID == fleetID);
+    //    if (fleet == null)
+    //    {
+    //        return;
+    //    }
 
-        fleet.AttackUnit(unitPosition, strength);
-    }
-    #endregion
+    //    fleet.AttackUnit(unitPosition, strength);
+    //}
+    //#endregion
 
-    public void AddMouseEvents()
-    {
-        // Add events
-        MouseController.LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);
-        MouseController.RightMouseclickEvent += new MouseclickHandler(CheckFleetMovement);
-    }
+    //public void AddMouseEvents()
+    //{
+    //    // Add events
+    //    MouseController.LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);
+    //    MouseController.RightMouseclickEvent += new MouseclickHandler(CheckFleetMovement);
+    //}
 
-    public void RemoveMouseEvents()
-    {
-        // Remove events
-        MouseController.LeftMousecklickEvent -= new MouseclickHandler(CheckTileSelection);
-        MouseController.RightMouseclickEvent -= new MouseclickHandler(CheckFleetMovement);
-    }
+    //public void RemoveMouseEvents()
+    //{
+    //    // Remove events
+    //    MouseController.LeftMousecklickEvent -= new MouseclickHandler(CheckTileSelection);
+    //    MouseController.RightMouseclickEvent -= new MouseclickHandler(CheckFleetMovement);
+    //}
 
     private void Init()
     {

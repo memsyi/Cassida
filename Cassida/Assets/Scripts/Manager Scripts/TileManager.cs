@@ -14,7 +14,7 @@ public class SettingsTileColor
         _mouseOverEnemyFleetColor = Color.magenta,
         _mouseOverCantMoveColor = Color.red;
 
-    #region Tiles
+    #region TileColor
     public Color MouseOverCantMoveColor
     {
         get { return _mouseOverCantMoveColor; }
@@ -64,18 +64,12 @@ public class SettingsTileAnimation
     [SerializeField]
     private float
         _animationSpeed = 1.0f,
-        _animationRange = 1.0f,
-        _animationFadeOut = 1.0f;
+        _animationRange = 1.0f;
 
     [SerializeField]
     private int _animatedObjectCount = 2;
 
-    public float AnimationFadeOut
-    {
-        get { return _animationFadeOut; }
-        set { _animationFadeOut = value; }
-    }
-
+    #region TileAnimation
     public float AnimationRange
     {
         get { return _animationRange; }
@@ -105,6 +99,7 @@ public class SettingsTileAnimation
         get { return _smothAnimation; }
         set { _smothAnimation = value; }
     }
+    #endregion
 
     public bool BackwardAnimation { get; set; }
     public List<Transform> SelectionObjects { get; set; }
@@ -136,12 +131,15 @@ public class TileManager : MonoBehaviour
     }
 
     // Scripts
+    private PlayerManager PlayerManager { get; set; }
     private MouseController MouseController { get; set; }
+    private FleetManager FleetManager { get; set; }
     private MapManager MapManager { get; set; }
     private MapGenerator MapGenerator { get; set; }
 
     // Lists
     public List<Tile> TileList { get; private set; }
+    private List<Fleet> FleetList { get { return FleetManager.FleetList; } }
 
     // Tiles
     public Tile CurrentHighlightedTile { get; private set; }
@@ -173,7 +171,7 @@ public class TileManager : MonoBehaviour
             RemoveCurrentSelectionAnimation();
         }
 
-        if (tile.Fleet != null && tile.Fleet.Player == PhotonNetwork.player)
+        if (tile.FleetID > -1 && FleetList.Find(f => f.ID == tile.FleetID).ID == PlayerManager.Player.ID)
         {
             CurrentSelectedTile = tile;
             SetTileBorderColor(CurrentSelectedTile, TileColor.MouseOverSelectionColor);
@@ -321,7 +319,7 @@ public class TileManager : MonoBehaviour
             else
             {
                 // Enemies fleet (own selected)
-                if (CurrentSelectedTile != null && CurrentHighlightedTile.Fleet != null)
+                if (CurrentSelectedTile != null && CurrentHighlightedTile.FleetID > -1)
                 {
                     if (CheckAttackEnemyFleet())
                     {
@@ -333,9 +331,10 @@ public class TileManager : MonoBehaviour
                     }
                 }
                 // Other fleet
-                else if (CurrentHighlightedTile.Fleet != null)
+                else if (CurrentHighlightedTile.FleetID > -1)
                 {
-                    if (CurrentHighlightedTile.Fleet.Player == PhotonNetwork.player)
+                    var fleet = FleetList.Find(f => f.ID == CurrentHighlightedTile.FleetID);
+                    if (fleet != null && fleet.ID == PlayerManager.Player.ID)
                     {
                         SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverFleetColor);
                     }
@@ -383,7 +382,7 @@ public class TileManager : MonoBehaviour
     #region Check Fleets and Units on tiles
     public bool CheckAttackEnemyFleet()
     {
-        if (CurrentHighlightedTile == null || CurrentHighlightedTile.Fleet == null || CurrentHighlightedTile.Fleet.Player == PhotonNetwork.player)
+        if (CurrentHighlightedTile == null || !FleetList.Exists(f => f.ID == CurrentHighlightedTile.FleetID) || FleetList.Find(f => f.ID == CurrentHighlightedTile.FleetID).ID == PlayerManager.Player.ID)
         {
             return false;
         }
@@ -395,29 +394,31 @@ public class TileManager : MonoBehaviour
             return false;
         }
 
-        var ownFleet = CurrentSelectedTile.Fleet;
-        var enemyFleet = CurrentHighlightedTile.Fleet;
+        var ownFleet = FleetList.Find(f => f.ID == CurrentSelectedTile.FleetID);
+        var enemyFleet = FleetList.Find(f => f.ID == CurrentHighlightedTile.FleetID);
         var ownUnit = ownFleet.Units[unitDirection];
 
-        if (ownUnit != null)
+        if (ownUnit == null)
         {
-            if (ownUnit.UnitController == null)// || ownUnit.AllowAttack == false) FUNktionier nicht nicht.. Angriffe funktionieren nicht mehr!!
-            {
-                return false;
-            }
+            return false;
+        }
 
-            var distanceBetweenFleets = Vector3.Distance(ownFleet.Position, enemyFleet.Position);
+        if (ownUnit.UnitController == null)// || ownUnit.AllowAttack == false) FUNktionier nicht nicht.. Angriffe funktionieren nicht mehr!!
+        {
+            return false;
+        }
 
-            if (ownUnit.UnitValues.UnitType == UnitType.Meele
-                && distanceBetweenFleets <= 2)
-            {
-                return true;
-            }
-            else if (ownUnit.UnitValues.UnitType == UnitType.Range
-                && distanceBetweenFleets > 2 && distanceBetweenFleets <= 4)
-            {
-                return true;
-            }
+        var distanceBetweenFleets = Vector3.Distance(ownFleet.Position, enemyFleet.Position);
+
+        if (ownUnit.UnitValues.UnitType == UnitType.Meele
+            && distanceBetweenFleets <= 2)
+        {
+            return true;
+        }
+        else if (ownUnit.UnitValues.UnitType == UnitType.Range
+            && distanceBetweenFleets > 2 && distanceBetweenFleets <= 4)
+        {
+            return true;
         }
 
         return false;
@@ -485,7 +486,9 @@ public class TileManager : MonoBehaviour
 
     private void Init()
     {
+        PlayerManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<PlayerManager>();
         MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
+        FleetManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<FleetManager>();
         MapManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<MapManager>();
         MapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
 

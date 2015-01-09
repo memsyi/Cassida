@@ -22,11 +22,13 @@ public enum ObjectiveType
 
 public class Tile
 {
+    public Vector2 Position { get; private set; }
+    public int FleetID { get; set; }
+    public Transform TileParent { get; private set; }
+
     private TerrainType _terrain;
     private ObjectiveType _objective;
 
-    public Vector2 Position { get; private set; }
-    public Transform TileParent { get; private set; }
     public TerrainType TerrainType
     {
         get
@@ -52,8 +54,6 @@ public class Tile
         }
     }
 
-    public Fleet Fleet { get; set; }
-
     public TerrainController TerrainController { get; private set; }
     public ObjectiveController ObjectiveController { get; private set; }
 
@@ -73,7 +73,7 @@ public class Tile
         }
 
         TerrainController = TileParent.gameObject.AddComponent<TerrainController>();
-        TerrainController.Type = TerrainType;
+        //TerrainController.Type = TerrainType;
     }
 
     private void SetCorrectObjective()
@@ -90,7 +90,7 @@ public class Tile
         }
 
         ObjectiveController = TileParent.gameObject.AddComponent<ObjectiveController>();
-        ObjectiveController.Type = ObjectiveType;
+        //ObjectiveController.Type = ObjectiveType;
     }
 }
 

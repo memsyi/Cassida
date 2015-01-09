@@ -6,37 +6,49 @@ public enum UnitType
     Range
 }
 
+public class UnitValues
+{
+    public UnitType UnitType { get; private set; }
+    public int Strength { get; set; }
+
+    public UnitValues(UnitType unitType, int strength)
+    {
+        UnitType = unitType;
+        Strength = strength;
+    }
+}
+
 public class Unit
 {
-    private PhotonPlayer _player;
-
-    public PhotonPlayer Player
+    private Player _player;
+    public Player Player
     {
         get { return _player; }
         private set
         {
             _player = value;
-            var color = (Vector3)Player.customProperties[PlayerProperties.Color];
-            UnitController.Color = new Color(color.x, color.y, color.z);
+            UnitController.Color = value.Color;
         }
     }
+    public UnitValues UnitValues { get; set; }
+
+    public Transform UnitParent { get; private set; }
+    public UnitController UnitController { get; private set; }
 
     public bool AllowAttack { get; set; }
 
-    public Transform UnitParent { get; private set; }
-    public UnitValues UnitValues { get; set; }
-
-    public UnitController UnitController { get; private set; }
-
-    public Unit(PhotonPlayer player, Transform unitParent, UnitValues unitValues)
+    public Unit(Player player, UnitValues unitValues, Transform unitParent)
     {
         // Fleet object and controller must be first!
         UnitParent = unitParent;
         UnitController = UnitParent.gameObject.AddComponent<UnitController>();
 
-        UnitValues = unitValues; // Values befor type
-        UnitController.Type = UnitValues.UnitType; // Type befor player
         Player = player;
+        UnitValues = unitValues; // Values befor type
+
+        // Flotte instattiieren!!!
+
+        //UnitController.Type = UnitValues.UnitType; // Type befor player
     }
 
     public bool CheckWhetherUnitIsAlive()
@@ -48,18 +60,6 @@ public class Unit
 
         UnitController.DestroyUnitObject();
         return false;
-    }
-}
-
-public class UnitValues
-{
-    public UnitType UnitType { get; set; }
-    public int Strength { get; set; }
-
-    public UnitValues(UnitType unitType, int strength)
-    {
-        UnitType = unitType;
-        Strength = strength;
     }
 }
 

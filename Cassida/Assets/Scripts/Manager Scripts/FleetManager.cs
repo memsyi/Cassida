@@ -43,40 +43,8 @@ public struct UnitSettings
     }
 }
 
-public struct BufferedFleet
-{
-    public int ID { get; private set; }
-    public Vector2 Position { get; private set; }
-    public FleetType FleetType { get; private set; }
-    public PhotonPlayer Player { get; private set; }
-
-    public BufferedFleet(int id, Vector2 position, FleetType fleetType, PhotonPlayer player)
-    {
-        ID = id;
-        Position = position;
-        FleetType = fleetType;
-        Player = player;
-    }
-}
-
-public struct BufferedUnit
-{
-    public Vector2 FleetPosition { get; set; }
-    public int Position { get; set; }
-    public UnitType UnitType { get; set; }
-    public int Strength { get; set; }
-
-    public BufferedUnit(Vector2 fleetPosition, int position, UnitType unitType, int strength)
-    {
-        FleetPosition = fleetPosition;
-        Position = position;
-        UnitType = unitType;
-        Strength = strength;
-    }
-}
-
 [RequireComponent(typeof(PhotonView))]
-public class FleetManager : Photon.MonoBehaviour
+public class FleetManager : Photon.MonoBehaviour//, IJSON
 {
     [SerializeField]
     private FleetSettings _fleetSettings;
@@ -97,165 +65,195 @@ public class FleetManager : Photon.MonoBehaviour
         set { _fleetSettings = value; }
     }
 
+    //private static FleetManager _inst = null;
+    //public static FleetManager Get()
+    //{
+    //    if (_inst == null) _inst = new FleetManager();
+    //    return _inst;
+    //}
+
+    //public static GameManager Singleton
+    //{
+    //    get
+    //    {
+    //        if (_instance == null)
+    //        {
+    //            GameObject obj = new GameObject("GameManager");
+    //            _instance = obj.AddComponent<GameManager>();
+    //        }
+    //        return _instance;
+    //    }
+    //}
+
+
+    //private void Start()
+    //{
+    //    //Check for Singleton
+    //    if (_instance == null)
+    //        _instance = this;
+    //    else if (_instance != this)
+    //        Debug.LogError("Second instance of GameManager.");
+    //}
+
     // Lists
     public List<Fleet> FleetList { get; private set; }
     private List<Tile> TileList { get { return TileManager.TileList; } }
 
     // Fleet ID
     private int _highestFleetID = 0;
-    private int HighestFleetID { get { _highestFleetID++; return _highestFleetID; } }
-
-    // Buffered lists
-    private List<BufferedFleet> BufferedFleetList { get; set; }
-    private List<BufferedUnit> BufferedUnitList { get; set; }
+    private int HighestFleetID
+    {
+        get { return _highestFleetID; }
+        set { if (PhotonNetwork.isMasterClient) _highestFleetID = value; }
+    }
 
     // Scripts
+    private PlayerManager PlayerManager { get; set; }
     private TileManager TileManager { get; set; }
     #endregion
 
-    private void InstantiateNewFleet(Vector2 position, FleetType fleetType, UnitValues[] unitValues)
+    private void InstantiateNewFleet(Player player, Vector2 position, FleetType fleetType, UnitValues[] unitValues)
     {
-        photonView.RPC("NetworkAddFleetToWorld", PhotonTargets.MasterClient, 0, position, fleetType.GetHashCode(), PhotonNetwork.player);
+        photonView.RPC(RPCs.AskForNewFleet, PhotonTargets.MasterClient, position, (int)fleetType, player); // TODO RPCs checken
 
         for (int i = 0; i < unitValues.Length; i++)
         {
             if (unitValues[i] != null)
             {
-                photonView.RPC("NetworkAddUnitToFleet", PhotonTargets.MasterClient, position, i, unitValues[i].UnitType.GetHashCode(), unitValues[i].Strength);
+                photonView.RPC(RPCs.AskForNewUnit, PhotonTargets.MasterClient, -1, i, (int)unitValues[i].UnitType, unitValues[i].Strength, player); // TODO RPCs checken
             }
         }
     }
 
-    #region Add fleets to world
+    #region Add fleet
     [RPC]
-    private void NetworkAddFleetToWorld(int fleetID, Vector2 position, int fleetType, PhotonPlayer player)
+    private void AskForNewFleet(Vector2 position, int fleetType, Player player)
     {
-        if (PhotonNetwork.isMasterClient)
-        {
-            fleetID = HighestFleetID;
-        }
-
-        BufferedFleetList.Add(new BufferedFleet(fleetID, position, (FleetType)fleetType, player));
-
         if (!PhotonNetwork.isMasterClient)
         {
-            // erase id also on clients
-            fleetID = HighestFleetID;
             return;
         }
 
-        photonView.RPC("NetworkAddFleetToWorld", PhotonTargets.Others, fleetID, position, fleetType, player);
+        // TODO genügend Geld?
+
+        var tile = TileList.Find(t => t.Position == position);
+
+        if (tile == null || tile.FleetID > -1) // TODO player turn and free tile
+        {
+            return;
+        }
+
+        HighestFleetID++;
+        photonView.RPC(RPCs.AddNewFleet, PhotonTargets.All, HighestFleetID, player, position, (FleetType)fleetType); // TODO RPCs checken
+    }
+
+    [RPC]
+    public void AddNewFleet(int ID, Player player, Vector2 position, int fleetType, PhotonMessageInfo info)
+    {
+        if (!info.sender.isMasterClient)
+        {
+            return;
+        }
+
+        var tile = TileList.Find(t => t.Position == position);
+
+        if (tile == null || FleetList.Exists(f => f.ID == ID))
+        {
+            return;
+        }
+
+        HighestFleetID = ID;
+
+        var fleetParent = new GameObject("Fleet of: " + player.Name).transform;
+
+        fleetParent.position = tile.TileParent.position;
+        fleetParent.SetParent(GameObject.Find(Tags.Fleets).transform);
+
+        FleetList.Add(new Fleet(ID, player, position, new FleetValues((FleetType)fleetType), fleetParent));
+
+        tile.FleetID = ID;
     }
 
     public void InstatiateAllExistingFleetsAtPlayer(PhotonPlayer player)
     {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
         foreach (var fleet in FleetList)
         {
-            photonView.RPC("NetworkAddFleetToWorld", player, fleet.ID, TileList.Find(t => t.Fleet == fleet).Position, fleet.FleetType.GetHashCode(), fleet.Player);
+            photonView.RPC(RPCs.AddNewFleet, player, fleet.ID, fleet.Position, (int)fleet.FleetValues.FleetType, fleet.Player); // TODO RPCs checken
 
             for (int i = 0; i < fleet.Units.Length; i++)
             {
                 if (fleet.Units[i] != null)
                 {
-                    photonView.RPC("NetworkAddUnitToFleet", player, TileList.Find(t => t.Fleet == fleet).Position, i, fleet.Units[i].UnitValues.UnitType.GetHashCode(), fleet.Units[i].UnitValues.Strength);
-                }
-            }
-        }
-    }
-
-    public void AddBufferedFleetsToWorld(BufferedFleet bufferedFleet)
-    {
-        var fleetTile = TileList.Find(t => t.Position == bufferedFleet.Position);
-
-        if (fleetTile.Fleet != null)
-        {
-            return;
-        }
-
-        var fleetParent = new GameObject("Fleet of: " + bufferedFleet.Player).transform;
-
-        fleetParent.position = fleetTile.TileParent.position;
-        fleetParent.SetParent(GameObject.Find(Tags.Fleets).transform);
-
-        #region Instantiate units
-        var units = new Unit[6];
-
-        for (int i = 0; i < units.Length; i++)
-        {
-            var unitParent = new GameObject("Unit: " + i).transform;
-
-            fleetParent.rotation = Quaternion.Euler(Vector3.up * (i * -60 - 30));
-
-            unitParent.position = fleetTile.TileParent.position + Vector3.forward * 0.6f;
-            unitParent.SetParent(fleetParent);
-        }
-
-        fleetParent.rotation = Quaternion.identity;
-        #endregion
-
-        var newFleet = new Fleet(bufferedFleet.ID, bufferedFleet.Player, fleetParent, (FleetType)bufferedFleet.FleetType, units);
-
-        FleetList.Add(newFleet);
-
-        fleetTile.Fleet = newFleet;
-
-        BufferedFleetList.Remove(bufferedFleet);
-    }
-
-    private void AddFleetsToWorldIfTileExists()
-    {
-        for (int i = 0; i < BufferedFleetList.Count; i++)
-        {
-            print("fleet in order");
-            if (TileList.Exists(t => t.Position == BufferedFleetList[i].Position))
-            {
-                AddBufferedFleetsToWorld(BufferedFleetList[i]);
+                    photonView.RPC(RPCs.AddNewUnit, player, fleet.ID, i, (int)fleet.Units[i].UnitValues.UnitType, fleet.Units[i].UnitValues.Strength);
+                } // TODO RPCs checken
             }
         }
     }
     #endregion
 
-    #region Add units to fleets
+    #region Add unit
     [RPC]
-    private void NetworkAddUnitToFleet(Vector2 fleetPosition, int position, int unitType, int strength)
+    private void AskForNewUnit(int fleetID, int position, int unitType, int strength, Player player)
     {
-        BufferedUnitList.Add(new BufferedUnit(fleetPosition, position, (UnitType)unitType, strength));
-
         if (!PhotonNetwork.isMasterClient)
         {
             return;
         }
 
-        photonView.RPC("NetworkAddUnitToFleet", PhotonTargets.Others, fleetPosition, position, unitType, strength);
-    }
+        if (fleetID < 0)
+        {
+            fleetID = HighestFleetID;
+        }
 
-    private void AddBufferedUnitsToFleet(Fleet fleet, BufferedUnit bufferedUnit)
-    {
-        if (fleet == null || fleet.Units[bufferedUnit.Position] != null)
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null || fleet.Units[position] != null) // player turn
         {
             return;
         }
 
-        fleet.Units[bufferedUnit.Position] = new Unit(fleet.Player, fleet.FleetParent.FindChild("Unit: " + bufferedUnit.Position), new UnitValues(bufferedUnit.UnitType, bufferedUnit.Strength));
-
-        BufferedUnitList.Remove(bufferedUnit);
+        photonView.RPC(RPCs.AddNewUnit, PhotonTargets.All, fleetID, position, unitType, strength); // TODO rpc calls
     }
 
-    private void AddUnitsToFleetIfFleetExists()
+    [RPC]
+    private void AddNewUnit(int fleetID, int position, int unitType, int strength, PhotonMessageInfo info)
     {
-        for (int i = 0; i < BufferedUnitList.Count; i++)
+        if (!info.sender.isMasterClient)
         {
-            var tile = TileList.Find(t => t.Position == BufferedUnitList[i].FleetPosition);
-
-            if (tile == null)
-            {
-                return;
-            }
-
-            var fleet = tile.Fleet;
-
-            AddBufferedUnitsToFleet(fleet, BufferedUnitList[i]);
+            return;
         }
+
+        // TODO genügend Geld?
+
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null || fleet.Units[position] != null)
+        {
+            return;
+        }
+
+        var unitParent = new GameObject("Unit: " + position).transform;
+
+        fleet.FleetParent.rotation = Quaternion.Euler(Vector3.up * (position * -60 - 30));
+
+        var tile = TileList.Find(t => t.FleetID == fleetID);
+
+        if (tile == null)
+        {
+            return;
+        }
+
+        unitParent.position = tile.TileParent.position + Vector3.forward * 0.6f;
+        unitParent.SetParent(fleet.FleetParent);
+
+        fleet.FleetParent.rotation = Quaternion.identity;
+
+        fleet.Units[position] = new Unit(fleet.Player, new UnitValues((UnitType)unitType, strength), unitParent);
     }
     #endregion
 
@@ -270,8 +268,8 @@ public class FleetManager : Photon.MonoBehaviour
 
     public void DestroyFleet(Fleet fleet)
     {
-        var tileOfFleet = TileList.Find(t => t.Fleet == fleet);
-        tileOfFleet.Fleet = null;
+        var tile = TileList.Find(t => t.FleetID == fleet.ID);
+        tile.FleetID = -1;
 
         Destroy(fleet.FleetParent.gameObject);
 
@@ -280,32 +278,11 @@ public class FleetManager : Photon.MonoBehaviour
         FleetList.Remove(fleet);
     }
 
-    [RPC]
-    public void DestroyAllFleetsOfDisconnectedPlayers(PhotonPlayer player)
+    public void DestroyAllFleetsOfDisconnectedPlayers(int playerID)
     {
-        // TODO kommt im Spiel eigentlich nicht vor... so gibt es einen outofrange fehler bei löschen der flotte
-        //if (BufferedFleetList.Count > 0)
-        //{
-        //    for (int i = BufferedFleetList.Count - 1; i >= 0; i--)
-        //    {
-        //        if (!playerList.Exists(p => p == BufferedFleetList[i].Player))
-        //        {
-        //            for (int u = BufferedUnitList.Count - 1; i >= 0; i--)
-        //            {
-        //                if (BufferedUnitList[u].FleetPosition == BufferedFleetList[i].Position)
-        //                {
-        //                    BufferedUnitList.Remove(BufferedUnitList[u]);
-        //                }
-        //            }
-
-        //            BufferedFleetList.Remove(BufferedFleetList[i]); // HIER!!!
-        //        }
-        //    }
-        //}
-
         for (int i = FleetList.Count - 1; i >= 0; i--)
         {
-            if (FleetList[i].Player == player)
+            if (FleetList[i].Player.ID == playerID)
             {
                 DestroyFleet(FleetList[i]);
             }
@@ -325,14 +302,15 @@ public class FleetManager : Photon.MonoBehaviour
         {
             var position = new Vector2(Random.Range(-2, 2), Random.Range(-3, 3));
 
-            InstantiateNewFleet(position, FleetType.Slow, testUnits);
+            InstantiateNewFleet(PlayerManager.Player, position, FleetType.Slow, testUnits);
         }
         //InstantiateNewFleet(new Vector2(Random.Range(-2, 2), Random.Range(-3, 3)), FleetType.Fast, testUnits);
     }
 
     private void Init()
     {
-        TileManager = GameObject.Find(Tags.Manager).GetComponent<TileManager>();
+        PlayerManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<PlayerManager>();
+        TileManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<TileManager>();
 
         if (!TileManager)
         {
@@ -343,8 +321,6 @@ public class FleetManager : Photon.MonoBehaviour
     private void Start()
     {
         FleetList = new List<Fleet>();
-        BufferedFleetList = new List<BufferedFleet>();
-        BufferedUnitList = new List<BufferedUnit>();
     }
 
     private void Awake()
@@ -354,7 +330,24 @@ public class FleetManager : Photon.MonoBehaviour
 
     private void Update()
     {
-        AddFleetsToWorldIfTileExists();
-        AddUnitsToFleetIfFleetExists();
+
     }
+
+    //public JSONObject ToJSON()
+    //{
+    //    var o = JSONObject.obj;
+
+    //    //o["FleetList"] = JSONObject.CreateList(FleetList);
+    //    o["blah"] = new JSONObject(123);
+
+    //    return o;
+    //}
+
+    //public void FromJSON(JSONObject o)
+    //{
+    //    throw new System.NotImplementedException();
+    //}
+
+    // https://github.com/ChristophPech/servertest/blob/master/src/gamesrv/techtree.cfg
+    // https://github.com/omegasrevenge/Project4/blob/master/Assets/Scripts/GameManager.cs
 }

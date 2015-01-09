@@ -12,6 +12,7 @@ public class GameController : Photon.MonoBehaviour
 {
     // Scripts
     //WorldManager WorldManager { get; set; }
+    private PlayerManager PlayerManager { get; set; }
     private TileManager TileManager { get; set; }
     private FleetManager FleetManager { get; set; }
     private InputManager InputManager { get; set; }
@@ -22,16 +23,25 @@ public class GameController : Photon.MonoBehaviour
 
     private void StartGame()
     {
-        TileManager.InitializeWorld();
-
-        FleetManager.InstantiateStartFleets();
-
         if (PhotonNetwork.isMasterClient)
         {
             SetPlayerPropertiesAndAddToList(PhotonNetwork.player, Color.red);
             TurnOwner = PhotonNetwork.player;
-            InputManager.AddMouseEvents();
+            //InputManager.AddMouseEvents();
         }
+
+        TileManager.InitializeWorld();
+
+        FleetManager.InstantiateStartFleets();
+
+
+        //print(FleetManager.ToJSON().print());
+    }
+
+    [RPC]
+    private void SendNumber(int i)
+    {
+        print(i);
     }
 
     private void OnJoinedRoom()
@@ -62,7 +72,35 @@ public class GameController : Photon.MonoBehaviour
 
         // Instatiate fleets at player
         FleetManager.InstatiateAllExistingFleetsAtPlayer(newPlayer);
+
+        for (int i = 0; i < 100; i++)
+        {
+            photonView.RPC("SendNumber", PhotonTargets.All, i);
+        }
     }
+
+    //private JSONObject ToJSON()
+    //{
+    //    JSONObject x=base.Save();
+    //    x["size"]=JSONObject(size);
+
+    //    if(x)
+
+    //    x["FleetMgr"] = FleetManager.Save();
+
+    //    return x;
+
+    //    List<string> strs;
+    //    var l=JSONObject.arr;l.Add(strs 
+
+    //    x["Player"]["Levels"][2]["XP"] = 2
+    //    (int)x["Player/Levels/2/XP"]
+    //}
+
+    //private void FromJSON(JSONObject x)
+    //{
+    //    size = (float)x["size"];
+    //}
 
     private void SetPlayerPropertiesAndAddToList(PhotonPlayer player, Color color)
     {
@@ -95,7 +133,7 @@ public class GameController : Photon.MonoBehaviour
     #endregion
 
     #region Player disconnect
-    private void OnPhotonPlayerDisconnected(PhotonPlayer player)
+    private void OnPhotonPlayerDisconnected(PhotonPlayer photonPlayer)
     {
         if (!PhotonNetwork.isMasterClient)
         {
@@ -104,18 +142,25 @@ public class GameController : Photon.MonoBehaviour
 
         var playerList = new List<PhotonPlayer>(PhotonNetwork.playerList);
 
-        if (!playerList.Exists(p => p == player))
+        if (!playerList.Exists(p => p == photonPlayer))
         {
-            NetworkEndTurn(player);
+            NetworkEndTurn(photonPlayer);
         }
+
+        var player = PlayerManager.PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
 
         photonView.RPC("NetworkClearAndDestroyAllOfDisconnectedPlayers", PhotonTargets.All, player);
     }
 
     [RPC]
-    private void NetworkClearAndDestroyAllOfDisconnectedPlayers(PhotonPlayer player)
+    private void NetworkClearAndDestroyAllOfDisconnectedPlayers(int playerID, PhotonMessageInfo info)
     {
-        FleetManager.DestroyAllFleetsOfDisconnectedPlayers(player);
+        if (!info.sender.isMasterClient)
+        {
+            return;
+        }
+
+        FleetManager.DestroyAllFleetsOfDisconnectedPlayers(playerID);
     }
     #endregion
 
@@ -129,8 +174,8 @@ public class GameController : Photon.MonoBehaviour
     {
         FleetManager.ResetMovementOfAllFleets();
         TileManager.ResetAllTiles();
-        InputManager.ResetMovementArea();
-        InputManager.RemoveMouseEvents();
+        //InputManager.ResetMovementArea();
+        //InputManager.RemoveMouseEvents();
 
         photonView.RPC("NetworkEndTurn", PhotonTargets.MasterClient, PhotonNetwork.player);
     }
@@ -156,7 +201,7 @@ public class GameController : Photon.MonoBehaviour
             return;
         }
 
-        InputManager.AddMouseEvents();
+        //InputManager.AddMouseEvents();
     }
 
     private PhotonPlayer CheckTurnOwner(PhotonPlayer lastPlayer)
@@ -201,6 +246,7 @@ public class GameController : Photon.MonoBehaviour
     private void Init()
     {
         var managerObject = GameObject.FindGameObjectWithTag(Tags.Manager);
+        PlayerManager = managerObject.GetComponent<PlayerManager>();
         TileManager = managerObject.GetComponent<TileManager>();
         FleetManager = managerObject.GetComponent<FleetManager>();
         InputManager = managerObject.GetComponent<InputManager>();

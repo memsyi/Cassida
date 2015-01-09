@@ -6,75 +6,83 @@ public enum FleetType
     Fast = 2
 }
 
-public class Fleet
+public class FleetValues
 {
-    private PhotonPlayer _player;
+    public FleetType FleetType { get; private set; }
 
-    public PhotonPlayer Player
+    public FleetValues(FleetType fleetType)
     {
-        get { return _player; }
-        private set
-        {
-            _player = value;
-            var color = (Vector3)Player.customProperties[PlayerProperties.Color];
-            FleetController.Color = new Color(color.x, color.y, color.z);
-        }
+        FleetType = fleetType;
     }
+}
 
-    private FleetType _fleetType;
-
+public class Fleet// : IJSON
+{
     public int ID { get; private set; }
-
-    public Vector3 Position
-    {
-        get
-        {
-            return FleetParent.position;
-        }
-        set
-        {
-            FleetController.MoveFleet(value);
-        }
-    }
-
-    public int MovementPointsLeft { get; set; }
-
-    public bool AllowRotation { get; set; }
+    public Player Player { get; private set; }
+    public Vector2 Position { get; private set; }
+    public FleetValues FleetValues { get; private set; }
 
     public Transform FleetParent { get; private set; }
-    
-    public FleetType FleetType
-    {
-        get
-        {
-            return _fleetType;
-        }
-        private set
-        {
-            _fleetType = value;
-            FleetController.Type = FleetType;
-        }
-    }
-    public Unit[] Units { get; set; }
-
     public FleetController FleetController { get; private set; }
+    public Unit[] Units { get; private set; }
 
-    public Fleet(int id, PhotonPlayer player, Transform fleetParent, FleetType fleetType, Unit[] units)
+    public int MovementPointsLeft { get; set; }
+    public bool AllowRotation { get; set; }
+
+    //public PhotonPlayer Player
+    //{
+    //    get { return _player; }
+    //    private set
+    //    {
+    //        _player = value;
+
+    //        var color = (Vector3)value.customProperties[PlayerProperties.Color];
+    //        FleetController.Color = new Color(color.x, color.y, color.z);
+    //    }
+    //}
+
+    //public Vector3 Position
+    //{
+    //    get
+    //    {
+    //        return FleetParent.position;
+    //    }
+    //    set
+    //    {
+    //        FleetController.MoveFleet(value);
+    //    }
+    //}
+
+    //public FleetType FleetType
+    //{
+    //    get
+    //    {
+    //        return _fleetType;
+    //    }
+    //    private set
+    //    {
+    //        _fleetType = value;
+    //        FleetController.Type = FleetType;
+    //    }
+    //}
+
+    public Fleet(int id, Player player, Vector2 position, FleetValues fleetValues, Transform fleetParent)//, Unit[] units)
     {
         // Fleet object and controller must be first!
         FleetParent = fleetParent;
         FleetController = FleetParent.gameObject.AddComponent<FleetController>();
+        Units = new Unit[6];
 
         ID = id;
-        FleetType = fleetType; // Type befor player
         Player = player;
-        Units = units;
+        FleetValues = fleetValues; // Flotte instattiieren!!!
 
         ResetMovementRotationAndAttack();
         AllowRotation = true;
     }
 
-    public void MoveFleet(Vector3 target)
+    public void MoveFleet(Vector2 target)
     {
         if (MovementPointsLeft == 0)
         {
@@ -82,6 +90,7 @@ public class Fleet
         }
 
         Position = target;
+        // TODO movement an Controller weitergeben
 
         MovementPointsLeft--;
     }
@@ -94,40 +103,28 @@ public class Fleet
 
         FleetController.RotateFleet(rotationDirection);
 
-        var newUnitPositions = new Unit[6];
-
-        for (int i = 0; i < newUnitPositions.Length; i++)
         {
-            if (rotationDirection < 0)
+            var newUnitPositions = new Unit[6];
+            for (int i = 0; i < newUnitPositions.Length; i++)
             {
-                if (i < 5)
+                if (rotationDirection < 0)
                 {
-                    newUnitPositions[i] = Units[i + 1];
+                    if (i < 5) { newUnitPositions[i] = Units[i + 1]; }
+                    else { newUnitPositions[5] = Units[0]; }
                 }
                 else
                 {
-                    newUnitPositions[5] = Units[0];
+                    if (i > 0) { newUnitPositions[i] = Units[i - 1]; }
+                    else { newUnitPositions[0] = Units[5]; }
                 }
             }
-            else
-            {
-                if (i > 0)
-                {
-                    newUnitPositions[i] = Units[i - 1];
-                }
-                else
-                {
-                    newUnitPositions[0] = Units[5];
-                }
-            }
+            Units = newUnitPositions;
         }
-
-        Units = newUnitPositions;
     }
 
     public void ResetMovementRotationAndAttack()
     {
-        MovementPointsLeft = FleetType.GetHashCode();
+        MovementPointsLeft = (int)FleetValues.FleetType;
         AllowRotation = true;
 
         foreach (var unit in Units)
@@ -172,6 +169,23 @@ public class Fleet
         FleetController.DestroyFleet(this);
         return false;
     }
+
+    //public JSONObject ToJSON()
+    //{
+    //    var o = JSONObject.obj;
+
+    //    o["ID"] = new JSONObject(ID);
+    //    o["Player"] = new JSONObject(Player.ToJSON());
+    //    o["Position"] = Position.ToJSON();
+    //    o["Type"] = new JSONObject((int)FleetType);
+        
+    //    return o;
+    //}
+
+    //public void FromJSON(JSONObject o)
+    //{
+    //    throw new System.NotImplementedException();
+    //}
 }
 
 public class FleetController : MonoBehaviour
@@ -193,7 +207,7 @@ public class FleetController : MonoBehaviour
 
     public Color Color
     {
-        get {return _color;}
+        get { return _color; }
         set
         {
             _color = value;

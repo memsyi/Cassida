@@ -71,6 +71,7 @@ GameObject:
   - 114: {fileID: 11400026}
   - 114: {fileID: 11400032}
   - 114: {fileID: 11400030}
+  - 114: {fileID: 11400036}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Manager
@@ -628,7 +629,6 @@ MonoBehaviour:
     _smothAnimation: 1
     _animationSpeed: 1
     _animationRange: 1
-    _animationFadeOut: 1
     _animatedObjectCount: 4
 --- !u!114 &11400032
 MonoBehaviour:
@@ -666,6 +666,17 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   viewIdField: 0
   instantiationId: -1
+--- !u!114 &11400036
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4acf37f9c12f150489eecf3e6f65b5f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1
