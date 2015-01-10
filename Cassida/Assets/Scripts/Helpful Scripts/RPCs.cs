@@ -8,4 +8,18 @@ public struct RPCs
 
     public const string AddNewFleet = "AddNewFleet";
     public const string AddNewUnit = "AddNewUnit";
+
+    public const string SetPlayerInformation = "SetPlayerInformation";
+
+    public const string AskForEndTurn = "AskForEndTurn";
+    public const string SetCurrentPlayer = "SetCurrentPlayer";
+
+    public const string InstantiateTile = "InstantiateTile";
+
+    public const string AskForMoveFleet = "AskForMoveFleet";
+    public const string MoveFleet = "MoveFleet";
+    public const string AskForRotateFleet = "AskForRotateFleet";
+    public const string RotateFleet = "RotateFleet";
+    public const string AskForAttackFleet = "AskForAttackFleet";
+    public const string AttackFleet = "AttackFleet";
 }

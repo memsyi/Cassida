@@ -89,11 +89,34 @@ public class NetworkManager : MonoBehaviour
 
     private void Start()
     {
+        //Check for Singleton
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+        else if (_instance != this)
+        {
+            Debug.LogError("Second instance!");
+            return;
+        }
+
         Init();
     }
 
     private void Update()
     {
 
+    }
+
+    private static NetworkManager _instance = null;
+    public static NetworkManager Get()
+    {
+        if (_instance == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.Manager);
+            _instance = obj.AddComponent<NetworkManager>();
+        }
+
+        return _instance;
     }
 }

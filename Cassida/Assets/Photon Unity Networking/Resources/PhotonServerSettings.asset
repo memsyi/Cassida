@@ -19,30 +19,28 @@ MonoBehaviour:
   AppID: 0d6f27ca-4d1d-43e7-80ee-81767d4067f4
   PingCloudServersOnAwake: 0
   RpcList:
+  - AddNewFleet
+  - AddNewUnit
+  - AskForEndTurn
+  - AskForNewFleet
+  - AskForNewUnit
   - Chat
-  - DestroyAllFleetsOfDisconnectedPlayers
   - DestroyRpc
   - InstantiateRpc
-  - InstantiateTileParentObject
-  - NetworkAddFleetToWorld
-  - NetworkAddUnitToFleet
-  - NetworkAttackUnitOfFleet
+  - InstantiateTile
   - NetworkClearAndDestroyAllOfDisconnectedPlayers
-  - NetworkEndTurn
-  - NetworkMoveFleet
-  - NetworkRotateFleet
-  - NetworkSetNewTurnOwner
-  - NetworkSetPlayerNumber
   - OnAwakeRPC
   - PickupItemInit
   - PunPickup
   - PunPickupSimple
   - PunRespawn
   - RequestForPickupTimes
-  - NetworkAddPlayerToPlayerList
-  - SendNumber
-  - AddNewFleet
-  - AddNewUnit
-  - AskForNewFleet
-  - AskForNewUnit
+  - SetCurrentPlayer
+  - SetPlayerInformation
+  - AskForAttackFleet
+  - AskForRotateFleet
+  - AttackFleet
+  - MoveFleet
+  - NetworkAttackUnitOfFleet
+  - RotateFleet
   DisableAutoOpenWizard: 0

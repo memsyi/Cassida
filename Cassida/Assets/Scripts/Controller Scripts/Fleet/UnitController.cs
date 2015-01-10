@@ -20,16 +20,7 @@ public class UnitValues
 
 public class Unit
 {
-    private Player _player;
-    public Player Player
-    {
-        get { return _player; }
-        private set
-        {
-            _player = value;
-            UnitController.Color = value.Color;
-        }
-    }
+    public Player Player { get; private set; }
     public UnitValues UnitValues { get; set; }
 
     public Transform UnitParent { get; private set; }
@@ -44,11 +35,10 @@ public class Unit
         UnitController = UnitParent.gameObject.AddComponent<UnitController>();
 
         Player = player;
-        UnitValues = unitValues; // Values befor type
+        UnitValues = unitValues;
 
-        // Flotte instattiieren!!!
-
-        //UnitController.Type = UnitValues.UnitType; // Type befor player
+        UnitController.InstantiateUnit(unitValues.UnitType);
+        UnitController.SetColorOfUnit(player.Color);
     }
 
     public bool CheckWhetherUnitIsAlive()
@@ -66,61 +56,37 @@ public class Unit
 public class UnitController : MonoBehaviour
 {
     #region Object and Instantiation
-    UnitType _type;
-
-    public UnitType Type
-    {
-        get { return _type; }
-        set
-        {
-            _type = value;
-            InstantiateUnit();
-        }
-    }
-
-    private Color _color;
-
-    public Color Color
-    {
-        get { return _color; }
-        set
-        {
-            _color = value;
-            SetColorOfUnit();
-        }
-    }
-
     private Transform UnitObject { get; set; }
 
-    private FleetManager FleetManager { get; set; }
-
-    private void InstantiateUnit()
+    public void InstantiateUnit(UnitType type)
     {
-        switch (Type)
+        var fleetManager = FleetManager.Get();
+
+        switch (type)
         {
             case UnitType.Meele:
-                InstantiateUnitObject(FleetManager.UnitSettings.MeeleUnitObject);
+                InstantiateUnitObject(fleetManager.UnitSettings.MeeleUnitObject, type);
                 break;
             case UnitType.Range:
-                InstantiateUnitObject(FleetManager.UnitSettings.RangeUnitObject);
+                InstantiateUnitObject(fleetManager.UnitSettings.RangeUnitObject, type);
                 break;
             default:
                 break;
         }
     }
 
-    public void InstantiateUnitObject(Transform model)
+    public void InstantiateUnitObject(Transform model, UnitType type)
     {
         // Instantiate unit
         UnitObject = Instantiate(model, transform.position, transform.rotation) as Transform;
 
-        UnitObject.name = "Unit Object: " + Type;
+        UnitObject.name = "Unit Object: " + type;
         UnitObject.SetParent(transform);
     }
 
-    private void SetColorOfUnit()
+    public void SetColorOfUnit(Color color)
     {
-        UnitObject.GetChild(0).renderer.material.color = Color;
+        UnitObject.GetChild(0).renderer.material.color = color;
     }
     #endregion
 
@@ -132,12 +98,7 @@ public class UnitController : MonoBehaviour
 
     private void Init()
     {
-        FleetManager = GameObject.Find(Tags.Manager).GetComponent<FleetManager>();
 
-        if (!FleetManager)
-        {
-            Debug.LogError("MissedComponents!");
-        }
     }
 
     private void Start()

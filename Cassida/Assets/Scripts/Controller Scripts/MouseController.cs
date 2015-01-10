@@ -10,6 +10,7 @@ public delegate void MouseclickHandler();
 
 public class MouseController : MonoBehaviour
 {
+    #region Variables
     [SerializeField]
     private float
         _mouseclickTime = 0.5f,
@@ -27,19 +28,19 @@ public class MouseController : MonoBehaviour
         set { _mouseclickTime = value; }
     }
 
-
     public Vector2 MousePositionOnMap { get { return GetMousePositionOnMap(); } }
 
     private Transform Map { get; set; }
 
     private MouseclickInformation _mouseclickInformation = new MouseclickInformation();
+    #endregion
 
     #region Events
     public event MouseclickHandler
         LeftMousecklickEvent,
         RightMouseclickEvent,
         MiddleMouseclickEvent;
-        
+
     #endregion
 
     private Vector2 GetMousePositionOnMap()
@@ -75,7 +76,6 @@ public class MouseController : MonoBehaviour
                 && Time.time - _mouseclickInformation.DownTime < MouseclickTime
                 && Vector2.Distance(MousePositionOnMap, _mouseclickInformation.DownPosition) < MouseclickDistance)
             {
-                //print(buttonName + " click!");
                 switch (buttonName)
                 {
                     case "Fire1":
@@ -111,16 +111,42 @@ public class MouseController : MonoBehaviour
 
     private void Start()
     {
-        
-    }
+        //Check for Singleton
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+        else if (_instance != this)
+        {
+            Debug.LogError("Second instance!");
+            return;
+        }
 
-    private void Awake()
-    {
         Init();
     }
 
     private void Update()
     {
         CheckForMouseclicks();
+    }
+
+    private static MouseController _instance = null;
+    public static MouseController Get()
+    {
+        if (_instance == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.GameController);
+
+            if (obj.GetComponent<MouseController>() == null)
+            {
+                _instance = obj.AddComponent<MouseController>();
+            }
+            else
+            {
+                _instance = obj.GetComponent<MouseController>();
+            }
+        }
+
+        return _instance;
     }
 }

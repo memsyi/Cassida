@@ -1,6 +1,77 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+public enum TerrainType
+{
+    Empty,
+    Asteroids,
+    Nebula,
+    EnergyField,
+    BlackHole
+}
+
+public enum ObjectiveType
+{
+    Empty,
+    Rubble,
+    Village,
+    Town,
+    TradingStation,
+    Outpost
+}
+
+public class Tile
+{
+    public Vector2 Position { get; private set; }
+    public int FleetID { get; set; }
+    public Transform TileParent { get; private set; }
+
+    public TerrainType TerrainType { get; private set; }
+    public ObjectiveType ObjectiveType { get; private set; }
+
+    public TerrainController TerrainController { get; private set; }
+    public ObjectiveController ObjectiveController { get; private set; }
+
+    public Tile(Vector2 position, Transform tileParent, TerrainType terrain, ObjectiveType objective)
+    {
+        Position = position;
+        TileParent = tileParent;
+        TerrainType = terrain;
+        ObjectiveType = objective;
+
+        SetCorrectTerrain();
+        SetCorrectObjective();
+    }
+
+    private void SetCorrectTerrain()
+    {
+        if (TerrainType == TerrainType.Empty)
+        {
+            return;
+        }
+
+        TerrainController = TileParent.gameObject.AddComponent<TerrainController>();
+        TerrainController.InstantiateTerrain(TerrainType);
+    }
+
+    private void SetCorrectObjective()
+    {
+        if (ObjectiveController)
+        {
+            ObjectiveController.DeletObjective();
+            ObjectiveController = null;
+        }
+
+        if (ObjectiveType == ObjectiveType.Empty)
+        {
+            return;
+        }
+
+        ObjectiveController = TileParent.gameObject.AddComponent<ObjectiveController>();
+        ObjectiveController.InstantiateObjective(ObjectiveType);
+    }
+}
+
 [System.Serializable]
 public class SettingsTileColor
 {
@@ -112,13 +183,13 @@ public class SettingsTileAnimation
 
 public class TileManager : MonoBehaviour
 {
+    #region Variables
     [SerializeField]
     SettingsTileColor _tileColor;
 
     [SerializeField]
     SettingsTileAnimation _tileAnimation;
 
-    #region Variables
     public SettingsTileColor TileColor
     {
         get { return _tileColor; }
@@ -130,40 +201,22 @@ public class TileManager : MonoBehaviour
         set { _tileAnimation = value; }
     }
 
-    // Scripts
-    private PlayerManager PlayerManager { get; set; }
-    private MouseController MouseController { get; set; }
-    private FleetManager FleetManager { get; set; }
-    private MapManager MapManager { get; set; }
-    private MapGenerator MapGenerator { get; set; }
-
-    // Lists
-    public List<Tile> TileList { get; private set; }
-    private List<Fleet> FleetList { get { return FleetManager.FleetList; } }
-
     // Tiles
     public Tile CurrentHighlightedTile { get; private set; }
     public Tile CurrentSelectedTile { get; private set; }
+
+    // Lists
+    public List<Tile> TileList { get; private set; }
+    private List<Fleet> FleetList { get { return FleetManager.Get().FleetList; } }
     #endregion
 
-    private void InitializeMap()
+    public void SelectTile(Tile tile)
     {
-        if (!PhotonNetwork.isMasterClient)
+        if(tile == null)
         {
             return;
         }
 
-        // Generate map
-        MapManager.GenerateMap();
-    }
-
-    public void InitializeWorld()
-    {
-        InitializeMap();
-    }
-
-    public void SelectTile(Tile tile)
-    {
         if (CurrentSelectedTile != null)
         {
             SetTileBorderColor(CurrentSelectedTile, TileColor.DefaultColor);
@@ -171,7 +224,7 @@ public class TileManager : MonoBehaviour
             RemoveCurrentSelectionAnimation();
         }
 
-        if (tile.FleetID > -1 && FleetList.Find(f => f.ID == tile.FleetID).ID == PlayerManager.Player.ID)
+        if (tile.FleetID > -1 && FleetList.Find(f => f.ID == tile.FleetID).ID == PlayerManager.Get().Player.ID)
         {
             CurrentSelectedTile = tile;
             SetTileBorderColor(CurrentSelectedTile, TileColor.MouseOverSelectionColor);
@@ -293,14 +346,14 @@ public class TileManager : MonoBehaviour
     #region Highlight tiles
     private void HighLightNearestTile()
     {
-        if (CurrentHighlightedTile == MapManager.NearestTileToMousePosition)
+        if (CurrentHighlightedTile == MapManager.Get().NearestTileToMousePosition)
         {
             return;
         }
 
         ResetHighlightedTile();
 
-        CurrentHighlightedTile = MapManager.NearestTileToMousePosition;
+        CurrentHighlightedTile = MapManager.Get().NearestTileToMousePosition;
 
         HighlightTile();
     }
@@ -321,7 +374,7 @@ public class TileManager : MonoBehaviour
                 // Enemies fleet (own selected)
                 if (CurrentSelectedTile != null && CurrentHighlightedTile.FleetID > -1)
                 {
-                    if (CheckAttackEnemyFleet())
+                    if (InputManager.Get().CheckAttack(CurrentSelectedTile.FleetID, CurrentHighlightedTile.FleetID))
                     {
                         SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverEnemyFleetColor);
                     }
@@ -334,7 +387,7 @@ public class TileManager : MonoBehaviour
                 else if (CurrentHighlightedTile.FleetID > -1)
                 {
                     var fleet = FleetList.Find(f => f.ID == CurrentHighlightedTile.FleetID);
-                    if (fleet != null && fleet.ID == PlayerManager.Player.ID)
+                    if (fleet != null && fleet.ID == PlayerManager.Get().Player.ID)
                     {
                         SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverFleetColor);
                     }
@@ -379,94 +432,6 @@ public class TileManager : MonoBehaviour
     }
     #endregion
 
-    #region Check Fleets and Units on tiles
-    public bool CheckAttackEnemyFleet()
-    {
-        if (CurrentHighlightedTile == null || !FleetList.Exists(f => f.ID == CurrentHighlightedTile.FleetID) || FleetList.Find(f => f.ID == CurrentHighlightedTile.FleetID).ID == PlayerManager.Player.ID)
-        {
-            return false;
-        }
-
-        var unitDirection = GetOwnUnitInDirection();
-
-        if (unitDirection < 0)
-        {
-            return false;
-        }
-
-        var ownFleet = FleetList.Find(f => f.ID == CurrentSelectedTile.FleetID);
-        var enemyFleet = FleetList.Find(f => f.ID == CurrentHighlightedTile.FleetID);
-        var ownUnit = ownFleet.Units[unitDirection];
-
-        if (ownUnit == null)
-        {
-            return false;
-        }
-
-        if (ownUnit.UnitController == null)// || ownUnit.AllowAttack == false) FUNktionier nicht nicht.. Angriffe funktionieren nicht mehr!!
-        {
-            return false;
-        }
-
-        var distanceBetweenFleets = Vector3.Distance(ownFleet.Position, enemyFleet.Position);
-
-        if (ownUnit.UnitValues.UnitType == UnitType.Meele
-            && distanceBetweenFleets <= 2)
-        {
-            return true;
-        }
-        else if (ownUnit.UnitValues.UnitType == UnitType.Range
-            && distanceBetweenFleets > 2 && distanceBetweenFleets <= 4)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    public int GetOwnUnitInDirection()
-    {
-        var ownFleetPosition = CurrentSelectedTile.Position;
-        var enemyFleetPosition = CurrentHighlightedTile.Position;
-
-        if (enemyFleetPosition.x == ownFleetPosition.x)
-        {
-            if (enemyFleetPosition.y > ownFleetPosition.y)
-            {
-                return 0;
-            }
-
-            return 3;
-        }
-        else if (enemyFleetPosition.y == ownFleetPosition.y)
-        {
-            if (enemyFleetPosition.x > ownFleetPosition.x)
-            {
-                return 1;
-            }
-
-            return 4;
-        }
-        else
-        {
-            if (enemyFleetPosition.x < ownFleetPosition.x
-                && enemyFleetPosition.y > ownFleetPosition.y
-                && (enemyFleetPosition.x - ownFleetPosition.x) - (enemyFleetPosition.y - ownFleetPosition.y) == 0)
-            {
-                return 5;
-            }
-            else if (enemyFleetPosition.x > ownFleetPosition.x
-                && enemyFleetPosition.y < ownFleetPosition.y
-                && (enemyFleetPosition.x + ownFleetPosition.x) - (enemyFleetPosition.y + ownFleetPosition.y) == 0)
-            {
-                return 2;
-            }
-        }
-
-        return -1;
-    }
-    #endregion
-
     private void SetTileBorderColor(Tile tile, Color color)
     {
         if (tile == null)
@@ -480,37 +445,36 @@ public class TileManager : MonoBehaviour
     private void AddMouseEvents()
     {
         // Add events
-        MouseController.LeftMousecklickEvent += new MouseclickHandler(ResetHighlightedTile);
-        MouseController.RightMouseclickEvent += new MouseclickHandler(ResetHighlightedTile);
+        MouseController.Get().LeftMousecklickEvent += new MouseclickHandler(ResetHighlightedTile);
+        MouseController.Get().RightMouseclickEvent += new MouseclickHandler(ResetHighlightedTile);
     }
 
     private void Init()
-    {
-        PlayerManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<PlayerManager>();
-        MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
-        FleetManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<FleetManager>();
-        MapManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<MapManager>();
-        MapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
-
-        if (!MouseController || !MapManager || !MapGenerator)
-        {
-            Debug.LogError("MissedComponents!");
-        }
-    }
-
-    private void Start()
     {
         TileList = new List<Tile>();
 
         for (int i = 0; i < TileAnimation.AnimatedObjectCount; i++)
         {
-            TileAnimation.SelectionObjects.Add(Instantiate(MapGenerator.TileParent) as Transform);
+            var tileAnimationObject = Instantiate(MapGenerator.Get().TileParent) as Transform;
+
+            TileAnimation.SelectionObjects.Add(tileAnimationObject);
             TileAnimation.SelectionObjects[i].gameObject.SetActive(false);
         }
     }
 
-    private void Awake()
+    private void Start()
     {
+        //Check for Singleton
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+        else if (_instance != this)
+        {
+            Debug.LogError("Second instance!");
+            return;
+        }
+
         Init();
     }
 
@@ -523,5 +487,17 @@ public class TileManager : MonoBehaviour
         {
             AnimateSelection();
         }
+    }
+
+    private static TileManager _instance = null;
+    public static TileManager Get()
+    {
+        if (_instance == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.Manager);
+            _instance = obj.AddComponent<TileManager>();
+        }
+
+        return _instance;
     }
 }

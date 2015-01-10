@@ -76,10 +76,13 @@ public class Fleet// : IJSON
 
         ID = id;
         Player = player;
-        FleetValues = fleetValues; // Flotte instattiieren!!!
+        FleetValues = fleetValues;
 
         ResetMovementRotationAndAttack();
         AllowRotation = true;
+
+        FleetController.InstantiateFleet(fleetValues.FleetType);
+        FleetController.SetColorOfFleet(player.Color);
     }
 
     public void MoveFleet(Vector2 target)
@@ -191,62 +194,37 @@ public class Fleet// : IJSON
 public class FleetController : MonoBehaviour
 {
     #region Object and Instantiation
-    private FleetType _type;
-
-    public FleetType Type
-    {
-        get { return _type; }
-        set
-        {
-            _type = value;
-            InstantiateFleet();
-        }
-    }
-
-    private Color _color;
-
-    public Color Color
-    {
-        get { return _color; }
-        set
-        {
-            _color = value;
-            SetColorOfFleet();
-        }
-    }
-
     private Transform FleetObject { get; set; }
 
-    // Scripts
-    private FleetManager FleetManager { get; set; }
-
-    private void InstantiateFleet()
+    public void InstantiateFleet(FleetType type)
     {
-        switch (Type)
+        var fleetManager = FleetManager.Get();
+
+        switch (type)
         {
             case FleetType.Slow:
-                InstantiateFleetObject(FleetManager.FleetSettings.SlowFleetObject);
+                InstantiateFleetObject(fleetManager.FleetSettings.SlowFleetObject, type);
                 break;
             case FleetType.Fast:
-                InstantiateFleetObject(FleetManager.FleetSettings.FastFleetObject);
+                InstantiateFleetObject(fleetManager.FleetSettings.FastFleetObject, type);
                 break;
             default:
                 break;
         }
     }
 
-    private void InstantiateFleetObject(Transform model)
+    private void InstantiateFleetObject(Transform model, FleetType type)
     {
         // Instantiate fleet
         FleetObject = Instantiate(model, transform.position, transform.rotation) as Transform;
 
-        FleetObject.name = "Fleet Object: " + Type;
+        FleetObject.name = "Fleet Object: " + type;
         FleetObject.SetParent(transform);
     }
 
-    private void SetColorOfFleet()
+    public void SetColorOfFleet(Color color)
     {
-        FleetObject.GetChild(0).renderer.material.color = Color;
+        FleetObject.GetChild(0).renderer.material.color = color;
     }
     #endregion
 
@@ -323,17 +301,12 @@ public class FleetController : MonoBehaviour
 
     public void DestroyFleet(Fleet fleet)
     {
-        FleetManager.DestroyFleet(fleet);
+        FleetManager.Get().DestroyFleet(fleet);
     }
 
     private void Init()
     {
-        FleetManager = GameObject.Find(Tags.Manager).GetComponent<FleetManager>();
 
-        if (!FleetManager)
-        {
-            Debug.LogError("MissedComponents!");
-        }
     }
 
     private void Start()

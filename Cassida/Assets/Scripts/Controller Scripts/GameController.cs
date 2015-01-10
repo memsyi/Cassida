@@ -10,38 +10,19 @@ public struct PlayerProperties
 [RequireComponent(typeof(PhotonView))]
 public class GameController : Photon.MonoBehaviour
 {
-    // Scripts
-    //WorldManager WorldManager { get; set; }
-    private PlayerManager PlayerManager { get; set; }
-    private TileManager TileManager { get; set; }
-    private FleetManager FleetManager { get; set; }
-    private InputManager InputManager { get; set; }
-
-    private List<PhotonPlayer> PlayerList { get; set; }
-    private PhotonPlayer TurnOwner { get; set; }
-    //private int PlayerNumber { get; set; }
-
     private void StartGame()
     {
         if (PhotonNetwork.isMasterClient)
         {
-            SetPlayerPropertiesAndAddToList(PhotonNetwork.player, Color.red);
-            TurnOwner = PhotonNetwork.player;
-            //InputManager.AddMouseEvents();
+            PlayerManager.Get().AddPlayerInformation(PhotonNetwork.player, "master", Color.red);
+            PlayerManager.Get().SetCurrentPlayer(PhotonNetwork.player);
         }
 
-        TileManager.InitializeWorld();
+        WorldManager.Get().InitializeWorld();
 
-        FleetManager.InstantiateStartFleets();
-
+        FleetManager.Get().InstantiateStartFleets();
 
         //print(FleetManager.ToJSON().print());
-    }
-
-    [RPC]
-    private void SendNumber(int i)
-    {
-        print(i);
     }
 
     private void OnJoinedRoom()
@@ -57,26 +38,7 @@ public class GameController : Photon.MonoBehaviour
             return;
         }
 
-        // Set player number
-        SetPlayerPropertiesAndAddToList(newPlayer, Color.blue);
-
-        // Add all players to player list
-        foreach (var player in PlayerList)
-        {
-            photonView.RPC("NetworkAddPlayerToPlayerList", PhotonTargets.All, player);
-        }
-
-        // Instantiate map at player
-        var mapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
-        mapGenerator.InstatiateAllExistingTilesAtPlayer(newPlayer);
-
-        // Instatiate fleets at player
-        FleetManager.InstatiateAllExistingFleetsAtPlayer(newPlayer);
-
-        for (int i = 0; i < 100; i++)
-        {
-            photonView.RPC("SendNumber", PhotonTargets.All, i);
-        }
+        PlayerManager.Get().AddPlayerInformation(newPlayer, "new player", Color.blue);
     }
 
     //private JSONObject ToJSON()
@@ -101,35 +63,6 @@ public class GameController : Photon.MonoBehaviour
     //{
     //    size = (float)x["size"];
     //}
-
-    private void SetPlayerPropertiesAndAddToList(PhotonPlayer player, Color color)
-    {
-        if (!PhotonNetwork.isMasterClient)
-        {
-            return;
-        }
-
-        // Add player number
-        var playerProperties = new ExitGames.Client.Photon.Hashtable();
-        playerProperties.Add(PlayerProperties.Number, PhotonNetwork.playerList.Length);
-        playerProperties.Add(PlayerProperties.Color, new Vector3(color.r, color.g, color.b));
-
-        player.SetCustomProperties(playerProperties);
-
-        // Add to list
-        PlayerList.Add(player);
-    }
-
-    [RPC]
-    private void NetworkAddPlayerToPlayerList(PhotonPlayer player)
-    {
-        if (PlayerList.Exists(p => p == player))
-        {
-            return;
-        }
-
-        PlayerList.Add(player);
-    }
     #endregion
 
     #region Player disconnect
@@ -144,10 +77,10 @@ public class GameController : Photon.MonoBehaviour
 
         if (!playerList.Exists(p => p == photonPlayer))
         {
-            NetworkEndTurn(photonPlayer);
+            PlayerManager.Get().EndTurn();
         }
 
-        var player = PlayerManager.PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
+        var player = PlayerManager.Get().PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
 
         photonView.RPC("NetworkClearAndDestroyAllOfDisconnectedPlayers", PhotonTargets.All, player);
     }
@@ -160,7 +93,7 @@ public class GameController : Photon.MonoBehaviour
             return;
         }
 
-        FleetManager.DestroyAllFleetsOfDisconnectedPlayers(playerID);
+        FleetManager.Get().DestroyAllFleetsOfDisconnectedPlayers(playerID);
     }
     #endregion
 
@@ -169,106 +102,60 @@ public class GameController : Photon.MonoBehaviour
         Application.LoadLevel(Application.loadedLevelName);
     }
 
-    #region End turn
-    public void EndOwnTurn()
-    {
-        FleetManager.ResetMovementOfAllFleets();
-        TileManager.ResetAllTiles();
-        //InputManager.ResetMovementArea();
-        //InputManager.RemoveMouseEvents();
-
-        photonView.RPC("NetworkEndTurn", PhotonTargets.MasterClient, PhotonNetwork.player);
-    }
-
-    [RPC]
-    private void NetworkEndTurn(PhotonPlayer lastPlayer)
-    {
-        if (!PhotonNetwork.isMasterClient)
-        {
-            return;
-        }
-
-        photonView.RPC("NetworkSetNewTurnOwner", PhotonTargets.All, CheckTurnOwner(lastPlayer));
-    }
-
-    [RPC]
-    private void NetworkSetNewTurnOwner(PhotonPlayer nextPlayer)
-    {
-        TurnOwner = nextPlayer;
-
-        if (PhotonNetwork.player != nextPlayer)
-        {
-            return;
-        }
-
-        //InputManager.AddMouseEvents();
-    }
-
-    private PhotonPlayer CheckTurnOwner(PhotonPlayer lastPlayer)
-    {
-        PhotonPlayer nextPlayer = null;
-        var nextPlayerNumber = (int)lastPlayer.customProperties[PlayerProperties.Number] + 1;
-
-        while (nextPlayer == null)
-        {
-            if (nextPlayerNumber > PlayerList.Count)
-            {
-                nextPlayerNumber = 1;
-            }
-
-            var playerList = new List<PhotonPlayer>(PhotonNetwork.playerList);
-
-            var possiblePlayer = PlayerList.Find(p => playerList.Exists(pp => pp == p) && (int)p.customProperties[PlayerProperties.Number] == nextPlayerNumber );
-
-            if (possiblePlayer != null)
-            {
-                nextPlayer = possiblePlayer;
-            }
-
-            nextPlayerNumber++;
-        }
-
-        return nextPlayer;
-    }
-    #endregion
-
     private void OnGUI()
     {
-        if (PhotonNetwork.player == TurnOwner)
+        if (PhotonNetwork.player == PlayerManager.Get().CurrentPlayer.PhotonPlayer)
         {
             if (GUI.Button(new Rect(100, 0, 100, 20), "EndTurn"))
             {
-                EndOwnTurn();
+                PlayerManager.Get().EndTurn();
             }
         }
     }
 
     private void Init()
     {
-        var managerObject = GameObject.FindGameObjectWithTag(Tags.Manager);
-        PlayerManager = managerObject.GetComponent<PlayerManager>();
-        TileManager = managerObject.GetComponent<TileManager>();
-        FleetManager = managerObject.GetComponent<FleetManager>();
-        InputManager = managerObject.GetComponent<InputManager>();
 
-        if (!TileManager || !FleetManager || !InputManager)
-        {
-            Debug.LogError("MissedComponents!");
-        }
     }
 
     private void Start()
     {
-        PlayerList = new List<PhotonPlayer>();
-    }
+        //Check for Singleton
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+        else if (_instance != this)
+        {
+            Debug.LogError("Second instance!");
+            return;
+        }
 
-    private void Awake()
-    {
         Init();
     }
 
     private void Update()
     {
 
+    }
+
+    private static GameController _instance = null;
+    public static GameController Get()
+    {
+        if (_instance == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.GameController);
+
+            if (obj.GetComponent<GameController>() == null)
+            {
+                _instance = obj.AddComponent<GameController>();
+            }
+            else
+            {
+                _instance = obj.GetComponent<GameController>();
+            }
+        }
+
+        return _instance;
     }
 }

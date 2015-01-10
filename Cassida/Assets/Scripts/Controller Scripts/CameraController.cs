@@ -251,6 +251,7 @@ public class SettingsCameraSettings
 
 public class CameraController : MonoBehaviour
 {
+    #region Variables
     [SerializeField]
     private SettingsCameraControlls _cameraControlls;
 
@@ -298,6 +299,7 @@ public class CameraController : MonoBehaviour
         get { return _cameraSettings; }
         set { _cameraSettings = value; }
     }
+    #endregion
 
     private void HandleUserInput()
     {
@@ -769,16 +771,43 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
-        
-    }
+        //Check for Singleton
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+        else if (_instance != this)
+        {
+            Debug.LogError("Second instance!");
+            return;
+        }
 
-    private void Awake()
-    {
         Init();
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        HandleUserInput();
+        HandleKeyboardInput();
+        HandleMouseInput();
+    }
+
+    private static CameraController _instance = null;
+    public static CameraController Get()
+    {
+        if (_instance == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.MainCamera);
+
+            if (obj.GetComponent<CameraController>() == null)
+            {
+                _instance = obj.AddComponent<CameraController>();
+            }
+            else
+            {
+                _instance = obj.GetComponent<CameraController>();
+            }
+        }
+
+        return _instance;
     }
 }

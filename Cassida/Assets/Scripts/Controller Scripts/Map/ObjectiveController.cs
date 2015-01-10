@@ -3,28 +3,13 @@
 public class ObjectiveController : MonoBehaviour
 {
     #region Object and Instantiation
-    private ObjectiveType _type;
-
-    public ObjectiveType Type
-    {
-        get
-        {
-            return _type;
-        }
-        set
-        {
-            _type = value;
-            InstantiateObjective();
-        }
-    }
-
     private Transform ObjectiveObject { get; set; }
 
-    private void InstantiateObjective()
+    public void InstantiateObjective(ObjectiveType type)
     {
-        var mapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
+        var mapGenerator = MapGenerator.Get();
 
-        switch (Type)
+        switch (type)
         {
             case ObjectiveType.Rubble:
                 break;
@@ -41,12 +26,12 @@ public class ObjectiveController : MonoBehaviour
         }
     }
 
-    public void InstantiateObjectiveObject(Transform model)
+    private void InstantiateObjectiveObject(Transform model, ObjectiveType type)
     {
         // Instantiate objective
         ObjectiveObject = Instantiate(model, transform.position, Quaternion.identity) as Transform;
 
-        ObjectiveObject.name = "Objective: " + Type;
+        ObjectiveObject.name = "Objective: " + type;
         ObjectiveObject.SetParent(transform);
     }
 

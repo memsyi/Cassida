@@ -8,13 +8,14 @@ public enum MapForms { Hexagon, CuttedDiamond, Diamond }
 [RequireComponent(typeof(PhotonView))]
 public class MapGenerator : Photon.MonoBehaviour
 {
+    #region Variables
     [SerializeField]
     private EdgeLength _bottomEdgeLength = EdgeLength.Fife;
 
     [SerializeField]
     private MapForms _mapForm = MapForms.Hexagon;
 
-    [SerializeField]
+    [SerializeField] // TODO struct !! [Serialize..]
     private Transform
         _tileParent = null,
         _asteroidsTerrain = null;
@@ -32,9 +33,6 @@ public class MapGenerator : Photon.MonoBehaviour
     }
     #endregion
 
-    private TileManager TileManager { get; set; }
-
-    #region Variables
     private MapForms MapForm
     {
         get { return _mapForm; }
@@ -46,10 +44,18 @@ public class MapGenerator : Photon.MonoBehaviour
         get { return (int)_bottomEdgeLength; }
         set { _bottomEdgeLength = (EdgeLength)value; }
     }
+
+    // Lists
+    List<Tile> TileList { get { return TileManager.Get().TileList; } }
     #endregion
 
     public void GenerateMap()
     {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
         if (MapForm == MapForms.CuttedDiamond)
         {
             BottomEdgeLength = BottomEdgeLength - BottomEdgeLength / 2 + 1;
@@ -69,7 +75,7 @@ public class MapGenerator : Photon.MonoBehaviour
                  || MapForm == MapForms.Diamond)
                 {
                     Vector2 position = new Vector2(x, y);
-                    photonView.RPC("InstantiateTileParentObject", PhotonTargets.All, position, CalculateTerrainType().GetHashCode(), CalculateObjectiveType().GetHashCode());
+                    photonView.RPC(RPCs.InstantiateTile, PhotonTargets.All, position, (int)CalculateTerrainType(), (int)CalculateObjectiveType());
                 }
             }
         }
@@ -77,15 +83,25 @@ public class MapGenerator : Photon.MonoBehaviour
 
     public void InstatiateAllExistingTilesAtPlayer(PhotonPlayer player)
     {
-        foreach (var tile in TileManager.TileList)
+        if (!PhotonNetwork.isMasterClient)
         {
-            photonView.RPC("InstantiateTileParentObject", player, tile.Position, tile.TerrainType.GetHashCode(), tile.ObjectiveType.GetHashCode());
+            return;
+        }
+
+        foreach (var tile in TileManager.Get().TileList)
+        {
+            photonView.RPC(RPCs.InstantiateTile, player, tile.Position, tile.TerrainType.GetHashCode(), tile.ObjectiveType.GetHashCode());
         }
     }
 
     [RPC]
-    private void InstantiateTileParentObject(Vector2 position, int terrainType, int objectiveType)
+    private void InstantiateTile(Vector2 position, int terrainType, int objectiveType, PhotonMessageInfo info)
     {
+        if (!info.sender.isMasterClient || TileList.Exists(t => t.Position == position))
+        {
+            return;
+        }
+
         // Instantiate tile
         var tileObject = Instantiate(
             TileParent,
@@ -94,10 +110,10 @@ public class MapGenerator : Photon.MonoBehaviour
             Quaternion.identity) as Transform;
 
         tileObject.name = position.ToString();
-        tileObject.renderer.material.color = TileManager.TileColor.DefaultColor;
+        tileObject.renderer.material.color = TileManager.Get().TileColor.DefaultColor;
         tileObject.SetParent(this.transform);
 
-        TileManager.TileList.Add(new Tile(position, tileObject, (TerrainType)terrainType, (ObjectiveType)objectiveType));
+        TileList.Add(new Tile(position, tileObject, (TerrainType)terrainType, (ObjectiveType)objectiveType));
     }
 
     private TerrainType CalculateTerrainType()
@@ -119,21 +135,48 @@ public class MapGenerator : Photon.MonoBehaviour
 
     private void Init()
     {
-        TileManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<TileManager>();
+
     }
 
     private void Start()
     {
+        //Check for Singleton
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+        else if (_instance != this)
+        {
+            Debug.LogError("Second instance!");
 
-    }
+            return;
+        }
 
-    private void Awake()
-    {
         Init();
     }
 
     private void Update()
     {
 
+    }
+
+    private static MapGenerator _instance = null;
+    public static MapGenerator Get()
+    {
+        if (_instance == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.Map);
+
+            if (obj.GetComponent<MapGenerator>() == null)
+            {
+                _instance = obj.AddComponent<MapGenerator>();
+            }
+            else
+            {
+                _instance = obj.GetComponent<MapGenerator>();
+            }
+        }
+
+        return _instance;
     }
 }

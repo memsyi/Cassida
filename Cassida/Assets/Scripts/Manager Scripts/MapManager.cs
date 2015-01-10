@@ -1,111 +1,30 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public enum TerrainType
-{
-    Empty,
-    Asteroids,
-    Nebula,
-    EnergyField,
-    BlackHole
-}
-
-public enum ObjectiveType
-{
-    Empty,
-    Rubble,
-    Village,
-    Town,
-    TradingStation,
-    Outpost
-}
-
-public class Tile
-{
-    public Vector2 Position { get; private set; }
-    public int FleetID { get; set; }
-    public Transform TileParent { get; private set; }
-
-    private TerrainType _terrain;
-    private ObjectiveType _objective;
-
-    public TerrainType TerrainType
-    {
-        get
-        {
-            return _terrain;
-        }
-        private set
-        {
-            _terrain = value;
-            SetCorrectTerrain();
-        }
-    }
-    public ObjectiveType ObjectiveType
-    {
-        get
-        {
-            return _objective;
-        }
-        private set
-        {
-            _objective = value;
-            SetCorrectObjective();
-        }
-    }
-
-    public TerrainController TerrainController { get; private set; }
-    public ObjectiveController ObjectiveController { get; private set; }
-
-    public Tile(Vector2 position, Transform tileParent, TerrainType terrain, ObjectiveType objective)
-    {
-        Position = position;
-        TileParent = tileParent;
-        TerrainType = terrain;
-        ObjectiveType = objective;
-    }
-
-    private void SetCorrectTerrain()
-    {
-        if (TerrainType == TerrainType.Empty)
-        {
-            return;
-        }
-
-        TerrainController = TileParent.gameObject.AddComponent<TerrainController>();
-        //TerrainController.Type = TerrainType;
-    }
-
-    private void SetCorrectObjective()
-    {
-        if (ObjectiveController)
-        {
-            ObjectiveController.DeletObjective();
-            ObjectiveController = null;
-        }
-
-        if (ObjectiveType == ObjectiveType.Empty)
-        {
-            return;
-        }
-
-        ObjectiveController = TileParent.gameObject.AddComponent<ObjectiveController>();
-        //ObjectiveController.Type = ObjectiveType;
-    }
-}
-
 public class MapManager : MonoBehaviour
 {
     #region Variables
+    // Tiles
     public Tile NearestTileToMousePosition { get { return FindNearestTileToMousePosition(); } }
 
-    // Scripts
-    private MouseController MouseController { get; set; }
-    private TileManager TileManager { get; set; } 
-
     // Lists
-    private List<Tile> TileList { get { return TileManager.TileList; } }
+    private List<Tile> TileList { get { return TileManager.Get().TileList; } }
     #endregion
+
+    public void InitializeMap()
+    {
+        GenerateMap();
+    }
+
+    private void GenerateMap()
+    {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
+        MapGenerator.Get().GenerateMap();
+    }
 
     private Tile FindNearestTileToMousePosition()
     {
@@ -114,14 +33,12 @@ public class MapManager : MonoBehaviour
             return null;
         }
 
-        var mousePosition = MouseController.MousePositionOnMap;
-
         var shortestDistance = 1000f;
         Tile nearestTile = null;
 
         foreach (var tile in TileList)
         {
-            var distance = Vector2.Distance(mousePosition, new Vector2(tile.TileParent.position.x, tile.TileParent.position.z));
+            var distance = Vector2.Distance(MouseController.Get().MousePositionOnMap, new Vector2(tile.TileParent.position.x, tile.TileParent.position.z));
 
             if (distance < shortestDistance)
             {
@@ -133,42 +50,41 @@ public class MapManager : MonoBehaviour
         return nearestTile;
     }
 
-    public void GenerateMap()
-    {
-        var mapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
-
-        if (!mapGenerator)
-        {
-            Debug.LogError("Add MapGenerator to Map object");
-            return;
-        }
-
-        mapGenerator.GenerateMap();
-    }
-
     private void Init()
     {
-        MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
-        TileManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<TileManager>();
 
-        if (!MouseController || !TileManager)
-        {
-            Debug.LogError("MissedComponents!");
-        }
     }
 
     private void Start()
     {
+        //Check for Singleton
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+        else if (_instance != this)
+        {
+            Debug.LogError("Second instance!");
+            return;
+        }
 
-    }
-
-    private void Awake()
-    {
         Init();
     }
 
     private void Update()
     {
 
+    }
+
+    private static MapManager _instance = null;
+    public static MapManager Get()
+    {
+        if (_instance == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.Manager);
+            _instance = obj.AddComponent<MapManager>();
+        }
+
+        return _instance;
     }
 }
