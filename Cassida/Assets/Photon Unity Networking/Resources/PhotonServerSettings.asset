@@ -43,4 +43,5 @@ MonoBehaviour:
   - MoveFleet
   - NetworkAttackUnitOfFleet
   - RotateFleet
+  - AskForMoveFleet
   DisableAutoOpenWizard: 0

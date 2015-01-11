@@ -8,7 +8,7 @@ public struct Player
     public string Name { get; private set; }
     public Color Color { get; private set; }
 
-    public Player(int id, PhotonPlayer photonPlayer, string name, Color color)
+    public Player(int id, PhotonPlayer photonPlayer, string name, Color color) : this()
     {
         ID = id;
         PhotonPlayer = photonPlayer;
@@ -56,7 +56,7 @@ public class PlayerManager : Photon.MonoBehaviour
             MapGenerator.Get().InstatiateAllExistingTilesAtPlayer(player);
 
             // Instatiate fleets at player
-            FleetManager.Get().InstatiateAllExistingFleetsAtPlayer(player);
+            FleetManager.Get().InstantiateAllExistingFleetsAtPlayer(player);
         }
 
         if (PhotonNetwork.player != player || Player.PhotonPlayer != null)

@@ -65,25 +65,31 @@ public class InputManager : Photon.MonoBehaviour
         if (targetTile.FleetID > -1)
         {
             // Attack 
-            AttackEnemyFleet(CurrentSelectedTile.FleetID, targetTile.FleetID);
+            AttackFleet(CurrentSelectedTile.FleetID, targetTile.FleetID);
             return;
         }
 
-        // Move fleet
         if (MoveableTileList.Exists(t => t == targetTile))
         {
-            MoveFleet(CurrentSelectedTile.FleetID, targetTile.Position);
+            // Move fleet
+            MoveFleet(CurrentSelectedTile.FleetID, targetTile);
 
             TileManager.Get().SelectTile(targetTile);
         }
     }
 
     #region Movement
-    private void MoveFleet(int fleetID, Vector2 targetTilePosition)
+    private void MoveFleet(int fleetID, Tile targetTile)
     {
-        photonView.RPC(RPCs.AskForMoveFleet, PhotonTargets.MasterClient, fleetID, targetTilePosition);
+        if (fleetID < 0 || targetTile.FleetID > -1)
+        {
+            return;
+        }
+
+        photonView.RPC(RPCs.AskForMoveFleet, PhotonTargets.MasterClient, fleetID, targetTile.Position);
     }
 
+    [RPC]
     private void AskForMoveFleet(int fleetID, Vector2 targetTilePosition, PhotonMessageInfo info)
     {
         if (!PhotonNetwork.isMasterClient || info.sender != PlayerManager.Get().CurrentPlayer.PhotonPlayer)
@@ -93,7 +99,7 @@ public class InputManager : Photon.MonoBehaviour
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet != null || fleet.MovementPointsLeft > 0)
+        if (fleet == null || fleet.MovementPointsLeft <= 0)
         {
             return;
         }
@@ -101,7 +107,8 @@ public class InputManager : Photon.MonoBehaviour
         var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
         var targetTile = TileList.Find(t => t.Position == targetTilePosition);
 
-        if (currentTile == null || targetTile == null || currentTile.FleetID < 0 || targetTile.FleetID > -1)
+        if (currentTile == null || targetTile == null || currentTile.FleetID < 0 || targetTile.FleetID > -1
+            || Vector3.Distance(currentTile.TileParent.position, targetTile.TileParent.position) > 2f)
         {
             return;
         }
@@ -119,7 +126,7 @@ public class InputManager : Photon.MonoBehaviour
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null)
+        if (fleet == null || fleet.MovementPointsLeft <= 0)
         {
             return;
         }
@@ -127,7 +134,8 @@ public class InputManager : Photon.MonoBehaviour
         var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
         var targetTile = TileList.Find(t => t.Position == targetTilePosition);
 
-        if (currentTile == null || targetTile == null || currentTile.FleetID < 0 || targetTile.FleetID > -1)
+        if (currentTile == null || targetTile == null || currentTile.FleetID < 0 || targetTile.FleetID > -1
+            || Vector3.Distance(currentTile.TileParent.position, targetTile.TileParent.position) > 2f)
         {
             return;
         }
@@ -137,16 +145,21 @@ public class InputManager : Photon.MonoBehaviour
 
         fleet.MoveFleet(targetTile.Position);
 
-        if(PlayerManager.Get().CurrentPlayer.PhotonPlayer == PhotonNetwork.player)
+        if (PlayerManager.Get().CurrentPlayer.PhotonPlayer == PhotonNetwork.player)
         {
             CheckShowMovementArea();
         }
-    } 
+    }
     #endregion
 
     #region Rotation
     private void RotateFleet(int fleetID, bool rotateRight = true)
     {
+        if (fleetID < 0)
+        {
+            return;
+        }
+
         photonView.RPC(RPCs.AskForRotateFleet, PhotonTargets.MasterClient, fleetID, rotateRight);
     }
 
@@ -160,7 +173,7 @@ public class InputManager : Photon.MonoBehaviour
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet != null || !fleet.AllowRotation)
+        if (fleet == null || !fleet.AllowRotation)
         {
             return;
         }
@@ -199,13 +212,18 @@ public class InputManager : Photon.MonoBehaviour
 
         var fleet = FleetList.Find(f => f.ID == CurrentSelectedTile.FleetID);
 
+        if (fleet == null)
+        {
+            return;
+        }
+
         if (fleet.MovementPointsLeft > 0)
         {
-            ShowMovementArea();
+            SetMovementArea();
         }
     }
 
-    private void ShowMovementArea()
+    private void SetMovementArea()
     {
         var fleet = FleetList.Find(f => f.ID == CurrentSelectedTile.FleetID);
 
@@ -236,9 +254,9 @@ public class InputManager : Photon.MonoBehaviour
     #endregion
 
     #region Fight
-    private void AttackEnemyFleet(int ownFleetID, int enemyFleetID)
+    private void AttackFleet(int ownFleetID, int enemyFleetID)
     {
-        if (CheckAttack(ownFleetID, enemyFleetID))
+        if (!CheckAttack(ownFleetID, enemyFleetID))
         {
             return;
         }
@@ -254,37 +272,10 @@ public class InputManager : Photon.MonoBehaviour
             return;
         }
 
-        if (CheckAttack(ownFleetID, enemyFleetID))
+        if (!CheckAttack(ownFleetID, enemyFleetID))
         {
             return;
         }
-
-        //var ownUnitDirection = TileManager.Get().GetOwnUnitInDirection();
-        //var enemyUnitDirection = ownUnitDirection < 3 ? ownUnitDirection + 3 : ownUnitDirection - 3;
-
-        //var ownUnit = FleetList.Find(f => f.ID == ownFleetID).Units[ownUnitDirection];
-        //var enemyUnit = FleetList.Find(f => f.ID == enemyFleetID).Units[enemyUnitDirection];
-
-        //if (enemyUnit == null)
-        //{
-        //    for (int i = 0; i < enemyFleet.Units.Length; i++)
-        //    {
-        //        AttackUnitOfFleet(enemyFleetID, i, ownUnitStrength);
-        //    }
-        //}
-        //else
-        //{
-        //    // damage to own
-        //    if (ownUnit.UnitValues.UnitType == enemyUnit.UnitValues.UnitType)
-        //    {
-        //        AttackUnitOfFleet(ownFleetTile.Fleet.ID, ownUnitDirection, enemyUnit.UnitValues.Strength);
-        //    }
-
-        //    // damage to enemy
-        //    AttackUnitOfFleet(enemyFleetTile.Fleet.ID, enemyUnitDirection, ownUnitStrength);
-        //}
-
-        
 
         photonView.RPC(RPCs.AttackFleet, PhotonTargets.All, ownFleetID, enemyFleetID);
     }
@@ -297,24 +288,52 @@ public class InputManager : Photon.MonoBehaviour
             return;
         }
 
-        //ownFleet.MovementPointsLeft = 0;
-        //ResetMovementArea();
-        //ownFleet.AllowRotation = false;
-        //ownUnit.AllowAttack = false;
+        if (!CheckAttack(ownFleetID, enemyFleetID))
+        {
+            return;
+        }
+
+        var ownFleet = FleetList.Find(f => f.ID == ownFleetID);
+        var enemyFleet = FleetList.Find(f => f.ID == enemyFleetID);
+
+        var ownUnitPosition = GetOwnUnitPosition(ownFleet.Position, enemyFleet.Position);
+        var enemyUnitPosition = ownUnitPosition < 3 ? ownUnitPosition + 3 : ownUnitPosition - 3;
+
+        var ownUnit = ownFleet.Units[ownUnitPosition];
+        var enemyUnit = enemyFleet.Units[enemyUnitPosition];
+
+        // damage to all enemy units
+        if (enemyUnit == null)
+        {
+            for (int i = 0; i < enemyFleet.Units.Length; i++)
+            {
+                AttackUnitOfFleet(enemyFleetID, i, ownUnit.UnitValues.Strength);
+            }
+        }
+        else
+        {
+            // damage to own unit
+            if (ownUnit.UnitValues.UnitType == enemyUnit.UnitValues.UnitType)
+            {
+                AttackUnitOfFleet(ownFleet.ID, ownUnitPosition, enemyUnit.UnitValues.Strength);
+            }
+
+            // damage to enemy unit
+            AttackUnitOfFleet(enemyFleet.ID, enemyUnitPosition, ownUnit.UnitValues.Strength);
+        }
+
+        ownFleet.MovementPointsLeft = 0;
+        ownFleet.AllowRotation = false;
+        ownUnit.AllowAttack = false;
 
         if (PlayerManager.Get().CurrentPlayer.PhotonPlayer == PhotonNetwork.player)
         {
+            ResetMovementArea();
             TileManager.Get().ResetHighlightedTile();
         }
     }
 
     private void AttackUnitOfFleet(int fleetID, int unitPosition, int strength)
-    {
-        photonView.RPC("NetworkAttackUnitOfFleet", PhotonTargets.All, fleetID, unitPosition, strength);
-    }
-
-    [RPC]
-    private void NetworkAttackUnitOfFleet(int fleetID, int unitPosition, int strength)
     {
         var fleet = FleetList.Find(f => f.ID == fleetID);
         if (fleet == null)
@@ -335,7 +354,7 @@ public class InputManager : Photon.MonoBehaviour
             return false;
         }
 
-        var unitDirection = GetOwnUnitInDirection(ownFleet.Position, enemyFleet.Position);
+        var unitDirection = GetOwnUnitPosition(ownFleet.Position, enemyFleet.Position);
 
         if (unitDirection < 0)
         {
@@ -370,7 +389,7 @@ public class InputManager : Photon.MonoBehaviour
         return false;
     }
 
-    public int GetOwnUnitInDirection(Vector2 ownFleetPosition, Vector2 enemyFleetPosition)
+    public int GetOwnUnitPosition(Vector2 ownFleetPosition, Vector2 enemyFleetPosition)
     {
         if (enemyFleetPosition.x == ownFleetPosition.x)
         {

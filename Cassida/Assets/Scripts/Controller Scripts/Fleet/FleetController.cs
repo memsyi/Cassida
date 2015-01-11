@@ -93,7 +93,7 @@ public class Fleet// : IJSON
         }
 
         Position = target;
-        // TODO movement an Controller weitergeben
+        FleetController.MoveFleet(target);
 
         MovementPointsLeft--;
     }
@@ -256,9 +256,9 @@ public class FleetController : MonoBehaviour
     private bool Move { get; set; }
     private bool Turn { get; set; }
 
-    public void MoveFleet(Vector3 target)
+    public void MoveFleet(Vector2 target)
     {
-        MovementTarget = target;
+        MovementTarget = TileManager.Get().TileList.Find(t => t.Position == target).TileParent.position;
     }
 
     public void RotateFleet(int rotationDirection)

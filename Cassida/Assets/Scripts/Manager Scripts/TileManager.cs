@@ -35,6 +35,7 @@ public class Tile
     public Tile(Vector2 position, Transform tileParent, TerrainType terrain, ObjectiveType objective)
     {
         Position = position;
+        FleetID = -1;
         TileParent = tileParent;
         TerrainType = terrain;
         ObjectiveType = objective;
@@ -212,32 +213,25 @@ public class TileManager : MonoBehaviour
 
     public void SelectTile(Tile tile)
     {
-        if(tile == null)
-        {
-            return;
-        }
-
         if (CurrentSelectedTile != null)
         {
             SetTileBorderColor(CurrentSelectedTile, TileColor.DefaultColor);
-
             RemoveCurrentSelectionAnimation();
         }
 
-        if (tile.FleetID > -1 && FleetList.Find(f => f.ID == tile.FleetID).ID == PlayerManager.Get().Player.ID)
-        {
-            CurrentSelectedTile = tile;
-            SetTileBorderColor(CurrentSelectedTile, TileColor.MouseOverSelectionColor);
-
-            if (TileAnimation.AllowAnimation)
-            {
-                InitiateSelectionAnimation(tile);
-            }
-        }
-        else
+        if (tile == null || tile.FleetID < 0 || FleetList.Find(f => f.ID == tile.FleetID).Player.ID != PlayerManager.Get().Player.ID)
         {
             CurrentSelectedTile = null;
+            return;
         }
+
+        CurrentSelectedTile = tile;
+        SetTileBorderColor(CurrentSelectedTile, TileColor.MouseOverSelectionColor);
+        if (TileAnimation.AllowAnimation)
+        {
+            InitiateSelectionAnimation(tile);
+        }
+
     }
 
     public void ResetAllTiles()

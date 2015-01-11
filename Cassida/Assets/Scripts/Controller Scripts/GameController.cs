@@ -16,11 +16,13 @@ public class GameController : Photon.MonoBehaviour
         {
             PlayerManager.Get().AddPlayerInformation(PhotonNetwork.player, "master", Color.red);
             PlayerManager.Get().SetCurrentPlayer(PhotonNetwork.player);
+
+            WorldManager.Get().InitializeWorld();
+
+            FleetManager.Get().InstantiateStartFleets();
         }
 
-        WorldManager.Get().InitializeWorld();
-
-        FleetManager.Get().InstantiateStartFleets();
+        
 
         //print(FleetManager.ToJSON().print());
     }
@@ -82,7 +84,7 @@ public class GameController : Photon.MonoBehaviour
 
         var player = PlayerManager.Get().PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
 
-        photonView.RPC("NetworkClearAndDestroyAllOfDisconnectedPlayers", PhotonTargets.All, player);
+        photonView.RPC("NetworkClearAndDestroyAllOfDisconnectedPlayers", PhotonTargets.All, player.ID);
     }
 
     [RPC]
