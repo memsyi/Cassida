@@ -78,7 +78,7 @@ public class FleetManager : Photon.MonoBehaviour //, IJSON
     }
     #endregion
 
-    private void InstantiateNewFleet(Position position, FleetType fleetType, UnitValues[] unitValues)
+    public void InstantiateNewFleet(Position position, FleetType fleetType, UnitValues[] unitValues)
     {
         photonView.RPC(RPCs.AskForNewFleet, PhotonTargets.MasterClient, position.X, position.Y, (int)fleetType);
 
@@ -114,10 +114,6 @@ public class FleetManager : Photon.MonoBehaviour //, IJSON
         }
 
         photonView.RPC(RPCs.AddNewFleet, PhotonTargets.All, HighestFleetID, info.sender, positionX, positionY, fleetType);
-
-#if UNITY_EDITOR
-        Debug.Log("AskForNewFleet" + info.sender.name);
-#endif
     }
 
     [RPC]
@@ -148,9 +144,6 @@ public class FleetManager : Photon.MonoBehaviour //, IJSON
         FleetList.Add(new Fleet(ID, player, position, new FleetValues((FleetType)fleetType), fleetParent));
 
         tile.FleetID = ID;
-#if UNITY_EDITOR
-        Debug.Log("OnAddFleet" + info.sender.name);
-#endif
     }
 
     public void InstantiateAllExistingFleetsAtPlayer(PhotonPlayer photonPlayer)
@@ -197,10 +190,6 @@ public class FleetManager : Photon.MonoBehaviour //, IJSON
         }
 
         photonView.RPC(RPCs.AddNewUnit, PhotonTargets.All, fleetID, position, unitType, strength);
-
-#if UNITY_EDITOR
-        Debug.Log("AskForNewUnit" + info.sender.name);
-#endif
     }
 
     [RPC]
@@ -237,10 +226,6 @@ public class FleetManager : Photon.MonoBehaviour //, IJSON
         fleet.FleetParent.rotation = Quaternion.identity;
 
         fleet.Units[position] = new Unit(fleet.Player, new UnitValues((UnitType)unitType, strength), unitParent);
-
-#if UNITY_EDITOR
-        Debug.Log("AddNewUnit" + info.sender.name);
-#endif
     }
     #endregion
 
@@ -280,7 +265,7 @@ public class FleetManager : Photon.MonoBehaviour //, IJSON
 
     private void OnGUI()
     {
-        if(GUI.Button(new Rect(300, 0, 100, 20), "Add Fleet"))
+        if (GUI.Button(new Rect(300, 0, 100, 20), "Add Fleet"))
         {
             var testUnits = new UnitValues[] { new UnitValues(UnitType.Meele, 1), new UnitValues(UnitType.Range, 1), null, null, null, null };
             InstantiateNewFleet(new Position(0, 0), FleetType.Slow, testUnits);
@@ -294,6 +279,11 @@ public class FleetManager : Photon.MonoBehaviour //, IJSON
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Awake()
+    {
         //Check for Singleton
         if (_instance == null)
         {
@@ -304,8 +294,6 @@ public class FleetManager : Photon.MonoBehaviour //, IJSON
             Debug.LogError("Second instance!");
             return;
         }
-
-        Init();
     }
 
     private void Update()

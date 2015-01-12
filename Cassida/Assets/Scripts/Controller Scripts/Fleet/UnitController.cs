@@ -36,6 +36,7 @@ public class Unit
 
         Player = player;
         UnitValues = unitValues;
+        AllowAttack = true;
 
         UnitController.InstantiateUnit(unitValues.UnitType);
         UnitController.SetColorOfUnit(player.Color);

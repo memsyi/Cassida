@@ -115,6 +115,11 @@ public class GameController : Photon.MonoBehaviour
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Awake()
+    {
         //Check for Singleton
         if (_instance == null)
         {
@@ -125,8 +130,6 @@ public class GameController : Photon.MonoBehaviour
             Debug.LogError("Second instance!");
             return;
         }
-
-        Init();
     }
 
     private void Update()
@@ -139,16 +142,8 @@ public class GameController : Photon.MonoBehaviour
     {
         if (_instance == null)
         {
-            GameObject obj = GameObject.FindGameObjectWithTag(Tags.GameController);
-
-            if (obj.GetComponent<GameController>() == null)
-            {
-                _instance = obj.AddComponent<GameController>();
-            }
-            else
-            {
-                _instance = obj.GetComponent<GameController>();
-            }
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.Manager);
+            _instance = obj.AddComponent<GameController>();
         }
 
         return _instance;

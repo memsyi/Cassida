@@ -57,6 +57,11 @@ public class MapManager : MonoBehaviour
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Awake()
+    {
         //Check for Singleton
         if (_instance == null)
         {
@@ -67,8 +72,6 @@ public class MapManager : MonoBehaviour
             Debug.LogError("Second instance!");
             return;
         }
-
-        Init();
     }
 
     private void Update()

@@ -381,7 +381,7 @@ public class TileManager : MonoBehaviour
                 else if (CurrentHighlightedTile.FleetID > -1)
                 {
                     var fleet = FleetList.Find(f => f.ID == CurrentHighlightedTile.FleetID);
-                    if (fleet != null && fleet.ID == PlayerManager.Get().Player.ID)
+                    if (fleet != null && fleet.Player.ID == PlayerManager.Get().Player.ID)
                     {
                         SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverFleetColor);
                     }
@@ -458,6 +458,11 @@ public class TileManager : MonoBehaviour
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Awake()
+    {
         //Check for Singleton
         if (_instance == null)
         {
@@ -468,8 +473,6 @@ public class TileManager : MonoBehaviour
             Debug.LogError("Second instance!");
             return;
         }
-
-        Init();
     }
 
     private void Update()

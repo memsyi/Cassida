@@ -111,6 +111,11 @@ public class MouseController : MonoBehaviour
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Awake()
+    {
         //Check for Singleton
         if (_instance == null)
         {
@@ -121,8 +126,6 @@ public class MouseController : MonoBehaviour
             Debug.LogError("Second instance!");
             return;
         }
-
-        Init();
     }
 
     private void Update()
@@ -135,16 +138,8 @@ public class MouseController : MonoBehaviour
     {
         if (_instance == null)
         {
-            GameObject obj = GameObject.FindGameObjectWithTag(Tags.GameController);
-
-            if (obj.GetComponent<MouseController>() == null)
-            {
-                _instance = obj.AddComponent<MouseController>();
-            }
-            else
-            {
-                _instance = obj.GetComponent<MouseController>();
-            }
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.Manager);
+            _instance = obj.AddComponent<MouseController>();
         }
 
         return _instance;

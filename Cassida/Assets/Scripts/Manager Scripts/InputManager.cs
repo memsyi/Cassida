@@ -65,7 +65,7 @@ public class InputManager : Photon.MonoBehaviour
         if (targetTile.FleetID > -1)
         {
             // Attack 
-            AttackFleet(CurrentSelectedTile.FleetID, targetTile.FleetID);
+            TryToAttackFleet(CurrentSelectedTile.FleetID, targetTile.FleetID);
             return;
         }
 
@@ -73,8 +73,6 @@ public class InputManager : Photon.MonoBehaviour
         {
             // Move fleet
             TryToMoveFleet(CurrentSelectedTile.FleetID, targetTile.Position);
-
-            TileManager.Get().SelectTile(targetTile);
         }
     }
 
@@ -86,9 +84,12 @@ public class InputManager : Photon.MonoBehaviour
             return;
         }
 
-        photonView.RPC(RPCs.AskForMoveFleet, PhotonTargets.MasterClient, fleetID, targetTilePosition.X, targetTilePosition.Y);
+        if (!PhotonNetwork.isMasterClient)
+        {
+            MoveFleet(fleetID, targetTilePosition);
+        }
 
-        MoveFleet(fleetID, targetTilePosition);
+        photonView.RPC(RPCs.AskForMoveFleet, PhotonTargets.MasterClient, fleetID, targetTilePosition.X, targetTilePosition.Y);
     }
 
     private void MoveFleet(int fleetID, Position targetTilePosition)
@@ -116,6 +117,8 @@ public class InputManager : Photon.MonoBehaviour
         if (PlayerManager.Get().CurrentPlayer.PhotonPlayer == PhotonNetwork.player)
         {
             CheckShowMovementArea();
+
+            TileManager.Get().SelectTile(targetTile);
         }
     }
 
@@ -194,9 +197,12 @@ public class InputManager : Photon.MonoBehaviour
 
         var rotationTarget = FleetList.Find(f => f.ID == fleetID).Rotation + (rotateRight ? 1 : -1);
 
-        photonView.RPC(RPCs.AskForRotateFleet, PhotonTargets.MasterClient, fleetID, rotationTarget);
+        if (!PhotonNetwork.isMasterClient)
+        {
+            RotateFleet(fleetID, rotationTarget);
+        }
 
-        RotateFleet(fleetID, rotationTarget);
+        photonView.RPC(RPCs.AskForRotateFleet, PhotonTargets.MasterClient, fleetID, rotationTarget);
     }
 
     private void RotateFleet(int fleetID, int rotationTarget)
@@ -208,7 +214,7 @@ public class InputManager : Photon.MonoBehaviour
             return; // TODO ask for refresh complete data
         }
 
-        fleet.RotateFleet(rotationTarget);//fleet.Rotation + (rotateRight ? 1 : -1));
+        fleet.RotateFleet(rotationTarget);
     }
 
     private bool CheckRotation(int fleetID)
@@ -317,53 +323,38 @@ public class InputManager : Photon.MonoBehaviour
     #endregion
 
     #region Fight
-    private void AttackFleet(int ownFleetID, int enemyFleetID)
+    private void TryToAttackFleet(int ownFleetID, int enemyFleetID)
     {
         if (!CheckAttack(ownFleetID, enemyFleetID))
         {
             return;
         }
+
+        // TODO start fight animation here
 
         photonView.RPC(RPCs.AskForAttackFleet, PhotonTargets.MasterClient, ownFleetID, enemyFleetID);
     }
 
-    [RPC]
-    private void AskForAttackFleet(int ownFleetID, int enemyFleetID, PhotonMessageInfo info)
+    private void AttackFleet(int ownFleetID, int enemyFleetID)
     {
-        if (!PhotonNetwork.isMasterClient || info.sender != PlayerManager.Get().CurrentPlayer.PhotonPlayer)
-        {
-            return;
-        }
-
-        if (!CheckAttack(ownFleetID, enemyFleetID))
-        {
-            return;
-        }
-
-        photonView.RPC(RPCs.AttackFleet, PhotonTargets.All, ownFleetID, enemyFleetID);
-    }
-
-    [RPC]
-    private void AttackFleet(int ownFleetID, int enemyFleetID, PhotonMessageInfo info)
-    {
-        if (!info.sender.isMasterClient)
-        {
-            return;
-        }
-
-        if (!CheckAttack(ownFleetID, enemyFleetID))
-        {
-            return;
-        }
-
         var ownFleet = FleetList.Find(f => f.ID == ownFleetID);
         var enemyFleet = FleetList.Find(f => f.ID == enemyFleetID);
+
+        //if (ownFleet == null || enemyFleet == null)
+        //{
+        //    return; // TODO ask for refresh complete data
+        //}
 
         var ownUnitPosition = GetOwnUnitPosition(ownFleet.Position, enemyFleet.Position);
         var enemyUnitPosition = ownUnitPosition < 3 ? ownUnitPosition + 3 : ownUnitPosition - 3;
 
         var ownUnit = ownFleet.Units[ownUnitPosition];
         var enemyUnit = enemyFleet.Units[enemyUnitPosition];
+
+        //if (ownUnit == null)
+        //{
+        //    return; // TODO ask for refresh complete data
+        //}
 
         var ownUnitStrength = ownUnit.UnitValues.Strength;
 
@@ -396,6 +387,35 @@ public class InputManager : Photon.MonoBehaviour
             ResetMovementArea();
             TileManager.Get().ResetHighlightedTile();
         }
+    }
+
+    [RPC]
+    private void AskForAttackFleet(int ownFleetID, int enemyFleetID, PhotonMessageInfo info)
+    {
+        if (!PhotonNetwork.isMasterClient || info.sender != PlayerManager.Get().CurrentPlayer.PhotonPlayer)
+        {
+            return;
+        }
+
+        if (!CheckAttack(ownFleetID, enemyFleetID))
+        {
+            return; // TODO refresh complete data at info.sender
+        }
+
+        photonView.RPC(RPCs.AttackFleet, PhotonTargets.All, ownFleetID, enemyFleetID);
+    }
+
+    [RPC]
+    private void AttackFleet(int ownFleetID, int enemyFleetID, PhotonMessageInfo info)
+    {
+        if (!info.sender.isMasterClient)
+        {
+            return;
+        }
+
+        // Achtung keine Überprüfung ob jetzt alle gleich syncronisiert sind!
+
+        AttackFleet(ownFleetID, enemyFleetID);
     }
 
     private void AttackUnitOfFleet(int fleetID, int unitPosition, int strength)
@@ -433,7 +453,7 @@ public class InputManager : Photon.MonoBehaviour
             return false;
         }
 
-        if (ownUnit.UnitController == null)// || ownUnit.AllowAttack == false) FUNktionier nicht nicht.. Angriffe funktionieren nicht mehr!!
+        if (ownUnit.UnitController == null || ownUnit.AllowAttack == false) //FUNktionier nicht nicht.. Angriffe funktionieren nicht mehr!!
         {
             return false;
         }
@@ -474,17 +494,15 @@ public class InputManager : Photon.MonoBehaviour
 
             return 4;
         }
-        else
+        else if(enemyFleetPosition.X + enemyFleetPosition.Y == ownFleetPosition.X + ownFleetPosition.Y)
         {
             if (enemyFleetPosition.X < ownFleetPosition.X
-                && enemyFleetPosition.Y > ownFleetPosition.Y
-                && (enemyFleetPosition.X - ownFleetPosition.X) - (enemyFleetPosition.Y - ownFleetPosition.Y) == 0)
+                && enemyFleetPosition.Y > ownFleetPosition.Y)
             {
                 return 5;
             }
             else if (enemyFleetPosition.X > ownFleetPosition.X
-                && enemyFleetPosition.Y < ownFleetPosition.Y
-                && (enemyFleetPosition.X + ownFleetPosition.X) - (enemyFleetPosition.Y + ownFleetPosition.Y) == 0)
+                && enemyFleetPosition.Y < ownFleetPosition.Y)
             {
                 return 2;
             }
@@ -517,6 +535,11 @@ public class InputManager : Photon.MonoBehaviour
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Awake()
+    {
         //Check for Singleton
         if (_instance == null)
         {
@@ -527,8 +550,6 @@ public class InputManager : Photon.MonoBehaviour
             Debug.LogError("Second instance!");
             return;
         }
-
-        Init();
     }
 
     private void Update()

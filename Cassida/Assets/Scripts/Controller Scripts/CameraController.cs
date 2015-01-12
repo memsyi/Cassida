@@ -771,6 +771,11 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Awake()
+    {
         //Check for Singleton
         if (_instance == null)
         {
@@ -781,8 +786,6 @@ public class CameraController : MonoBehaviour
             Debug.LogError("Second instance!");
             return;
         }
-
-        Init();
     }
 
     private void Update()
@@ -796,16 +799,8 @@ public class CameraController : MonoBehaviour
     {
         if (_instance == null)
         {
-            GameObject obj = GameObject.FindGameObjectWithTag(Tags.MainCamera);
-
-            if (obj.GetComponent<CameraController>() == null)
-            {
-                _instance = obj.AddComponent<CameraController>();
-            }
-            else
-            {
-                _instance = obj.GetComponent<CameraController>();
-            }
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.Manager);
+            _instance = obj.AddComponent<CameraController>();
         }
 
         return _instance;

@@ -53,7 +53,7 @@ public class Fleet// : IJSON
 
     public void MoveFleet(Position target)
     {
-        if (MovementPointsLeft == 0)
+        if (MovementPointsLeft <= 0)
         {
             return;
         }

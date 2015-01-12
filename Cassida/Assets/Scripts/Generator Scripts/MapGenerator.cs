@@ -141,6 +141,11 @@ public class MapGenerator : Photon.MonoBehaviour
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Awake()
+    {
         //Check for Singleton
         if (_instance == null)
         {
@@ -149,11 +154,8 @@ public class MapGenerator : Photon.MonoBehaviour
         else if (_instance != this)
         {
             Debug.LogError("Second instance!");
-
             return;
         }
-
-        Init();
     }
 
     private void Update()
