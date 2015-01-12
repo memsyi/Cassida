@@ -19,12 +19,20 @@ public class UnitValues : IJSON
 
     public JSONObject ToJSON()
     {
-        throw new System.NotImplementedException();
+        var jsonObject = JSONObject.obj;
+
+        jsonObject[JSONs.UnitType] = new JSONObject((int)UnitType);
+        jsonObject[JSONs.Strength] = new JSONObject(Strength);
+
+        return jsonObject;
     }
 
-    public void FromJSON(JSONObject o)
+    public UnitValues FromJSON(JSONObject jsonObject)
     {
-        throw new System.NotImplementedException();
+        var unitType = (UnitType)(int)jsonObject[JSONs.UnitType];
+        var strength = (int)jsonObject[JSONs.Strength];
+
+        return new UnitValues(unitType, strength);
     }
 }
 
@@ -38,9 +46,13 @@ public class Unit : IJSON
 
     public bool AllowAttack { get; set; }
 
-    public Unit(Player player, UnitValues unitValues, Transform unitParent)
+    public Unit(Player player, UnitValues unitValues, Transform unitParent) // TODO unitParent auslagern möglicherweise in die componente
     {
         // Fleet object and controller must be first!
+        //var unitParent = new GameObject("Unit: " + position).transform;
+        //unitParent.position = tile.TileParent.position + Vector3.forward * 0.6f;
+        //unitParent.SetParent(fleet.FleetParent);
+
         UnitParent = unitParent;
         UnitController = UnitParent.gameObject.AddComponent<UnitController>();
 
@@ -65,12 +77,21 @@ public class Unit : IJSON
 
     public JSONObject ToJSON()
     {
-        throw new System.NotImplementedException();
+        var jsonObject = JSONObject.obj;
+
+        jsonObject[JSONs.Player] = new JSONObject(Player.ToJSON());
+        jsonObject[JSONs.UnitValues] = new JSONObject(UnitValues.ToJSON());
+        jsonObject[JSONs.AllowAttack] = new JSONObject(AllowAttack);
+
+        return jsonObject;
     }
 
-    public void FromJSON(JSONObject o)
+    public Unit FromJSON(JSONObject jsonObject)
     {
-        throw new System.NotImplementedException();
+        var unit = new Unit(Player.FromJSON(jsonObject), UnitValues.FromJSON(jsonObject));
+        unit.AllowAttack = jsonObject[JSONs.AllowAttack];
+
+        return unit;
     }
 }
 

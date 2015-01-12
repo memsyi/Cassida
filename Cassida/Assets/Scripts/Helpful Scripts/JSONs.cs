@@ -3,11 +3,15 @@ using System.Collections;
 
 public struct JSONs
 {
-    public const string ID = "ID";
     public const string Player = "Player";
+    public const string ID = "ID";
+    public const string Name = "Name";
+    public const string Color = "Color";
     
     public const string Fleets = "Fleets";
     public const string Position = "Position";
+    public const string X = "X";
+    public const string Y = "Y";
     public const string Rotation = "Rotation";
     public const string FleetValues = "FleetValues";
     public const string FleetType = "FleetType";

@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public struct Player
+public struct Player : IJSON
 {
     public int ID { get; private set; }
-    public PhotonPlayer PhotonPlayer { get; private set; }
+    private PhotonPlayer photonPlayer;
+    public PhotonPlayer PhotonPlayer { get { return photonPlayer; } set { if (photonPlayer != null) photonPlayer = value; } }
     public string Name { get; private set; }
     public Color Color { get; private set; }
 
@@ -15,6 +16,31 @@ public struct Player
         PhotonPlayer = photonPlayer;
         Name = name;
         Color = color;
+    }
+
+    public JSONObject ToJSON()
+    {
+        var jsonObject = JSONObject.obj;
+
+        jsonObject[JSONs.ID] = new JSONObject(ID);
+        jsonObject[JSONs.Name] = new JSONObject(Name);
+
+        var colorObject = JSONObject.arr;
+        colorObject["r"] = new JSONObject(Color.r);
+        colorObject["g"] = new JSONObject(Color.g);
+        colorObject["b"] = new JSONObject(Color.b);
+        jsonObject[JSONs.Color] = new JSONObject(colorObject);
+
+        return jsonObject;
+    }
+
+    public Player FromJSON(JSONObject jsonObject)
+    {
+        var id = (int)jsonObject[JSONs.ID];
+        var name = (string)jsonObject[JSONs.Name];
+        var color = new Color((float)jsonObject[JSONs.Color]["r"], (float)jsonObject[JSONs.Color]["g"], (float)jsonObject[JSONs.Color]["b"]);
+
+        return new Player(id, null, name, color);
     }
 }
 

@@ -205,8 +205,6 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        var unitParent = new GameObject("Unit: " + position).transform;
-
         fleet.FleetParent.rotation = Quaternion.Euler(Vector3.up * (position * -60 - 30));
 
         var tile = TileList.Find(t => t.FleetID == fleetID);
@@ -216,6 +214,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
+        var unitParent = new GameObject("Unit: " + position).transform;
         unitParent.position = tile.TileParent.position + Vector3.forward * 0.6f;
         unitParent.SetParent(fleet.FleetParent);
 
@@ -314,7 +313,6 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         var jsonObject = JSONObject.obj;
 
         jsonObject[JSONs.Fleets] = JSONObject.CreateList(FleetList);
-        //jsonObject["blah"] = new JSONObject(123);
 
         return jsonObject;
     }

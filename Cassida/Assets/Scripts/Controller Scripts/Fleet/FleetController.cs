@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public enum FleetType
 {
@@ -17,12 +18,18 @@ public class FleetValues : IJSON
 
     public JSONObject ToJSON()
     {
-        throw new System.NotImplementedException();
+        var jsonObject = JSONObject.obj;
+
+        jsonObject[JSONs.FleetType] = new JSONObject((int)FleetType);
+
+        return jsonObject;
     }
 
-    public void FromJSON(JSONObject o)
+    public FleetValues FromJSON(JSONObject jsonObject)
     {
-        throw new System.NotImplementedException();
+        var fleetType = (FleetType)(int)jsonObject[JSONs.FleetType];
+
+        return new FleetValues(fleetType);
     }
 }
 
@@ -45,7 +52,7 @@ public class Fleet : IJSON
     {
         // Fleet object and controller must be first!
         var fleetParent = new GameObject("Fleet of: " + player.Name).transform;
-        fleetParent.position = TileManager.Get().TileList.Find(t => t.Position == position).TileParent.position;
+        fleetParent.position = TileManager.Get().TileList.Find(t => t.Position == position).TileParent.position; // TODO fleetParent möglicherweise in die componente
         fleetParent.SetParent(GameObject.Find(Tags.Fleets).transform);
 
         FleetParent = fleetParent;
@@ -165,11 +172,14 @@ public class Fleet : IJSON
         var jsonObject = JSONObject.obj;
 
         jsonObject[JSONs.ID] = new JSONObject(ID);
-        //jsonObject[JSONs.Player] = new JSONObject(Player.ToJSON());
-        //jsonObject[JSONs.Position] = new JSONObject(Position.ToJSON());
+        jsonObject[JSONs.Player] = new JSONObject(Player.ToJSON());
+        jsonObject[JSONs.Position] = new JSONObject(Position.ToJSON());
         jsonObject[JSONs.Rotation] = new JSONObject(Rotation);
-        //jsonObject[JSONs.FleetValues] = new JSONObject(FleetValues.ToJSON());
-        //jsonObject[JSONs.Units] = new JSONObject(Unit.ToJSON());
+        jsonObject[JSONs.FleetValues] = new JSONObject(FleetValues.ToJSON());
+        jsonObject[JSONs.Units] = JSONObject.CreateList(new List<Unit>(Units));
+
+        jsonObject[JSONs.AllowRotation] = new JSONObject(AllowRotation);
+        jsonObject[JSONs.MovementPointsLeft] = new JSONObject(MovementPointsLeft);
 
         return jsonObject;
     }

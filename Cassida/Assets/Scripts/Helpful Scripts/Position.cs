@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Position
+public class Position :IJSON
 {
     public int X { get; set; }
     public int Y { get; set; }
@@ -10,5 +10,21 @@ public class Position
     {
         X = x;
         Y = y;
+    }
+
+    public JSONObject ToJSON()
+    {
+        var jsonObject = JSONObject.obj;
+
+        jsonObject[JSONs.X] = new JSONObject(X);
+        jsonObject[JSONs.Y] = new JSONObject(Y);
+
+        return jsonObject;
+    }
+
+    public void FromJSON(JSONObject jsonObject)
+    {
+         X = (int)jsonObject[JSONs.X];
+         Y = (int)jsonObject[JSONs.Y];
     }
 }

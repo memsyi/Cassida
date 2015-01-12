@@ -88,6 +88,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
         {
             PlayerPrefs.SetString("Save", FleetManager.Get().ToJSON().print());
             print("save");
+            FleetManager.Get().ToJSON().print();
         }
     }
 
