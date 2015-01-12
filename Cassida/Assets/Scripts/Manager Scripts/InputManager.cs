@@ -37,7 +37,7 @@ public class InputManager : Photon.MonoBehaviour
         if (CurrentSelectedTile == clickedTile)
         {
             // Rotate Fleet
-            RotateFleet(CurrentSelectedTile.FleetID);
+            TryToRotateFleet(CurrentSelectedTile.FleetID);
             return;
         }
 
@@ -58,7 +58,7 @@ public class InputManager : Photon.MonoBehaviour
         if (CurrentSelectedTile == targetTile)
         {
             // Rotate Fleet
-            RotateFleet(CurrentSelectedTile.FleetID, false);
+            TryToRotateFleet(CurrentSelectedTile.FleetID, false);
             return;
         }
 
@@ -72,72 +72,40 @@ public class InputManager : Photon.MonoBehaviour
         if (MoveableTileList.Exists(t => t == targetTile))
         {
             // Move fleet
-            MoveFleet(CurrentSelectedTile.FleetID, targetTile);
+            TryToMoveFleet(CurrentSelectedTile.FleetID, targetTile.Position);
 
             TileManager.Get().SelectTile(targetTile);
         }
     }
 
     #region Movement
-    private void MoveFleet(int fleetID, Tile targetTile)
+    private void TryToMoveFleet(int fleetID, Position targetTilePosition)
     {
-        if (fleetID < 0 || targetTile.FleetID > -1)
+        if (!CheckMovement(fleetID, targetTilePosition))
         {
             return;
         }
 
-        photonView.RPC(RPCs.AskForMoveFleet, PhotonTargets.MasterClient, fleetID, targetTile.Position);
+        photonView.RPC(RPCs.AskForMoveFleet, PhotonTargets.MasterClient, fleetID, targetTilePosition.X, targetTilePosition.Y);
+
+        MoveFleet(fleetID, targetTilePosition);
     }
 
-    [RPC]
-    private void AskForMoveFleet(int fleetID, Vector2 targetTilePosition, PhotonMessageInfo info)
+    private void MoveFleet(int fleetID, Position targetTilePosition)
     {
-        if (!PhotonNetwork.isMasterClient || info.sender != PlayerManager.Get().CurrentPlayer.PhotonPlayer)
-        {
-            return;
-        }
-
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null || fleet.MovementPointsLeft <= 0)
+        if (fleet == null)
         {
-            return;
+            return; // TODO ask for refresh complete data
         }
 
         var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
-        var targetTile = TileList.Find(t => t.Position == targetTilePosition);
+        var targetTile = TileList.Find(t => t.Position.X == targetTilePosition.X && t.Position.Y == targetTilePosition.Y);
 
-        if (currentTile == null || targetTile == null || currentTile.FleetID < 0 || targetTile.FleetID > -1
-            || Vector3.Distance(currentTile.TileParent.position, targetTile.TileParent.position) > 2f)
+        if (currentTile == null || targetTile == null)
         {
-            return;
-        }
-
-        photonView.RPC(RPCs.MoveFleet, PhotonTargets.All, fleetID, targetTilePosition);
-    }
-
-    [RPC]
-    private void MoveFleet(int fleetID, Vector2 targetTilePosition, PhotonMessageInfo info)
-    {
-        if (!info.sender.isMasterClient)
-        {
-            return;
-        }
-
-        var fleet = FleetList.Find(f => f.ID == fleetID);
-
-        if (fleet == null || fleet.MovementPointsLeft <= 0)
-        {
-            return;
-        }
-
-        var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
-        var targetTile = TileList.Find(t => t.Position == targetTilePosition);
-
-        if (currentTile == null || targetTile == null || currentTile.FleetID < 0 || targetTile.FleetID > -1
-            || Vector3.Distance(currentTile.TileParent.position, targetTile.TileParent.position) > 2f)
-        {
-            return;
+            return; // TODO ask for refresh complete data
         }
 
         targetTile.FleetID = fleetID;
@@ -150,39 +118,53 @@ public class InputManager : Photon.MonoBehaviour
             CheckShowMovementArea();
         }
     }
-    #endregion
 
-    #region Rotation
-    private void RotateFleet(int fleetID, bool rotateRight = true)
+    private bool CheckMovement(int fleetID, Position targetTilePosition)
     {
         if (fleetID < 0)
         {
-            return;
+            return false;
         }
 
-        photonView.RPC(RPCs.AskForRotateFleet, PhotonTargets.MasterClient, fleetID, rotateRight);
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null || fleet.MovementPointsLeft <= 0 || fleet.Player.ID != PlayerManager.Get().CurrentPlayer.ID)
+        {
+            return false;
+        }
+
+        var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
+        var targetTile = TileList.Find(t => t.Position.X == targetTilePosition.X && t.Position.Y == targetTilePosition.Y);
+
+        if (currentTile == null || targetTile == null || currentTile.FleetID < 0 || targetTile.FleetID > -1
+            || Vector3.Distance(currentTile.TileParent.position, targetTile.TileParent.position) > 2f)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     [RPC]
-    private void AskForRotateFleet(int fleetID, bool rotateRight, PhotonMessageInfo info)
+    private void AskForMoveFleet(int fleetID, int targetTilePositionX, int targetTilePositionY, PhotonMessageInfo info)
     {
         if (!PhotonNetwork.isMasterClient || info.sender != PlayerManager.Get().CurrentPlayer.PhotonPlayer)
         {
             return;
         }
 
-        var fleet = FleetList.Find(f => f.ID == fleetID);
+        var targetTilePosition = new Position(targetTilePositionX, targetTilePositionY);
 
-        if (fleet == null || !fleet.AllowRotation)
+        if (!CheckMovement(fleetID, targetTilePosition))
         {
-            return;
+            return; // TODO refresh complete data at info.sender
         }
 
-        photonView.RPC(RPCs.RotateFleet, PhotonTargets.All, fleetID, rotateRight);
+        photonView.RPC(RPCs.MoveFleet, PhotonTargets.All, fleetID, targetTilePositionX, targetTilePositionY);
     }
 
     [RPC]
-    private void RotateFleet(int fleetID, bool rotateRight, PhotonMessageInfo info)
+    private void MoveFleet(int fleetID, int targetTilePositionX, int targetTilePositionY, PhotonMessageInfo info)
     {
         if (!info.sender.isMasterClient)
         {
@@ -191,12 +173,93 @@ public class InputManager : Photon.MonoBehaviour
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null || !fleet.AllowRotation)
+        if (fleet == null || (fleet.Position.X == targetTilePositionX && fleet.Position.Y == targetTilePositionY))
         {
             return;
         }
 
-        fleet.RotateFleet(rotateRight ? 1 : -1);
+        var targetTilePosition = new Position(targetTilePositionX, targetTilePositionY);
+
+        MoveFleet(fleetID, targetTilePosition);
+    }
+    #endregion
+
+    #region Rotation
+    private void TryToRotateFleet(int fleetID, bool rotateRight = true)
+    {
+        if (!CheckRotation(fleetID))
+        {
+            return;
+        }
+
+        var rotationTarget = FleetList.Find(f => f.ID == fleetID).Rotation + (rotateRight ? 1 : -1);
+
+        photonView.RPC(RPCs.AskForRotateFleet, PhotonTargets.MasterClient, fleetID, rotationTarget);
+
+        RotateFleet(fleetID, rotationTarget);
+    }
+
+    private void RotateFleet(int fleetID, int rotationTarget)
+    {
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null)
+        {
+            return; // TODO ask for refresh complete data
+        }
+
+        fleet.RotateFleet(rotationTarget);//fleet.Rotation + (rotateRight ? 1 : -1));
+    }
+
+    private bool CheckRotation(int fleetID)
+    {
+        if (fleetID < 0)
+        {
+            return false;
+        }
+
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null || !fleet.AllowRotation || fleet.Player.ID != PlayerManager.Get().CurrentPlayer.ID)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    [RPC]
+    private void AskForRotateFleet(int fleetID, int rotationTarget, PhotonMessageInfo info)
+    {
+        if (!PhotonNetwork.isMasterClient || info.sender != PlayerManager.Get().CurrentPlayer.PhotonPlayer)
+        {
+            return;
+        }
+
+        if (!CheckRotation(fleetID))
+        {
+            return; // TODO refresh complete data at info.sender
+        }
+
+        photonView.RPC(RPCs.RotateFleet, PhotonTargets.All, fleetID, rotationTarget);
+    }
+
+    [RPC]
+    private void RotateFleet(int fleetID, int rotationTarget, PhotonMessageInfo info)
+    {
+        if (!info.sender.isMasterClient)
+        {
+            return;
+        }
+
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null || fleet.Rotation == rotationTarget)
+        {
+            return;
+        }
+
+        RotateFleet(fleetID, rotationTarget);
     }
     #endregion
 
@@ -302,12 +365,14 @@ public class InputManager : Photon.MonoBehaviour
         var ownUnit = ownFleet.Units[ownUnitPosition];
         var enemyUnit = enemyFleet.Units[enemyUnitPosition];
 
+        var ownUnitStrength = ownUnit.UnitValues.Strength;
+
         // damage to all enemy units
         if (enemyUnit == null)
         {
             for (int i = 0; i < enemyFleet.Units.Length; i++)
             {
-                AttackUnitOfFleet(enemyFleetID, i, ownUnit.UnitValues.Strength);
+                AttackUnitOfFleet(enemyFleetID, i, ownUnitStrength);
             }
         }
         else
@@ -319,7 +384,7 @@ public class InputManager : Photon.MonoBehaviour
             }
 
             // damage to enemy unit
-            AttackUnitOfFleet(enemyFleet.ID, enemyUnitPosition, ownUnit.UnitValues.Strength);
+            AttackUnitOfFleet(enemyFleet.ID, enemyUnitPosition, ownUnitStrength);
         }
 
         ownFleet.MovementPointsLeft = 0;
@@ -373,7 +438,7 @@ public class InputManager : Photon.MonoBehaviour
             return false;
         }
 
-        var distanceBetweenFleets = Vector3.Distance(ownFleet.Position, enemyFleet.Position);
+        var distanceBetweenFleets = Vector3.Distance(ownFleet.FleetParent.position, enemyFleet.FleetParent.position);
 
         if (ownUnit.UnitValues.UnitType == UnitType.Meele
             && distanceBetweenFleets <= 2)
@@ -389,20 +454,20 @@ public class InputManager : Photon.MonoBehaviour
         return false;
     }
 
-    public int GetOwnUnitPosition(Vector2 ownFleetPosition, Vector2 enemyFleetPosition)
+    public int GetOwnUnitPosition(Position ownFleetPosition, Position enemyFleetPosition)
     {
-        if (enemyFleetPosition.x == ownFleetPosition.x)
+        if (enemyFleetPosition.X == ownFleetPosition.X)
         {
-            if (enemyFleetPosition.y > ownFleetPosition.y)
+            if (enemyFleetPosition.Y > ownFleetPosition.Y)
             {
                 return 0;
             }
 
             return 3;
         }
-        else if (enemyFleetPosition.y == ownFleetPosition.y)
+        else if (enemyFleetPosition.Y == ownFleetPosition.Y)
         {
-            if (enemyFleetPosition.x > ownFleetPosition.x)
+            if (enemyFleetPosition.X > ownFleetPosition.X)
             {
                 return 1;
             }
@@ -411,15 +476,15 @@ public class InputManager : Photon.MonoBehaviour
         }
         else
         {
-            if (enemyFleetPosition.x < ownFleetPosition.x
-                && enemyFleetPosition.y > ownFleetPosition.y
-                && (enemyFleetPosition.x - ownFleetPosition.x) - (enemyFleetPosition.y - ownFleetPosition.y) == 0)
+            if (enemyFleetPosition.X < ownFleetPosition.X
+                && enemyFleetPosition.Y > ownFleetPosition.Y
+                && (enemyFleetPosition.X - ownFleetPosition.X) - (enemyFleetPosition.Y - ownFleetPosition.Y) == 0)
             {
                 return 5;
             }
-            else if (enemyFleetPosition.x > ownFleetPosition.x
-                && enemyFleetPosition.y < ownFleetPosition.y
-                && (enemyFleetPosition.x + ownFleetPosition.x) - (enemyFleetPosition.y + ownFleetPosition.y) == 0)
+            else if (enemyFleetPosition.X > ownFleetPosition.X
+                && enemyFleetPosition.Y < ownFleetPosition.Y
+                && (enemyFleetPosition.X + ownFleetPosition.X) - (enemyFleetPosition.Y + ownFleetPosition.Y) == 0)
             {
                 return 2;
             }

@@ -8,7 +8,8 @@ public struct Player
     public string Name { get; private set; }
     public Color Color { get; private set; }
 
-    public Player(int id, PhotonPlayer photonPlayer, string name, Color color) : this()
+    public Player(int id, PhotonPlayer photonPlayer, string name, Color color)
+        : this()
     {
         ID = id;
         PhotonPlayer = photonPlayer;
@@ -36,7 +37,20 @@ public class PlayerManager : Photon.MonoBehaviour
             return;
         }
 
-        photonView.RPC(RPCs.SetPlayerInformation, PhotonTargets.All, PhotonNetwork.playerList.Length - 1, player, name, new Vector3(color.r, color.g, color.b));
+        photonView.RPC(RPCs.SetPlayerInformation, PhotonTargets.All, PlayerList.Count, player, name, new Vector3(color.r, color.g, color.b));
+    }
+
+    public void SetAllExistingPlayerInformationAtPlayer(PhotonPlayer photonPlayer)
+    {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
+        foreach (var player in PlayerList)
+        {
+            photonView.RPC(RPCs.SetPlayerInformation, photonPlayer, player.ID, player.PhotonPlayer, player.Name, new Vector3(player.Color.r, player.Color.g, player.Color.b));
+        }
     }
 
     [RPC]
@@ -47,16 +61,26 @@ public class PlayerManager : Photon.MonoBehaviour
             return;
         }
 
-        var newPlayer = new Player(id, PhotonNetwork.player, name, new Color(color.x, color.y, color.z));
+        var newPlayer = new Player(id, player, name, new Color(color.x, color.y, color.z));
         PlayerList.Add(newPlayer);
 
         if (PhotonNetwork.isMasterClient)
         {
-            // Instantiate map at player
-            MapGenerator.Get().InstatiateAllExistingTilesAtPlayer(player);
+            if (CurrentPlayer.PhotonPlayer == null)
+            {
+                CurrentPlayer = newPlayer;
+            }
 
-            // Instatiate fleets at player
-            FleetManager.Get().InstantiateAllExistingFleetsAtPlayer(player);
+            SetCurrentPlayer(CurrentPlayer.PhotonPlayer);
+
+            if (!player.isMasterClient)
+            {
+                // Instantiate map at player
+                MapGenerator.Get().InstatiateAllExistingTilesAtPlayer(player);
+
+                // Instatiate fleets at player
+                FleetManager.Get().InstantiateAllExistingFleetsAtPlayer(player);
+            }
         }
 
         if (PhotonNetwork.player != player || Player.PhotonPlayer != null)
@@ -67,9 +91,9 @@ public class PlayerManager : Photon.MonoBehaviour
         Player = newPlayer;
     }
 
-    public void SetCurrentPlayer(PhotonPlayer player)
+    private void SetCurrentPlayer(PhotonPlayer player)
     {
-        if(!PhotonNetwork.isMasterClient || CurrentPlayer.PhotonPlayer == player || !PlayerList.Exists(p => p.PhotonPlayer == player))
+        if (!PhotonNetwork.isMasterClient || !PlayerList.Exists(p => p.PhotonPlayer == player))
         {
             return;
         }
@@ -81,9 +105,12 @@ public class PlayerManager : Photon.MonoBehaviour
     #region End turn
     public void EndTurn()
     {
-        if (PhotonNetwork.player != CurrentPlayer.PhotonPlayer)
+        if (!PhotonNetwork.isMasterClient)
         {
-            return;
+            if (PhotonNetwork.player != CurrentPlayer.PhotonPlayer)
+            {
+                return;
+            }
         }
 
         photonView.RPC(RPCs.AskForEndTurn, PhotonTargets.MasterClient);
@@ -92,9 +119,12 @@ public class PlayerManager : Photon.MonoBehaviour
     [RPC]
     private void AskForEndTurn(PhotonMessageInfo info)
     {
-        if (!PhotonNetwork.isMasterClient || info.sender != CurrentPlayer.PhotonPlayer)
+        if (!PhotonNetwork.isMasterClient)
         {
-            return;
+            if (info.sender != CurrentPlayer.PhotonPlayer)
+            {
+                return;
+            }
         }
 
         photonView.RPC(RPCs.SetCurrentPlayer, PhotonTargets.All, FindNewCurrentPlayer());
@@ -116,7 +146,6 @@ public class PlayerManager : Photon.MonoBehaviour
             InputManager.Get().RemoveMouseEvents();
         }
 
-        print("set current player");
         CurrentPlayer = PlayerList.Find(p => p.PhotonPlayer == player);
 
         if (PhotonNetwork.player != player)
@@ -130,10 +159,12 @@ public class PlayerManager : Photon.MonoBehaviour
     private PhotonPlayer FindNewCurrentPlayer()
     {
         PhotonPlayer nextPlayer = null;
-        var nextPlayerID = (int)CurrentPlayer.ID + 1;
+        var nextPlayerID = CurrentPlayer.ID;
 
         while (nextPlayer == null)
         {
+            nextPlayerID++;
+
             if (nextPlayerID >= PlayerList.Count)
             {
                 nextPlayerID = 0;
@@ -147,8 +178,6 @@ public class PlayerManager : Photon.MonoBehaviour
             {
                 nextPlayer = possiblePlayer;
             }
-
-            nextPlayerID++;
         }
 
         return nextPlayer;

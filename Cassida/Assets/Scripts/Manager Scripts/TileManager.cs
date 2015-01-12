@@ -22,7 +22,7 @@ public enum ObjectiveType
 
 public class Tile
 {
-    public Vector2 Position { get; private set; }
+    public Position Position { get; private set; }
     public int FleetID { get; set; }
     public Transform TileParent { get; private set; }
 
@@ -32,7 +32,7 @@ public class Tile
     public TerrainController TerrainController { get; private set; }
     public ObjectiveController ObjectiveController { get; private set; }
 
-    public Tile(Vector2 position, Transform tileParent, TerrainType terrain, ObjectiveType objective)
+    public Tile(Position position, Transform tileParent, TerrainType terrain, ObjectiveType objective)
     {
         Position = position;
         FleetID = -1;

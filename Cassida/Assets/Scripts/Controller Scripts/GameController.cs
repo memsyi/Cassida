@@ -14,15 +14,9 @@ public class GameController : Photon.MonoBehaviour
     {
         if (PhotonNetwork.isMasterClient)
         {
-            PlayerManager.Get().AddPlayerInformation(PhotonNetwork.player, "master", Color.red);
-            PlayerManager.Get().SetCurrentPlayer(PhotonNetwork.player);
-
             WorldManager.Get().InitializeWorld();
-
-            FleetManager.Get().InstantiateStartFleets();
+            PlayerManager.Get().AddPlayerInformation(PhotonNetwork.player, "master", Color.red);
         }
-
-        
 
         //print(FleetManager.ToJSON().print());
     }
@@ -40,6 +34,7 @@ public class GameController : Photon.MonoBehaviour
             return;
         }
 
+        PlayerManager.Get().SetAllExistingPlayerInformationAtPlayer(newPlayer);
         PlayerManager.Get().AddPlayerInformation(newPlayer, "new player", Color.blue);
     }
 
@@ -75,20 +70,18 @@ public class GameController : Photon.MonoBehaviour
             return;
         }
 
-        var playerList = new List<PhotonPlayer>(PhotonNetwork.playerList);
-
-        if (!playerList.Exists(p => p == photonPlayer))
+        if (PlayerManager.Get().CurrentPlayer.PhotonPlayer == photonPlayer)
         {
             PlayerManager.Get().EndTurn();
         }
 
         var player = PlayerManager.Get().PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
 
-        photonView.RPC("NetworkClearAndDestroyAllOfDisconnectedPlayers", PhotonTargets.All, player.ID);
+        photonView.RPC(RPCs.ClearAndDestroyAllOfDisconnectedPlayer, PhotonTargets.All, player.ID);
     }
 
     [RPC]
-    private void NetworkClearAndDestroyAllOfDisconnectedPlayers(int playerID, PhotonMessageInfo info)
+    private void ClearAndDestroyAllOfDisconnectedPlayer(int playerID, PhotonMessageInfo info)
     {
         if (!info.sender.isMasterClient)
         {

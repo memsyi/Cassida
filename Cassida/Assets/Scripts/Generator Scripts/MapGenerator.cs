@@ -74,8 +74,7 @@ public class MapGenerator : Photon.MonoBehaviour
                  || (MapForm == MapForms.CuttedDiamond && Mathf.Abs(x + y) <= BottomEdgeLength * 2 - 4)
                  || MapForm == MapForms.Diamond)
                 {
-                    Vector2 position = new Vector2(x, y);
-                    photonView.RPC(RPCs.InstantiateTile, PhotonTargets.All, position, (int)CalculateTerrainType(), (int)CalculateObjectiveType());
+                    photonView.RPC(RPCs.InstantiateTile, PhotonTargets.All, x, y, (int)CalculateTerrainType(), (int)CalculateObjectiveType());
                 }
             }
         }
@@ -88,15 +87,17 @@ public class MapGenerator : Photon.MonoBehaviour
             return;
         }
 
-        foreach (var tile in TileManager.Get().TileList)
+        foreach (var tile in TileList)
         {
-            photonView.RPC(RPCs.InstantiateTile, player, tile.Position, tile.TerrainType.GetHashCode(), tile.ObjectiveType.GetHashCode());
+            photonView.RPC(RPCs.InstantiateTile, player, tile.Position.X, tile.Position.Y, tile.TerrainType.GetHashCode(), tile.ObjectiveType.GetHashCode());
         }
     }
 
     [RPC]
-    private void InstantiateTile(Vector2 position, int terrainType, int objectiveType, PhotonMessageInfo info)
+    private void InstantiateTile(int positionX, int positionY, int terrainType, int objectiveType, PhotonMessageInfo info)
     {
+        var position = new Position(positionX, positionY);
+
         if (!info.sender.isMasterClient || TileList.Exists(t => t.Position == position))
         {
             return;
@@ -106,7 +107,7 @@ public class MapGenerator : Photon.MonoBehaviour
         var tileObject = Instantiate(
             TileParent,
             // Calculate tile position
-            new Vector3(position.x * 1.75f + position.y * 0.875f, 0, position.y * 1.515f),
+            new Vector3(position.X * 1.75f + position.Y * 0.875f, 0, position.Y * 1.515f),
             Quaternion.identity) as Transform;
 
         tileObject.name = position.ToString();

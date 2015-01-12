@@ -20,7 +20,8 @@ public class Fleet// : IJSON
 {
     public int ID { get; private set; }
     public Player Player { get; private set; }
-    public Vector2 Position { get; private set; }
+    public Position Position { get; private set; }
+    public int Rotation { get; private set; }
     public FleetValues FleetValues { get; private set; }
 
     public Transform FleetParent { get; private set; }
@@ -30,44 +31,7 @@ public class Fleet// : IJSON
     public int MovementPointsLeft { get; set; }
     public bool AllowRotation { get; set; }
 
-    //public PhotonPlayer Player
-    //{
-    //    get { return _player; }
-    //    private set
-    //    {
-    //        _player = value;
-
-    //        var color = (Vector3)value.customProperties[PlayerProperties.Color];
-    //        FleetController.Color = new Color(color.x, color.y, color.z);
-    //    }
-    //}
-
-    //public Vector3 Position
-    //{
-    //    get
-    //    {
-    //        return FleetParent.position;
-    //    }
-    //    set
-    //    {
-    //        FleetController.MoveFleet(value);
-    //    }
-    //}
-
-    //public FleetType FleetType
-    //{
-    //    get
-    //    {
-    //        return _fleetType;
-    //    }
-    //    private set
-    //    {
-    //        _fleetType = value;
-    //        FleetController.Type = FleetType;
-    //    }
-    //}
-
-    public Fleet(int id, Player player, Vector2 position, FleetValues fleetValues, Transform fleetParent)//, Unit[] units)
+    public Fleet(int id, Player player, Position position, FleetValues fleetValues, Transform fleetParent)//, Unit[] units)
     {
         // Fleet object and controller must be first!
         FleetParent = fleetParent;
@@ -76,6 +40,8 @@ public class Fleet// : IJSON
 
         ID = id;
         Player = player;
+        Position = position;
+        Rotation = 0;
         FleetValues = fleetValues;
 
         ResetMovementRotationAndAttack();
@@ -85,28 +51,33 @@ public class Fleet// : IJSON
         FleetController.SetColorOfFleet(player.Color);
     }
 
-    public void MoveFleet(Vector2 target)
+    public void MoveFleet(Position target)
     {
         if (MovementPointsLeft == 0)
         {
             return;
         }
 
-        Position = target;
         FleetController.MoveFleet(target);
 
         MovementPointsLeft--;
+
+        Position = target;
     }
-    public void RotateFleet(int rotationDirection)
+    public void RotateFleet(int rotationTarget)
     {
         if (!AllowRotation)
         {
             return;
         }
 
-        FleetController.RotateFleet(rotationDirection);
+        var rotationCount = Mathf.Abs(Rotation - rotationTarget);
+        var rotationDirection = (int)Mathf.Sign(Rotation - rotationTarget);
 
+        for (int r = 0; r < rotationCount; r++)
         {
+            FleetController.RotateFleet(rotationDirection);
+
             var newUnitPositions = new Unit[6];
             for (int i = 0; i < newUnitPositions.Length; i++)
             {
@@ -123,6 +94,8 @@ public class Fleet// : IJSON
             }
             Units = newUnitPositions;
         }
+
+        Rotation = rotationTarget;
     }
 
     public void ResetMovementRotationAndAttack()
@@ -181,7 +154,7 @@ public class Fleet// : IJSON
     //    o["Player"] = new JSONObject(Player.ToJSON());
     //    o["Position"] = Position.ToJSON();
     //    o["Type"] = new JSONObject((int)FleetType);
-        
+
     //    return o;
     //}
 
@@ -256,7 +229,7 @@ public class FleetController : MonoBehaviour
     private bool Move { get; set; }
     private bool Turn { get; set; }
 
-    public void MoveFleet(Vector2 target)
+    public void MoveFleet(Position target)
     {
         MovementTarget = TileManager.Get().TileList.Find(t => t.Position == target).TileParent.position;
     }

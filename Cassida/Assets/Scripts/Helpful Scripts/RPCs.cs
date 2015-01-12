@@ -22,4 +22,6 @@ public struct RPCs
     public const string RotateFleet = "RotateFleet";
     public const string AskForAttackFleet = "AskForAttackFleet";
     public const string AttackFleet = "AttackFleet";
+
+    public const string ClearAndDestroyAllOfDisconnectedPlayer = "ClearAndDestroyAllOfDisconnectedPlayer";
 }
