@@ -6,7 +6,7 @@ public enum UnitType
     Range
 }
 
-public class UnitValues
+public class UnitValues : IJSON
 {
     public UnitType UnitType { get; private set; }
     public int Strength { get; set; }
@@ -16,9 +16,19 @@ public class UnitValues
         UnitType = unitType;
         Strength = strength;
     }
+
+    public JSONObject ToJSON()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void FromJSON(JSONObject o)
+    {
+        throw new System.NotImplementedException();
+    }
 }
 
-public class Unit
+public class Unit : IJSON
 {
     public Player Player { get; private set; }
     public UnitValues UnitValues { get; set; }
@@ -51,6 +61,16 @@ public class Unit
 
         UnitController.DestroyUnitObject();
         return false;
+    }
+
+    public JSONObject ToJSON()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void FromJSON(JSONObject o)
+    {
+        throw new System.NotImplementedException();
     }
 }
 

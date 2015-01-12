@@ -77,7 +77,7 @@ public class JSONObject : Nullable
             list.Add(new JSONObject { type = Type.STRING, str = kvp.Value });
         }
     }
-    public static JSONObject CreateList<T>(List<T> l) where T:IJSON
+    public static JSONObject CreateList<T>(List<T> l) where T : IJSON
     {
         var o = JSONObject.arr;
 

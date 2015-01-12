@@ -8,7 +8,7 @@ public struct PlayerProperties
 }
 
 [RequireComponent(typeof(PhotonView))]
-public class GameController : Photon.MonoBehaviour
+public class GameController : Photon.MonoBehaviour, IJSON
 {
     private void StartGame()
     {
@@ -18,7 +18,7 @@ public class GameController : Photon.MonoBehaviour
             PlayerManager.Get().AddPlayerInformation(PhotonNetwork.player, "master", Color.red);
         }
 
-        //print(FleetManager.ToJSON().print());
+        //print(FleetManager.Get().ToJSON().print());
     }
 
     private void OnJoinedRoom()
@@ -37,29 +37,6 @@ public class GameController : Photon.MonoBehaviour
         PlayerManager.Get().SetAllExistingPlayerInformationAtPlayer(newPlayer);
         PlayerManager.Get().AddPlayerInformation(newPlayer, "new player", Color.blue);
     }
-
-    //private JSONObject ToJSON()
-    //{
-    //    JSONObject x=base.Save();
-    //    x["size"]=JSONObject(size);
-
-    //    if(x)
-
-    //    x["FleetMgr"] = FleetManager.Save();
-
-    //    return x;
-
-    //    List<string> strs;
-    //    var l=JSONObject.arr;l.Add(strs 
-
-    //    x["Player"]["Levels"][2]["XP"] = 2
-    //    (int)x["Player/Levels/2/XP"]
-    //}
-
-    //private void FromJSON(JSONObject x)
-    //{
-    //    size = (float)x["size"];
-    //}
     #endregion
 
     #region Player disconnect
@@ -106,6 +83,12 @@ public class GameController : Photon.MonoBehaviour
                 PlayerManager.Get().EndTurn();
             }
         }
+
+        if (GUI.Button(new Rect(200, 0, 100, 20), "Save"))
+        {
+            PlayerPrefs.SetString("Save", FleetManager.Get().ToJSON().print());
+            print("save");
+        }
     }
 
     private void Init()
@@ -147,5 +130,40 @@ public class GameController : Photon.MonoBehaviour
         }
 
         return _instance;
+    }
+
+    //private JSONObject ToJSON()
+    //{
+    //    var x= JSONObject.obj;
+
+    //    //x["size"]=new JSONObject(1);
+
+    //    //if(x)
+
+    //    //x["FleetMgr"] = FleetManager.Save();
+
+    //    return x;
+
+    //    //List<string> strs;
+    //    //var l=JSONObject.arr;l.Add(strs 
+
+    //    //x["Player"]["Levels"][2]["XP"] = 2
+    //    //(int)x["Player/Levels/2/XP"]
+    //}
+
+    //private void FromJSON(JSONObject x)
+    //{
+    //    //size = (float)x["size"];
+    //}
+
+    JSONObject IJSON.ToJSON()
+    {
+        //var 
+        return null;
+    }
+
+    void IJSON.FromJSON(JSONObject o)
+    {
+        throw new System.NotImplementedException();
     }
 }

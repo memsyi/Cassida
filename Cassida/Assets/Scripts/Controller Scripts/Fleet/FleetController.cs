@@ -6,7 +6,7 @@ public enum FleetType
     Fast = 2
 }
 
-public class FleetValues
+public class FleetValues : IJSON
 {
     public FleetType FleetType { get; private set; }
 
@@ -14,26 +14,40 @@ public class FleetValues
     {
         FleetType = fleetType;
     }
+
+    public JSONObject ToJSON()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void FromJSON(JSONObject o)
+    {
+        throw new System.NotImplementedException();
+    }
 }
 
-public class Fleet// : IJSON
+public class Fleet : IJSON
 {
     public int ID { get; private set; }
     public Player Player { get; private set; }
     public Position Position { get; private set; }
     public int Rotation { get; private set; }
     public FleetValues FleetValues { get; private set; }
+    public Unit[] Units { get; private set; }
 
     public Transform FleetParent { get; private set; }
     public FleetController FleetController { get; private set; }
-    public Unit[] Units { get; private set; }
 
     public int MovementPointsLeft { get; set; }
     public bool AllowRotation { get; set; }
 
-    public Fleet(int id, Player player, Position position, FleetValues fleetValues, Transform fleetParent)//, Unit[] units)
+    public Fleet(int id, Player player, Position position, FleetValues fleetValues)
     {
         // Fleet object and controller must be first!
+        var fleetParent = new GameObject("Fleet of: " + player.Name).transform;
+        fleetParent.position = TileManager.Get().TileList.Find(t => t.Position == position).TileParent.position;
+        fleetParent.SetParent(GameObject.Find(Tags.Fleets).transform);
+
         FleetParent = fleetParent;
         FleetController = FleetParent.gameObject.AddComponent<FleetController>();
         Units = new Unit[6];
@@ -146,22 +160,24 @@ public class Fleet// : IJSON
         return false;
     }
 
-    //public JSONObject ToJSON()
-    //{
-    //    var o = JSONObject.obj;
+    public JSONObject ToJSON()
+    {
+        var jsonObject = JSONObject.obj;
 
-    //    o["ID"] = new JSONObject(ID);
-    //    o["Player"] = new JSONObject(Player.ToJSON());
-    //    o["Position"] = Position.ToJSON();
-    //    o["Type"] = new JSONObject((int)FleetType);
+        jsonObject[JSONs.ID] = new JSONObject(ID);
+        //jsonObject[JSONs.Player] = new JSONObject(Player.ToJSON());
+        //jsonObject[JSONs.Position] = new JSONObject(Position.ToJSON());
+        jsonObject[JSONs.Rotation] = new JSONObject(Rotation);
+        //jsonObject[JSONs.FleetValues] = new JSONObject(FleetValues.ToJSON());
+        //jsonObject[JSONs.Units] = new JSONObject(Unit.ToJSON());
 
-    //    return o;
-    //}
+        return jsonObject;
+    }
 
-    //public void FromJSON(JSONObject o)
-    //{
-    //    throw new System.NotImplementedException();
-    //}
+    public void FromJSON(JSONObject jsonObject)
+    {
+        throw new System.NotImplementedException();
+    }
 }
 
 public class FleetController : MonoBehaviour

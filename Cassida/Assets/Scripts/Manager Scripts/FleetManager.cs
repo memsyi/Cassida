@@ -44,7 +44,7 @@ public struct UnitSettings
 }
 
 [RequireComponent(typeof(PhotonView))]
-public class FleetManager : Photon.MonoBehaviour //, IJSON
+public class FleetManager : Photon.MonoBehaviour, IJSON
 {
     #region Variables
     [SerializeField]
@@ -136,12 +136,8 @@ public class FleetManager : Photon.MonoBehaviour //, IJSON
         HighestFleetID = ID;
 
         var player = PlayerManager.Get().PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
-        var fleetParent = new GameObject("Fleet of: " + player.Name).transform;
 
-        fleetParent.position = tile.TileParent.position;
-        fleetParent.SetParent(GameObject.Find(Tags.Fleets).transform);
-
-        FleetList.Add(new Fleet(ID, player, position, new FleetValues((FleetType)fleetType), fleetParent));
+        FleetList.Add(new Fleet(ID, player, position, new FleetValues((FleetType)fleetType)));
 
         tile.FleetID = ID;
     }
@@ -313,20 +309,20 @@ public class FleetManager : Photon.MonoBehaviour //, IJSON
         return _instance;
     }
 
-    //public JSONObject ToJSON()
-    //{
-    //    var o = JSONObject.obj;
+    public JSONObject ToJSON()
+    {
+        var jsonObject = JSONObject.obj;
 
-    //    //o["FleetList"] = JSONObject.CreateList(FleetList);
-    //    o["blah"] = new JSONObject(123);
+        jsonObject[JSONs.Fleets] = JSONObject.CreateList(FleetList);
+        //jsonObject["blah"] = new JSONObject(123);
 
-    //    return o;
-    //}
+        return jsonObject;
+    }
 
-    //public void FromJSON(JSONObject o)
-    //{
-    //    throw new System.NotImplementedException();
-    //}
+    public void FromJSON(JSONObject o)
+    {
+        throw new System.NotImplementedException();
+    }
 
     // https://github.com/ChristophPech/servertest/blob/master/src/gamesrv/techtree.cfg
     // https://github.com/omegasrevenge/Project4/blob/master/Assets/Scripts/GameManager.cs
