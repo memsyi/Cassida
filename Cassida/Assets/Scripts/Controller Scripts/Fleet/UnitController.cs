@@ -20,56 +20,52 @@ public class UnitValues : IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-
         jsonObject[JSONs.UnitType] = new JSONObject((int)UnitType);
         jsonObject[JSONs.Strength] = new JSONObject(Strength);
-
         return jsonObject;
     }
 
-    public UnitValues FromJSON(JSONObject jsonObject)
+    public void FromJSON(JSONObject jsonObject)
     {
         var unitType = (UnitType)(int)jsonObject[JSONs.UnitType];
         var strength = (int)jsonObject[JSONs.Strength];
-
-        return new UnitValues(unitType, strength);
     }
 }
 
 public class Unit : IJSON
 {
-    public Player Player { get; private set; }
-    public UnitValues UnitValues { get; set; }
+    private UnitValues unitValues;
+    public UnitValues UnitValues
+    {
+        get { return unitValues; }
+        set
+        {
+            if (value == null) { return; }
 
+            UnitController.InstantiateUnit(value.UnitType, FleetManager.Get().FleetList.Find(f => f.ID == FleetID).Player.Color);
+            unitValues = value;
+        }
+    }
+
+    private int FleetID { get; set; }
     public Transform UnitParent { get; private set; }
     public UnitController UnitController { get; private set; }
 
     public bool AllowAttack { get; set; }
 
-    public Unit(Player player, UnitValues unitValues, Transform unitParent) // TODO unitParent auslagern möglicherweise in die componente
+    public Unit(int fleetID, int position, UnitValues unitValues = null)
     {
-        // Fleet object and controller must be first!
-        //var unitParent = new GameObject("Unit: " + position).transform;
-        //unitParent.position = tile.TileParent.position + Vector3.forward * 0.6f;
-        //unitParent.SetParent(fleet.FleetParent);
-
-        UnitParent = unitParent;
+        FleetID = fleetID;
+        UnitParent = UnitController.InstatiateParentObject(fleetID, position);
         UnitController = UnitParent.gameObject.AddComponent<UnitController>();
 
-        Player = player;
         UnitValues = unitValues;
         AllowAttack = true;
-
-        UnitController.InstantiateUnit(unitValues.UnitType);
-        UnitController.SetColorOfUnit(player.Color);
     }
 
     public bool CheckWhetherUnitIsAlive()
     {
-        if (UnitValues.Strength > 0)
-        {
-            return true;
-        }
+        if (UnitValues.Strength > 0) { return true; }
 
         UnitController.DestroyUnitObject();
         return false;
@@ -78,20 +74,16 @@ public class Unit : IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-
-        jsonObject[JSONs.Player] = new JSONObject(Player.ToJSON());
-        jsonObject[JSONs.UnitValues] = new JSONObject(UnitValues.ToJSON());
+        jsonObject[JSONs.UnitValues] = UnitValues.ToJSON();
+        jsonObject[JSONs.FleetID] = new JSONObject(FleetID);
         jsonObject[JSONs.AllowAttack] = new JSONObject(AllowAttack);
-
         return jsonObject;
     }
 
-    public Unit FromJSON(JSONObject jsonObject)
+    public void FromJSON(JSONObject jsonObject)
     {
-        var unit = new Unit(Player.FromJSON(jsonObject), UnitValues.FromJSON(jsonObject));
-        unit.AllowAttack = jsonObject[JSONs.AllowAttack];
-
-        return unit;
+        UnitValues.FromJSON(jsonObject[JSONs.UnitValues]);
+        AllowAttack = jsonObject[JSONs.AllowAttack];
     }
 }
 
@@ -99,8 +91,27 @@ public class UnitController : MonoBehaviour
 {
     #region Object and Instantiation
     private Transform UnitObject { get; set; }
+    private Color color;
+    private Color Color { get { return color; } set { SetColorOfUnit(value); color = value; } }
 
-    public void InstantiateUnit(UnitType type)
+    public static Transform InstatiateParentObject(int fleetID, int position)
+    {
+        var fleetParent = FleetManager.Get().FleetList.Find(f => f.ID == fleetID).FleetParent;
+
+        if (fleetParent == null) { return null; }
+
+        fleetParent.rotation = Quaternion.Euler(Vector3.up * (position * -60 - 30));
+
+        var unitParent = new GameObject("Unit: " + position).transform;
+        unitParent.position = fleetParent.position + Vector3.forward * 0.6f;
+        unitParent.SetParent(fleetParent);
+
+        fleetParent.rotation = Quaternion.identity;
+
+        return unitParent;
+    }
+
+    public void InstantiateUnit(UnitType type, Color color)
     {
         var fleetManager = FleetManager.Get();
 
@@ -115,9 +126,11 @@ public class UnitController : MonoBehaviour
             default:
                 break;
         }
+
+        Color = color;
     }
 
-    public void InstantiateUnitObject(Transform model, UnitType type)
+    private void InstantiateUnitObject(Transform model, UnitType type)
     {
         // Instantiate unit
         UnitObject = Instantiate(model, transform.position, transform.rotation) as Transform;
@@ -126,7 +139,7 @@ public class UnitController : MonoBehaviour
         UnitObject.SetParent(transform);
     }
 
-    public void SetColorOfUnit(Color color)
+    private void SetColorOfUnit(Color color)
     {
         UnitObject.GetChild(0).renderer.material.color = color;
     }

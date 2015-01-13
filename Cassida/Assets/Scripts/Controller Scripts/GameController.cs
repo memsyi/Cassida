@@ -84,11 +84,18 @@ public class GameController : Photon.MonoBehaviour, IJSON
             }
         }
 
-        if (GUI.Button(new Rect(200, 0, 100, 20), "Save"))
+        if (GUI.Button(new Rect(300, 0, 100, 20), "Save"))
         {
             PlayerPrefs.SetString("Save", FleetManager.Get().ToJSON().print());
-            print("save");
-            FleetManager.Get().ToJSON().print();
+            print(FleetManager.Get().ToJSON().print());
+        }
+        if (GUI.Button(new Rect(400, 0, 100, 20), "Load"))
+        {
+            FleetManager.Get().FromJSON(JSONParser.parse(PlayerPrefs.GetString("Save")));
+        }
+        if (GUI.Button(new Rect(500, 0, 100, 20), "Print"))
+        {
+            print(PlayerPrefs.GetString("Save"));
         }
     }
 
@@ -118,7 +125,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
 
     private void Update()
     {
-
+        
     }
 
     private static GameController _instance = null;

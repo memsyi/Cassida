@@ -104,7 +104,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var position = new Position(positionX, positionY);
 
-        var tile = TileList.Find(t => t.Position.X == position.X && t.Position.Y == position.Y);
+        var tile = TileList.Find(t => t.Position.IsSameAs(position));
 
         HighestFleetID++;
 
@@ -126,7 +126,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var position = new Position(positionX, positionY);
 
-        var tile = TileList.Find(t => t.Position.X == position.X && t.Position.Y == position.Y);
+        var tile = TileList.Find(t => t.Position.IsSameAs(position));
 
         if (tile == null)
         {
@@ -205,22 +205,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        fleet.FleetParent.rotation = Quaternion.Euler(Vector3.up * (position * -60 - 30));
-
-        var tile = TileList.Find(t => t.FleetID == fleetID);
-
-        if (tile == null)
-        {
-            return;
-        }
-
-        var unitParent = new GameObject("Unit: " + position).transform;
-        unitParent.position = tile.TileParent.position + Vector3.forward * 0.6f;
-        unitParent.SetParent(fleet.FleetParent);
-
-        fleet.FleetParent.rotation = Quaternion.identity;
-
-        fleet.Units[position] = new Unit(fleet.Player, new UnitValues((UnitType)unitType, strength), unitParent);
+        fleet.Units[position] = new Unit(fleet.ID, position, new UnitValues((UnitType)unitType, strength));
     }
     #endregion
 
@@ -260,7 +245,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
     private void OnGUI()
     {
-        if (GUI.Button(new Rect(300, 0, 100, 20), "Add Fleet"))
+        if (GUI.Button(new Rect(200, 0, 100, 20), "Add Fleet"))
         {
             var testUnits = new UnitValues[] { new UnitValues(UnitType.Meele, 1), new UnitValues(UnitType.Range, 1), null, null, null, null };
             InstantiateNewFleet(new Position(0, 0), FleetType.Slow, testUnits);
@@ -311,9 +296,12 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-
-        jsonObject[JSONs.Fleets] = JSONObject.CreateList(FleetList);
-
+        var fleetObjects = JSONObject.arr;
+        foreach(var fleet in FleetList)
+        {
+            fleetObjects.Add(fleet.ToJSON());
+        }
+        jsonObject[JSONs.Fleets] = fleetObjects;
         return jsonObject;
     }
 

@@ -22,5 +22,6 @@ public struct JSONs
     public const string UnitValues = "UnitValues";
     public const string UnitType = "UnitType";
     public const string Strength = "Strength";
+    public const string FleetID = "FleetID";
     public const string AllowAttack = "AllowAttack";    
 }

@@ -12,13 +12,21 @@ public class Position :IJSON
         Y = y;
     }
 
+    public bool IsSameAs(Position position)
+    {
+        return X == position.X && Y == position.Y;
+    }
+
+    public override string ToString()
+    {
+        return "(" + X + "; " + Y + ")"; 
+    }
+
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-
         jsonObject[JSONs.X] = new JSONObject(X);
         jsonObject[JSONs.Y] = new JSONObject(Y);
-
         return jsonObject;
     }
 

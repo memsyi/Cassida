@@ -11,17 +11,17 @@ using System.Collections.Generic;
  * Copyright Matt Schoen 2010
  */
 
-public static class JSONExtensions
-{
-    public static JSONObject ToJSON(this Vector3 v)
-    {
-        var o = JSONObject.arr;
-        o.Add(new JSONObject(v.x));
-        o.Add(new JSONObject(v.y));
-        o.Add(new JSONObject(v.z));
-        return o;
-    }
-}
+//public static class JSONExtensions
+//{
+//    public static JSONObject ToJSON(this Vector3 v)
+//    {
+//        var o = JSONObject.arr;
+//        o.Add(new JSONObject(v.x));
+//        o.Add(new JSONObject(v.y));
+//        o.Add(new JSONObject(v.z));
+//        return o;
+//    }
+//}
 
 public class JSONObject : Nullable
 {
@@ -77,17 +77,17 @@ public class JSONObject : Nullable
             list.Add(new JSONObject { type = Type.STRING, str = kvp.Value });
         }
     }
-    public static JSONObject CreateList<T>(List<T> l) where T : IJSON
-    {
-        var o = JSONObject.arr;
+    //public static JSONObject CreateList<T>(List<T> l) where T : IJSON
+    //{
+    //    var o = JSONObject.arr;
 
-        foreach (var e in l)
-        {
-            o.Add(e.ToJSON());
-        }
+    //    foreach (var e in l)
+    //    {
+    //        o.Add(e.ToJSON());
+    //    }
 
-        return o;
-    }
+    //    return o;
+    //}
 
     public void Absorb(JSONObject obj)
     {

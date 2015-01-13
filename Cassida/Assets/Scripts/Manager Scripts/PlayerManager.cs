@@ -5,7 +5,7 @@ public struct Player : IJSON
 {
     public int ID { get; private set; }
     private PhotonPlayer photonPlayer;
-    public PhotonPlayer PhotonPlayer { get { return photonPlayer; } set { if (photonPlayer != null) photonPlayer = value; } }
+    public PhotonPlayer PhotonPlayer { get { return photonPlayer; } set { if (photonPlayer == null) photonPlayer = value; } }
     public string Name { get; private set; }
     public Color Color { get; private set; }
 
@@ -24,23 +24,20 @@ public struct Player : IJSON
 
         jsonObject[JSONs.ID] = new JSONObject(ID);
         jsonObject[JSONs.Name] = new JSONObject(Name);
-
-        var colorObject = JSONObject.arr;
+        var colorObject = JSONObject.obj;
         colorObject["r"] = new JSONObject(Color.r);
         colorObject["g"] = new JSONObject(Color.g);
         colorObject["b"] = new JSONObject(Color.b);
-        jsonObject[JSONs.Color] = new JSONObject(colorObject);
+        jsonObject[JSONs.Color] = colorObject;
 
         return jsonObject;
     }
 
-    public Player FromJSON(JSONObject jsonObject)
+    public void FromJSON(JSONObject jsonObject)
     {
         var id = (int)jsonObject[JSONs.ID];
         var name = (string)jsonObject[JSONs.Name];
         var color = new Color((float)jsonObject[JSONs.Color]["r"], (float)jsonObject[JSONs.Color]["g"], (float)jsonObject[JSONs.Color]["b"]);
-
-        return new Player(id, null, name, color);
     }
 }
 
@@ -157,9 +154,9 @@ public class PlayerManager : Photon.MonoBehaviour
     }
 
     [RPC]
-    private void SetCurrentPlayer(PhotonPlayer player, PhotonMessageInfo info)
+    private void SetCurrentPlayer(PhotonPlayer photonPlayer, PhotonMessageInfo info)
     {
-        if (!info.sender.isMasterClient || !PlayerList.Exists(p => p.PhotonPlayer == player))
+        if (!info.sender.isMasterClient || !PlayerList.Exists(p => p.PhotonPlayer == photonPlayer))
         {
             return;
         }
@@ -172,9 +169,9 @@ public class PlayerManager : Photon.MonoBehaviour
             InputManager.Get().RemoveMouseEvents();
         }
 
-        CurrentPlayer = PlayerList.Find(p => p.PhotonPlayer == player);
+        CurrentPlayer = PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
 
-        if (PhotonNetwork.player != player)
+        if (PhotonNetwork.player != photonPlayer)
         {
             return;
         }
