@@ -92,7 +92,7 @@ State:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Open
-  m_Speed: 1
+  m_Speed: 2
   m_CycleOffset: 0
   m_Motions:
   - {fileID: 7400000, guid: ac9f81409e53f62438725008d231356a, type: 2}
@@ -107,7 +107,7 @@ State:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: CreditsMenuEmpty
-  m_Speed: 1
+  m_Speed: 2
   m_CycleOffset: 0
   m_Motions:
   - {fileID: 7400000, guid: 6fa3aadb90cfc6d448c86bacffa067b9, type: 2}
@@ -122,7 +122,7 @@ State:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Closed
-  m_Speed: -1
+  m_Speed: -2
   m_CycleOffset: 0
   m_Motions:
   - {fileID: 7400000, guid: ac9f81409e53f62438725008d231356a, type: 2}
@@ -147,10 +147,6 @@ StateMachine:
   m_ChildStateMachinePosition: []
   m_OrderedTransitions:
     data:
-      first: {fileID: 110277365}
-      second:
-      - {fileID: 110122932}
-    data:
       first: {fileID: 110215622}
       second:
       - {fileID: 110100000}
@@ -158,6 +154,10 @@ StateMachine:
       first: {fileID: 110200000}
       second:
       - {fileID: 110174288}
+    data:
+      first: {fileID: 110277365}
+      second:
+      - {fileID: 110122932}
   m_MotionSetCount: 1
   m_AnyStatePosition: {x: 50, y: 20, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}

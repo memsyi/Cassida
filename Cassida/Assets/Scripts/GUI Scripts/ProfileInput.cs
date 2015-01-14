@@ -17,18 +17,34 @@ public class ProfileInput : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
-	
+
 	}
 
     public void SetUpProfile(int id, string name)
     {
-        profileName = name;
         profileID = id;
+        profileName = name;
+        
         print("created a profile with the id: " + id + " and name: " + name);
     }
 
-    public void OnClick()
+    public void Selected()
     {
-        manager.SelectedProfile(profileID);
+        manager.SelectedProfile(this);
+    }
+
+    public void ActivateSelection()
+    {
+        gameObject.transform.FindChild("Image").gameObject.SetActive(true);
+    }
+
+    public void DeactivateSelection()
+    {
+        gameObject.transform.FindChild("Image").gameObject.SetActive(false);
+    }
+
+    public void DeleteProfile()
+    {
+        Destroy(this.gameObject);
     }
 }
