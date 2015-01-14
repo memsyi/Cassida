@@ -106,9 +106,14 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var tile = TileList.Find(t => t.Position.IsSameAs(position));
 
+        if (tile == null || tile.FleetID > -1)
+        {
+            return;
+        }
+
         HighestFleetID++;
 
-        if (tile == null || FleetList.Exists(f => f.ID == HighestFleetID) || tile.FleetID > -1)
+        if (FleetList.Exists(f => f.ID == HighestFleetID))
         {
             return;
         }

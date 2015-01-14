@@ -48,8 +48,8 @@ public class Unit : IJSON
     }
 
     private int FleetID { get; set; }
-    public Transform UnitParent { get; private set; }
-    public UnitController UnitController { get; private set; }
+    public Transform UnitParent { get; protected set; }
+    public UnitController UnitController { get; protected set; }
 
     public bool AllowAttack { get; set; }
 
@@ -57,7 +57,7 @@ public class Unit : IJSON
     {
         FleetID = fleetID;
         UnitParent = UnitController.InstatiateParentObject(fleetID, position);
-        UnitController = UnitParent.gameObject.AddComponent<UnitController>();
+        UnitController = UnitParent.gameObject.AddComponent<UnitController>(); // TODO change controller to specific unit controller
 
         UnitValues = unitValues;
         AllowAttack = true;

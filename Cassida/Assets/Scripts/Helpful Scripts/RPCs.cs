@@ -14,7 +14,9 @@ public struct RPCs
     public const string AskForEndTurn = "AskForEndTurn";
     public const string SetCurrentPlayer = "SetCurrentPlayer";
 
-    public const string InstantiateTile = "InstantiateTile";
+    public const string AddTile = "AddTile";
+
+    public const string AddNewBase = "AddNewBase";
 
     public const string AskForMoveFleet = "AskForMoveFleet";
     public const string MoveFleet = "MoveFleet";

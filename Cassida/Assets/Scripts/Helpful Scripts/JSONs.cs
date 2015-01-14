@@ -7,6 +7,10 @@ public struct JSONs
     public const string ID = "ID";
     public const string Name = "Name";
     public const string Color = "Color";
+
+    public const string Tiles = "Tiles";
+    public const string TerrainType = "TerrainType";
+    public const string ObjectiveType = "ObjectiveType";
     
     public const string Fleets = "Fleets";
     public const string Position = "Position";

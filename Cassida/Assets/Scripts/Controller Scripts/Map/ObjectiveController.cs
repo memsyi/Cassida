@@ -11,6 +11,8 @@ public class ObjectiveController : MonoBehaviour
 
         switch (type)
         {
+            case ObjectiveType.Base:
+                return;
             case ObjectiveType.Rubble:
                 break;
             case ObjectiveType.Village:

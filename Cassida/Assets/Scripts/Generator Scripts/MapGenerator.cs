@@ -17,19 +17,19 @@ public class MapGenerator : Photon.MonoBehaviour
 
     [SerializeField] // TODO struct !! [Serialize..]
     private Transform
-        _tileParent = null,
-        _asteroidsTerrain = null;
+        _tileObject = null,
+        _asteroidsTerrainObject = null;
 
     #region Terrains
-    public Transform TileParent
+    public Transform TileObject
     {
-        get { return _tileParent; }
-        private set { _tileParent = value; }
+        get { return _tileObject; }
+        //private set { _tileParentObject = value; }
     }
-    public Transform AsteroidsTerrain
+    public Transform AsteroidsTerrainObject
     {
-        get { return _asteroidsTerrain; }
-        private set { _asteroidsTerrain = value; }
+        get { return _asteroidsTerrainObject; }
+        //private set { _asteroidsTerrainObject = value; }
     }
     #endregion
 
@@ -48,6 +48,14 @@ public class MapGenerator : Photon.MonoBehaviour
     // Lists
     List<Tile> TileList { get { return TileManager.Get().TileList; } }
     #endregion
+
+    public static Transform InstatiateParentObject(Position position)
+    {
+        var tileParent = new GameObject(position.ToString()).transform;
+        tileParent.position = new Vector3(position.X * 1.75f + position.Y * 0.875f, 0, position.Y * 1.515f);
+        tileParent.SetParent(MapGenerator.Get().transform);
+        return tileParent;
+    }
 
     public void GenerateMap()
     {
@@ -74,7 +82,8 @@ public class MapGenerator : Photon.MonoBehaviour
                  || (MapForm == MapForms.CuttedDiamond && Mathf.Abs(x + y) <= BottomEdgeLength * 2 - 4)
                  || MapForm == MapForms.Diamond)
                 {
-                    photonView.RPC(RPCs.InstantiateTile, PhotonTargets.All, x, y, (int)CalculateTerrainType(), (int)CalculateObjectiveType());
+                    var position = new Position(x, y);
+                    photonView.RPC(RPCs.AddTile, PhotonTargets.All, x, y, (int)CalculateTerrainType(position), (int)CalculateObjectiveType(position));
                 }
             }
         }
@@ -89,12 +98,12 @@ public class MapGenerator : Photon.MonoBehaviour
 
         foreach (var tile in TileList)
         {
-            photonView.RPC(RPCs.InstantiateTile, player, tile.Position.X, tile.Position.Y, tile.TerrainType.GetHashCode(), tile.ObjectiveType.GetHashCode());
+            photonView.RPC(RPCs.AddTile, player, tile.Position.X, tile.Position.Y, (int)tile.TerrainType, (int)tile.ObjectiveType);
         }
     }
 
     [RPC]
-    private void InstantiateTile(int positionX, int positionY, int terrainType, int objectiveType, PhotonMessageInfo info)
+    private void AddTile(int positionX, int positionY, int terrainType, int objectiveType, PhotonMessageInfo info)
     {
         var position = new Position(positionX, positionY);
 
@@ -103,21 +112,19 @@ public class MapGenerator : Photon.MonoBehaviour
             return;
         }
 
-        // Instantiate tile
-        var tileObject = Instantiate(
-            TileParent,
-            // Calculate tile position
-            new Vector3(position.X * 1.75f + position.Y * 0.875f, 0, position.Y * 1.515f),
-            Quaternion.identity) as Transform;
-
-        tileObject.name = position.ToString();
-        tileObject.renderer.material.color = TileManager.Get().TileColor.DefaultColor;
-        tileObject.SetParent(this.transform);
-
-        TileList.Add(new Tile(position, tileObject, (TerrainType)terrainType, (ObjectiveType)objectiveType));
+        TileList.Add(new Tile(position, (TerrainType)terrainType, (ObjectiveType)objectiveType));
     }
 
-    private TerrainType CalculateTerrainType()
+    public Transform InstatiateTileObject(Transform tileParent)
+    {
+        var tileObject = Instantiate(TileObject, tileParent.position, Quaternion.identity) as Transform;
+        tileObject.name = "Tile object";
+        tileObject.renderer.material.color = TileManager.Get().TileColor.DefaultColor;
+        tileObject.SetParent(tileParent);
+        return tileObject;
+    }
+
+    private TerrainType CalculateTerrainType(Position position)
     {
         // TODO not mirrowed!!!!!
         int _randomValue = Random.Range(0, 4);
@@ -129,9 +136,10 @@ public class MapGenerator : Photon.MonoBehaviour
         return TerrainType.Empty;
     }
 
-    private ObjectiveType CalculateObjectiveType()
+    private ObjectiveType CalculateObjectiveType(Position position)
     {
-        return ObjectiveType.Empty;
+        if(position.IsSameAs(new Position(3, 0))) return ObjectiveType.Base;
+        return ObjectiveType.Empty; // TODO calculate tiles where bases can be place
     }
 
     private void Init()

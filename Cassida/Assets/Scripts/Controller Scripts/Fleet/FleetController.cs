@@ -36,17 +36,18 @@ public class Fleet : IJSON
     public Position Position { get; private set; }
     public int Rotation { get; private set; }
     public FleetValues FleetValues { get; private set; }
-    public Unit[] Units { get; private set; }
+    public Unit[] Units { get; private set; } // TODO set private
 
-    public Transform FleetParent { get; private set; }
-    public FleetController FleetController { get; private set; }
+    public Transform FleetParent { get; protected set; }
+    public FleetController FleetController { get; protected set; }
 
-    public int MovementPointsLeft { get; set; }
-    public bool AllowRotation { get; set; }
+    private int MovementPointsLeft { get; set; }
+    public bool AllowMovement { get { return MovementPointsLeft > 0; } }
+    public bool AllowRotation { get; private set; }
 
     public Fleet(int id, Player player, Position position, FleetValues fleetValues)
     {
-        // Fleet object and controller must be first!
+        // Parent object and controller must be first!
         FleetParent = FleetController.InstatiateParentObject(position, player.Name);
         FleetController = FleetParent.gameObject.AddComponent<FleetController>();
         Units = new Unit[6];
@@ -60,13 +61,12 @@ public class Fleet : IJSON
         ResetMovementRotationAndAttack();
         AllowRotation = true;
 
-        FleetController.InstantiateFleet(fleetValues.FleetType);
-        FleetController.SetColorOfFleet(player.Color);
+        FleetController.InstantiateFleet(fleetValues.FleetType, player.Color);
     }
 
     public void MoveFleet(Position target)
     {
-        if (MovementPointsLeft <= 0) { return; }
+        if (!AllowMovement) { return; }
 
         FleetController.MoveFleet(target);
 
@@ -105,7 +105,7 @@ public class Fleet : IJSON
         Rotation = rotationTarget % 6;
     }
 
-    public void ResetMovementRotationAndAttack()
+    public void ResetMovementRotationAndAttack() // TODO add as event (set private)
     {
         MovementPointsLeft = (int)FleetValues.FleetType;
         AllowRotation = true;
@@ -119,7 +119,64 @@ public class Fleet : IJSON
         }
     }
 
-    public void AttackUnit(int unitPosition, int damage)
+    public void AttackWithFleet(int enemyFleetID)
+    {
+        var enemyFleet = FleetManager.Get().FleetList.Find(f => f.ID == enemyFleetID);
+
+        if (enemyFleet == null)
+        {
+            return;
+        }
+
+        var unitPosition = InputManager.Get().GetOwnUnitPosition(Position, enemyFleet.Position);
+        var unit = Units[unitPosition];
+
+        if (unit == null)
+        {
+            return;
+        }
+
+        var enemyUnitPosition = unitPosition < 3 ? unitPosition + 3 : unitPosition - 3;
+        var enemyUnit = enemyFleet.Units[enemyUnitPosition];
+
+
+        MovementPointsLeft = 0;
+        AllowRotation = false;
+        unit.AllowAttack = false;
+
+        // damage to all enemy units
+        if (enemyUnit == null)
+        {
+            for (int i = 0; i < enemyFleet.Units.Length; i++)
+            {
+                AttackUnitOfFleet(enemyFleet, i, unit.UnitValues.Strength);
+            }
+        }
+        else
+        {
+            var ownStrength = unit.UnitValues.Strength;
+            // damage to own unit
+            if (unit.UnitValues.UnitType == enemyUnit.UnitValues.UnitType)
+            {
+                AttackUnitOfFleet(this, unitPosition, enemyUnit.UnitValues.Strength);
+            }
+
+            // damage to enemy unit
+            AttackUnitOfFleet(enemyFleet, enemyUnitPosition, ownStrength);
+        }
+    }
+
+    private void AttackUnitOfFleet(Fleet fleet, int unitPosition, int strength)
+    {
+        if (fleet == null)
+        {
+            return;
+        }
+
+        fleet.BecomeAttacked(unitPosition, strength);
+    }
+
+    public void BecomeAttacked(int unitPosition, int damage)
     {
         var attackedUnit = Units[unitPosition];
 
@@ -193,17 +250,18 @@ public class FleetController : MonoBehaviour
 {
     #region Object and Instantiation
     private Transform FleetObject { get; set; }
+    private Color color;
+    private Color Color { get { return color; } set { SetColorOfFleet(value); color = value; } }
 
     public static Transform InstatiateParentObject(Position position, string playerName)
     {
         var fleetParent = new GameObject("Fleet of: " + playerName).transform;
         fleetParent.position = TileManager.Get().TileList.Find(t => t.Position.IsSameAs(position)).TileParent.position;
         fleetParent.SetParent(GameObject.Find(Tags.Fleets).transform);
-
         return fleetParent;
     }
 
-    public void InstantiateFleet(FleetType type)
+    public void InstantiateFleet(FleetType type, Color color)
     {
         var fleetManager = FleetManager.Get();
 
@@ -218,6 +276,8 @@ public class FleetController : MonoBehaviour
             default:
                 break;
         }
+
+        Color = color;
     }
 
     private void InstantiateFleetObject(Transform model, FleetType type)
@@ -229,7 +289,7 @@ public class FleetController : MonoBehaviour
         FleetObject.SetParent(transform);
     }
 
-    public void SetColorOfFleet(Color color)
+    private void SetColorOfFleet(Color color)
     {
         FleetObject.GetChild(0).renderer.material.color = color;
     }

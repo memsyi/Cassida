@@ -131,7 +131,7 @@ public class InputManager : Photon.MonoBehaviour
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null || fleet.MovementPointsLeft <= 0 || fleet.Player.ID != PlayerManager.Get().CurrentPlayer.ID)
+        if (fleet == null || !fleet.AllowMovement || fleet.Player.ID != PlayerManager.Get().CurrentPlayer.ID)
         {
             return false;
         }
@@ -286,7 +286,7 @@ public class InputManager : Photon.MonoBehaviour
             return;
         }
 
-        if (fleet.MovementPointsLeft > 0)
+        if (fleet.AllowMovement)
         {
             SetMovementArea();
         }
@@ -296,7 +296,7 @@ public class InputManager : Photon.MonoBehaviour
     {
         var fleet = FleetList.Find(f => f.ID == CurrentSelectedTile.FleetID);
 
-        if (fleet.MovementPointsLeft == 0)
+        if (!fleet.AllowMovement)
         {
             return;
         }
@@ -338,49 +338,13 @@ public class InputManager : Photon.MonoBehaviour
     private void AttackFleet(int ownFleetID, int enemyFleetID)
     {
         var ownFleet = FleetList.Find(f => f.ID == ownFleetID);
-        var enemyFleet = FleetList.Find(f => f.ID == enemyFleetID);
 
-        //if (ownFleet == null || enemyFleet == null)
-        //{
-        //    return; // TODO ask for refresh complete data
-        //}
-
-        var ownUnitPosition = GetOwnUnitPosition(ownFleet.Position, enemyFleet.Position);
-        var enemyUnitPosition = ownUnitPosition < 3 ? ownUnitPosition + 3 : ownUnitPosition - 3;
-
-        var ownUnit = ownFleet.Units[ownUnitPosition];
-        var enemyUnit = enemyFleet.Units[enemyUnitPosition];
-
-        //if (ownUnit == null)
-        //{
-        //    return; // TODO ask for refresh complete data
-        //}
-
-        var ownUnitStrength = ownUnit.UnitValues.Strength;
-
-        // damage to all enemy units
-        if (enemyUnit == null)
+        if (ownFleet == null)
         {
-            for (int i = 0; i < enemyFleet.Units.Length; i++)
-            {
-                AttackUnitOfFleet(enemyFleetID, i, ownUnitStrength);
-            }
-        }
-        else
-        {
-            // damage to own unit
-            if (ownUnit.UnitValues.UnitType == enemyUnit.UnitValues.UnitType)
-            {
-                AttackUnitOfFleet(ownFleet.ID, ownUnitPosition, enemyUnit.UnitValues.Strength);
-            }
-
-            // damage to enemy unit
-            AttackUnitOfFleet(enemyFleet.ID, enemyUnitPosition, ownUnitStrength);
+            return; // TODO ask for refresh complete data
         }
 
-        ownFleet.MovementPointsLeft = 0;
-        ownFleet.AllowRotation = false;
-        ownUnit.AllowAttack = false;
+        ownFleet.AttackWithFleet(enemyFleetID);
 
         if (PlayerManager.Get().CurrentPlayer.PhotonPlayer == PhotonNetwork.player)
         {
@@ -416,17 +380,6 @@ public class InputManager : Photon.MonoBehaviour
         // Achtung keine Überprüfung ob jetzt alle gleich syncronisiert sind!
 
         AttackFleet(ownFleetID, enemyFleetID);
-    }
-
-    private void AttackUnitOfFleet(int fleetID, int unitPosition, int strength)
-    {
-        var fleet = FleetList.Find(f => f.ID == fleetID);
-        if (fleet == null)
-        {
-            return;
-        }
-
-        fleet.AttackUnit(unitPosition, strength);
     }
     #region Check attack
     public bool CheckAttack(int ownFleetID, int enemyFleetID)

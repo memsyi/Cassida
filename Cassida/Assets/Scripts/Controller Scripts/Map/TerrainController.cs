@@ -8,12 +8,10 @@ public class TerrainController : MonoBehaviour
 
     public void InstantiateTerrain(TerrainType type)
     {
-        var mapGenerator = MapGenerator.Get();
-
         switch (type)
         {
             case TerrainType.Asteroids:
-                InstantiateTerrainObject(mapGenerator.AsteroidsTerrain, type);
+                InstantiateTerrainObject(MapGenerator.Get().AsteroidsTerrainObject, type);
                 break;
             case TerrainType.Nebula:
                 break;

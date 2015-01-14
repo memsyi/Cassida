@@ -11,4 +11,5 @@
     public const string Manager = "Manager";
     public const string Map = "Map";
     public const string Fleets = "Fleets";
+    public const string Bases = "Bases";
 }

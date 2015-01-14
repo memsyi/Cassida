@@ -26,6 +26,16 @@ public class MapManager : MonoBehaviour
         MapGenerator.Get().GenerateMap();
     }
 
+    public void AddBasesToMap()
+    {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
+        BaseManager.Get().InstantiateBasesForAllPlayer();
+    }
+
     private Tile FindNearestTileToMousePosition()
     {
         if (TileList == null || TileList.Count == 0)

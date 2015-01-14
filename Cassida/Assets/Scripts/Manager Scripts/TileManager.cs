@@ -13,6 +13,7 @@ public enum TerrainType
 public enum ObjectiveType
 {
     Empty,
+    Base,
     Rubble,
     Village,
     Town,
@@ -20,23 +21,26 @@ public enum ObjectiveType
     Outpost
 }
 
-public class Tile
+public class Tile : IJSON
 {
-    public Position Position { get; private set; }
+    public Position Position { get; protected set; }
     public int FleetID { get; set; }
-    public Transform TileParent { get; private set; }
-
     public TerrainType TerrainType { get; private set; }
     public ObjectiveType ObjectiveType { get; private set; }
+
+    public Transform TileParent { get; protected set; }
+    public Transform TileObject { get; private set; }
 
     public TerrainController TerrainController { get; private set; }
     public ObjectiveController ObjectiveController { get; private set; }
 
-    public Tile(Position position, Transform tileParent, TerrainType terrain, ObjectiveType objective)
+    public Tile(Position position, TerrainType terrain, ObjectiveType objective)
     {
+        TileParent = MapGenerator.InstatiateParentObject(position);
+        TileObject = MapGenerator.Get().InstatiateTileObject(TileParent);
+
         Position = position;
         FleetID = -1;
-        TileParent = tileParent;
         TerrainType = terrain;
         ObjectiveType = objective;
 
@@ -69,7 +73,25 @@ public class Tile
         }
 
         ObjectiveController = TileParent.gameObject.AddComponent<ObjectiveController>();
-        ObjectiveController.InstantiateObjective(ObjectiveType);
+        if (ObjectiveType != ObjectiveType.Base)
+        {
+            ObjectiveController.InstantiateObjective(ObjectiveType);
+        }
+    }
+
+    public JSONObject ToJSON()
+    {
+        var jsonObject = JSONObject.obj;
+        jsonObject[JSONs.Position] = Position.ToJSON();
+        jsonObject[JSONs.FleetID] = new JSONObject(FleetID);
+        jsonObject[JSONs.TerrainType] = new JSONObject((int)TerrainType);
+        jsonObject[JSONs.ObjectiveType] = new JSONObject((int)ObjectiveType);
+        return jsonObject;
+    }
+
+    public void FromJSON(JSONObject o)
+    {
+        throw new System.NotImplementedException();
     }
 }
 
@@ -182,7 +204,7 @@ public class SettingsTileAnimation
     }
 }
 
-public class TileManager : MonoBehaviour
+public class TileManager : MonoBehaviour, IJSON
 {
     #region Variables
     [SerializeField]
@@ -433,7 +455,7 @@ public class TileManager : MonoBehaviour
             return;
         }
 
-        tile.TileParent.renderer.material.color = color;
+        tile.TileObject.renderer.material.color = color;
     }
 
     private void AddMouseEvents()
@@ -449,7 +471,7 @@ public class TileManager : MonoBehaviour
 
         for (int i = 0; i < TileAnimation.AnimatedObjectCount; i++)
         {
-            var tileAnimationObject = Instantiate(MapGenerator.Get().TileParent) as Transform;
+            var tileAnimationObject = Instantiate(MapGenerator.Get().TileObject) as Transform;
 
             TileAnimation.SelectionObjects.Add(tileAnimationObject);
             TileAnimation.SelectionObjects[i].gameObject.SetActive(false);
@@ -496,5 +518,22 @@ public class TileManager : MonoBehaviour
         }
 
         return _instance;
+    }
+
+    public JSONObject ToJSON()
+    {
+        var jsonObject = JSONObject.obj;
+        var tileObjects = JSONObject.arr;
+        foreach (var tile in TileList)
+        {
+            tileObjects.Add(tile.ToJSON());
+        }
+        jsonObject[JSONs.Tiles] = tileObjects;
+        return jsonObject;
+    }
+
+    public void FromJSON(JSONObject o)
+    {
+        throw new System.NotImplementedException();
     }
 }

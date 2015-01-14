@@ -103,6 +103,9 @@ public class PlayerManager : Photon.MonoBehaviour
 
                 // Instatiate fleets at player
                 FleetManager.Get().InstantiateAllExistingFleetsAtPlayer(player);
+
+                // Instantiate bases at player
+                BaseManager.Get().InstantiateAllExistingBasesAtPlayer(player);
             }
         }
 

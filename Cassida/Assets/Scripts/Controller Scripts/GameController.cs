@@ -16,6 +16,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
         {
             WorldManager.Get().InitializeWorld();
             PlayerManager.Get().AddPlayerInformation(PhotonNetwork.player, "master", Color.red);
+            MapManager.Get().AddBasesToMap();
         }
 
         //print(FleetManager.Get().ToJSON().print());
@@ -86,16 +87,20 @@ public class GameController : Photon.MonoBehaviour, IJSON
 
         if (GUI.Button(new Rect(300, 0, 100, 20), "Save"))
         {
-            PlayerPrefs.SetString("Save", FleetManager.Get().ToJSON().print());
+            PlayerPrefs.SetString("Fleets", FleetManager.Get().ToJSON().print());
+            PlayerPrefs.SetString("Tiles", TileManager.Get().ToJSON().print());
             print(FleetManager.Get().ToJSON().print());
+            print(TileManager.Get().ToJSON().print());
         }
-        if (GUI.Button(new Rect(400, 0, 100, 20), "Load"))
+        if (GUI.Button(new Rect(400, 0, 100, 20), "Load(Clear at the moment)"))
         {
-            FleetManager.Get().FromJSON(JSONParser.parse(PlayerPrefs.GetString("Save")));
+            PlayerPrefs.DeleteAll();
+            //FleetManager.Get().FromJSON(JSONParser.parse(PlayerPrefs.GetString("Save")));
         }
         if (GUI.Button(new Rect(500, 0, 100, 20), "Print"))
         {
-            print(PlayerPrefs.GetString("Save"));
+            print(PlayerPrefs.GetString("Fleets"));
+            print(PlayerPrefs.GetString("Tiles"));
         }
     }
 

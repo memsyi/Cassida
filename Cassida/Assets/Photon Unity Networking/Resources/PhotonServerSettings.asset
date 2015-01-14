@@ -45,4 +45,6 @@ MonoBehaviour:
   - RotateFleet
   - AskForMoveFleet
   - ClearAndDestroyAllOfDisconnectedPlayer
+  - AddTile
+  - AddNewBase
   DisableAutoOpenWizard: 0
