@@ -12,4 +12,8 @@
     public const string Map = "Map";
     public const string Fleets = "Fleets";
     public const string Bases = "Bases";
+    public const string Buildings = "Buildings";
+
+    public const string PlayerColorObjects = "PlayerColorObjects";
+    public const string ModulPositionObjects = "ModulPositionObjects";
 }

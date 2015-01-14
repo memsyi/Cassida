@@ -10,6 +10,11 @@ TagManager:
   - Map
   - Fleets
   - Bases
+  - Buildings
+  - 
+  - 
+  - PlayerColorObjects
+  - ModulPositionObjects
   - 
   Builtin Layer 0: Default
   Builtin Layer 1: TransparentFX
