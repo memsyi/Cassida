@@ -89,6 +89,7 @@ GameObject:
   - 114: {fileID: 42835959}
   - 114: {fileID: 42835961}
   - 114: {fileID: 42835960}
+  - 114: {fileID: 42835962}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Manager
@@ -174,7 +175,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subId: 1
   ownerId: 0
   group: 0
   prefixBackup: -1
@@ -182,7 +182,11 @@ MonoBehaviour:
   synchronization: 0
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
-  instantiationId: 0
+  ownershipTransfer: 0
+  ObservedComponents: []
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 1
+  instantiationId: 1
 --- !u!114 &42835960
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -195,14 +199,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62a0f9c068e8daf4b837791594eaf1fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tileSettings:
-    _defaultColor: {r: .5, g: .5, b: .5, a: .137254909}
-    _mouseOverColor: {r: 0, g: 1, b: 1, a: .137254909}
-    _mouseOverFleetColor: {r: 0, g: 0, b: 1, a: .137254909}
-    _selectionColor: {r: 1, g: 1, b: 1, a: .196078435}
-    _mouseOverSelectionColor: {r: 1, g: 0, b: 0, a: .137254909}
-    _mouseOverEnemyFleetColor: {r: 1, g: 0, b: 1, a: .137254909}
-    _mouseOverCantMoveColor: {r: 1, g: 0, b: 0, a: .137254909}
+  _tileColor:
+    _defaultColor: {r: .470588207, g: .802839577, b: 1, a: .137254909}
+    _mouseOverColor: {r: 0, g: 1, b: 1, a: 1}
+    _mouseOverFleetColor: {r: 0, g: 0, b: 1, a: 1}
+    _selectionColor: {r: 1, g: 1, b: 1, a: 1}
+    _mouseOverSelectionColor: {r: 1, g: 0, b: 0, a: 1}
+    _mouseOverEnemyFleetColor: {r: 1, g: 0, b: 1, a: 1}
+    _mouseOverCantMoveColor: {r: 1, g: 0, b: 0, a: 1}
+  _tileAnimation:
+    _allowAnimation: 1
+    _smothAnimation: 1
+    _animationSpeed: 1
+    _animationRange: 1
+    _animatedObjectCount: 4
 --- !u!114 &42835961
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,6 +223,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b0ba1f400a171e5468bb2ae6438375a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _moveableTileObject: {fileID: 400000, guid: 3ff84fa9b225f0440bfc136ded0e0a32, type: 2}
+--- !u!114 &42835962
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400036, guid: ac3904c2974a4074387896e8725ecd4c,
+    type: 2}
+  m_PrefabInternal: {fileID: 1381313012}
+  m_GameObject: {fileID: 42835953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4acf37f9c12f150489eecf3e6f65b5f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &383271712
@@ -259,12 +282,13 @@ GameObject:
   - 15: {fileID: 481213489}
   - 26: {fileID: 481213488}
   - 12: {fileID: 481213487}
+  - 76: {fileID: 481213490}
   m_Layer: 0
   m_Name: Violet Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &481213486
 Transform:
@@ -367,7 +391,21 @@ EllipsoidParticleEmitter:
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
+--- !u!76 &481213490
+WorldParticleCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 7600002, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 481213485}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
 --- !u!1 &580915586
 GameObject:
   m_ObjectHideFlags: 0
@@ -440,7 +478,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subId: 2
   ownerId: 0
   group: 0
   prefixBackup: -1
@@ -448,7 +485,78 @@ MonoBehaviour:
   synchronization: 0
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
-  instantiationId: 0
+  ownershipTransfer: 0
+  ObservedComponents: []
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 2
+  instantiationId: 2
+--- !u!1 &1047537322
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100012, guid: 3d83c95fee1be9d488400265fa281e5b, type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1047537323}
+  - 33: {fileID: 1047537326}
+  - 135: {fileID: 1047537325}
+  - 54: {fileID: 1047537324}
+  m_Layer: 8
+  m_Name: ColliderSphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 4294967295
+  m_IsActive: 1
+--- !u!4 &1047537323
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400012, guid: 3d83c95fee1be9d488400265fa281e5b, type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1047537322}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 25, y: 25, z: 25}
+  m_Children: []
+  m_Father: {fileID: 1747751644}
+  m_RootOrder: 6
+--- !u!54 &1047537324
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 5400000, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1047537322}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: .0500000007
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
+--- !u!135 &1047537325
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 13500000, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1047537322}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: .5
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &1047537326
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 3300000, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1047537322}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1145639016
 GameObject:
   m_ObjectHideFlags: 0
@@ -462,7 +570,7 @@ GameObject:
   m_TagString: Fleets
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &1145639017
 Transform:
@@ -483,6 +591,14 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 11400026, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: ObservedComponents.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400028, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: ObservedComponents.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -523,6 +639,30 @@ Prefab:
       propertyPath: subId
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 11400026, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: viewIdField
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400026, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: instantiationId
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400028, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: viewIdField
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400028, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: instantiationId
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400034, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: viewIdField
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400034, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: instantiationId
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
   m_RootGameObject: {fileID: 383271712}
@@ -539,12 +679,13 @@ GameObject:
   - 15: {fileID: 1441878437}
   - 26: {fileID: 1441878436}
   - 12: {fileID: 1441878439}
+  - 76: {fileID: 1441878440}
   m_Layer: 0
   m_Name: Red Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!26 &1441878436
 ParticleRenderer:
@@ -604,7 +745,7 @@ EllipsoidParticleEmitter:
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
 --- !u!4 &1441878438
 Transform:
   m_ObjectHideFlags: 0
@@ -648,6 +789,20 @@ ParticleAnimator:
   damping: 1
   stopSimulation: 0
   autodestruct: 0
+--- !u!76 &1441878440
+WorldParticleCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 7600004, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1441878435}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
 --- !u!1 &1642486144
 GameObject:
   m_ObjectHideFlags: 0
@@ -659,12 +814,13 @@ GameObject:
   - 15: {fileID: 1642486148}
   - 26: {fileID: 1642486147}
   - 12: {fileID: 1642486146}
+  - 76: {fileID: 1642486149}
   m_Layer: 0
   m_Name: Green Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &1642486145
 Transform:
@@ -767,7 +923,21 @@ EllipsoidParticleEmitter:
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
+--- !u!76 &1642486149
+WorldParticleCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 7600000, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1642486144}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
 --- !u!1 &1693772021
 GameObject:
   m_ObjectHideFlags: 0
@@ -779,12 +949,13 @@ GameObject:
   - 15: {fileID: 1693772024}
   - 26: {fileID: 1693772023}
   - 12: {fileID: 1693772022}
+  - 76: {fileID: 1693772026}
   m_Layer: 0
   m_Name: Blue Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!12 &1693772022
 ParticleAnimator:
@@ -875,7 +1046,7 @@ EllipsoidParticleEmitter:
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
 --- !u!4 &1693772025
 Transform:
   m_ObjectHideFlags: 0
@@ -888,6 +1059,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1747751644}
   m_RootOrder: 0
+--- !u!76 &1693772026
+WorldParticleCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 7600008, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1693772021}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
 --- !u!1 &1747751643
 GameObject:
   m_ObjectHideFlags: 0
@@ -901,7 +1086,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &1747751644
 Transform:
@@ -918,8 +1103,78 @@ Transform:
   - {fileID: 1441878438}
   - {fileID: 481213486}
   - {fileID: 1642486145}
+  - {fileID: 1763456382}
+  - {fileID: 1047537323}
   m_Father: {fileID: 0}
   m_RootOrder: 1
+--- !u!1 &1763456378
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100014, guid: 3d83c95fee1be9d488400265fa281e5b, type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1763456382}
+  - 33: {fileID: 1763456381}
+  - 64: {fileID: 1763456380}
+  - 54: {fileID: 1763456379}
+  m_Layer: 8
+  m_Name: InsideColliderBox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 4294967295
+  m_IsActive: 1
+--- !u!54 &1763456379
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 5400002, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1763456378}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: .0500000007
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
+--- !u!64 &1763456380
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 6400000, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1763456378}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_SmoothSphereCollisions: 0
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: f28b62af7ab5d0843be526fda4c253bf, type: 3}
+--- !u!33 &1763456381
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 3300002, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1763456378}
+  m_Mesh: {fileID: 4300000, guid: f28b62af7ab5d0843be526fda4c253bf, type: 3}
+--- !u!4 &1763456382
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400014, guid: 3d83c95fee1be9d488400265fa281e5b, type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1763456378}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_Children: []
+  m_Father: {fileID: 1747751644}
+  m_RootOrder: 5
 --- !u!1 &1792008322
 GameObject:
   m_ObjectHideFlags: 0
@@ -1293,12 +1548,13 @@ GameObject:
   - 15: {fileID: 1990250295}
   - 26: {fileID: 1990250294}
   - 12: {fileID: 1990250293}
+  - 76: {fileID: 1990250297}
   m_Layer: 0
   m_Name: Yellow Galaxy System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!12 &1990250293
 ParticleAnimator:
@@ -1389,7 +1645,7 @@ EllipsoidParticleEmitter:
   Simulate in Worldspace?: 0
   m_OneShot: 1
   m_Ellipsoid: {x: 100, y: 100, z: 100}
-  m_MinEmitterRange: 0
+  m_MinEmitterRange: .00100000005
 --- !u!4 &1990250296
 Transform:
   m_ObjectHideFlags: 0
@@ -1402,6 +1658,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1747751644}
   m_RootOrder: 1
+--- !u!76 &1990250297
+WorldParticleCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 7600006, guid: 3d83c95fee1be9d488400265fa281e5b,
+    type: 2}
+  m_PrefabInternal: {fileID: 1827594554}
+  m_GameObject: {fileID: 1990250292}
+  m_BounceFactor: 1
+  m_CollisionEnergyLoss: 0
+  m_CollidesWith:
+    serializedVersion: 2
+    m_Bits: 256
+  m_SendCollisionMessage: 0
+  m_MinKillVelocity: 0
 --- !u!1 &2128081995
 GameObject:
   m_ObjectHideFlags: 0
@@ -1412,6 +1682,7 @@ GameObject:
   - 4: {fileID: 2128081996}
   - 114: {fileID: 2128081998}
   - 114: {fileID: 2128081997}
+  - 114: {fileID: 2128081999}
   m_Layer: 0
   m_Name: Game Controller
   m_TagString: GameController
@@ -1457,3 +1728,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d091d822781e624abb2dd2f42d2f321, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2128081999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400034, guid: ac3904c2974a4074387896e8725ecd4c,
+    type: 2}
+  m_PrefabInternal: {fileID: 1381313012}
+  m_GameObject: {fileID: 2128081995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ownerId: 0
+  group: 0
+  prefixBackup: -1
+  observed: {fileID: 0}
+  synchronization: 0
+  onSerializeTransformOption: 3
+  onSerializeRigidBodyOption: 2
+  ownershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 0}
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 3
+  instantiationId: 3

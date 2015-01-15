@@ -4,31 +4,14 @@ using System.Collections;
 public class TerrainController : MonoBehaviour
 {
     #region Object and Instantiation
-    private TerrainType _type;
-
-    public TerrainType Type
-    {
-        get
-        {
-            return _type;
-        }
-        set
-        {
-            _type = value;
-            InstantiateTerrain();
-        }
-    }
-
     private Transform TerrainObject { get; set; }
 
-    private void InstantiateTerrain()
+    public void InstantiateTerrain(TerrainType type)
     {
-        var mapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
-
-        switch (Type)
+        switch (type)
         {
             case TerrainType.Asteroids:
-                InstantiateTerrainObject(mapGenerator.AsteroidsTerrain);
+                InstantiateTerrainObject(MapGenerator.Get().AsteroidsTerrainObject, type);
                 break;
             case TerrainType.Nebula:
                 break;
@@ -41,12 +24,12 @@ public class TerrainController : MonoBehaviour
         }
     }
 
-    public void InstantiateTerrainObject(Transform model)
+    private void InstantiateTerrainObject(Transform model, TerrainType type)
     {
         // Instantiate terrain
         TerrainObject = Instantiate(model, transform.position, Quaternion.identity) as Transform;
 
-        TerrainObject.name = "Terrain: " + Type;
+        TerrainObject.name = "Terrain: " + type;
         TerrainObject.SetParent(transform);
     }
     #endregion

@@ -31,6 +31,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
   m_IsActive: 1
+--- !u!1 &100004
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 400004}
+  m_Layer: 0
+  m_Name: Bases
+  m_TagString: Bases
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &100006
 GameObject:
   m_ObjectHideFlags: 0
@@ -71,6 +86,9 @@ GameObject:
   - 114: {fileID: 11400026}
   - 114: {fileID: 11400032}
   - 114: {fileID: 11400030}
+  - 114: {fileID: 11400036}
+  - 114: {fileID: 11400040}
+  - 114: {fileID: 11400038}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Manager
@@ -91,7 +109,7 @@ GameObject:
   m_TagString: Fleets
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &100014
 GameObject:
@@ -103,6 +121,7 @@ GameObject:
   - 4: {fileID: 400014}
   - 114: {fileID: 11400022}
   - 114: {fileID: 11400018}
+  - 114: {fileID: 11400034}
   m_Layer: 0
   m_Name: Game Controller
   m_TagString: GameController
@@ -144,6 +163,7 @@ Transform:
   - {fileID: 400014}
   - {fileID: 400016}
   - {fileID: 400010}
+  - {fileID: 400004}
   m_Father: {fileID: 0}
   m_RootOrder: 0
 --- !u!4 &400002
@@ -158,6 +178,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 400000}
   m_RootOrder: 0
+--- !u!4 &400004
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100004}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 400000}
+  m_RootOrder: 6
 --- !u!4 &400006
 Transform:
   m_ObjectHideFlags: 1
@@ -525,8 +557,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _bottomEdgeLength: 5
   _mapForm: 0
-  _tileParent: {fileID: 400002, guid: 8807240de349afe48be2e38e01c8e401, type: 2}
-  _asteroidsTerrain: {fileID: 400000, guid: 21487a1f37226e14789931fd6b2a48c1, type: 2}
+  _tileObject: {fileID: 400002, guid: 8807240de349afe48be2e38e01c8e401, type: 2}
+  _asteroidsTerrainObject: {fileID: 400000, guid: 21487a1f37226e14789931fd6b2a48c1,
+    type: 2}
 --- !u!114 &11400022
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -554,7 +587,7 @@ MonoBehaviour:
     _fastFleetObject: {fileID: 400002, guid: f28917b255eeb5042966bb9d78490456, type: 2}
   _unitSettgins:
     _meeleUnitObject: {fileID: 400000, guid: 8d7420edd65ff684581ad10491fb2eed, type: 2}
-    _rangeUnitObject: {fileID: 400000, guid: f9d0580f098646643a567abd14d7cbcb, type: 2}
+    _rangeUnitObject: {fileID: 400000, guid: 835014c0234881f4caee7da2c6684102, type: 2}
 --- !u!114 &11400026
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -566,7 +599,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subId: 0
   ownerId: 0
   group: 0
   prefixBackup: -1
@@ -574,7 +606,12 @@ MonoBehaviour:
   synchronization: 0
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
-  instantiationId: 0
+  ownershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 0}
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 0
+  instantiationId: -1
 --- !u!114 &11400028
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -586,7 +623,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subId: 0
   ownerId: 0
   group: 0
   prefixBackup: -1
@@ -594,7 +630,12 @@ MonoBehaviour:
   synchronization: 0
   onSerializeTransformOption: 3
   onSerializeRigidBodyOption: 2
-  instantiationId: 0
+  ownershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 0}
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 0
+  instantiationId: -1
 --- !u!114 &11400030
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -619,7 +660,6 @@ MonoBehaviour:
     _smothAnimation: 1
     _animationSpeed: 1
     _animationRange: 1
-    _animationFadeOut: 1
     _animatedObjectCount: 4
 --- !u!114 &11400032
 MonoBehaviour:
@@ -633,6 +673,68 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _moveableTileObject: {fileID: 400000, guid: 3ff84fa9b225f0440bfc136ded0e0a32, type: 2}
+--- !u!114 &11400034
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ownerId: 0
+  group: 0
+  prefixBackup: -1
+  observed: {fileID: 0}
+  synchronization: 0
+  onSerializeTransformOption: 3
+  onSerializeRigidBodyOption: 2
+  ownershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 0}
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 0
+  instantiationId: -1
+--- !u!114 &11400036
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4acf37f9c12f150489eecf3e6f65b5f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &11400038
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958a7b33dd5179149b497150c0d65d4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &11400040
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5793f452a51b004ebeb3714558c5131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _baseSettings:
+    _mainBuildingObject: {fileID: 400010, guid: b1f580a69da4d9245b21128dab4ca0c9,
+      type: 2}
+  _buildingSettings:
+    _foo: {fileID: 0}
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1

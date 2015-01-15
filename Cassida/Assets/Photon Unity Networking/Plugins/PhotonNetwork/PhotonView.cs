@@ -8,8 +8,11 @@
 // <author>developer@exitgames.com</author>
 // ----------------------------------------------------------------------------
 
+using System;
 using UnityEngine;
 using System.Reflection;
+using System.Collections.Generic;
+using ExitGames.Client.Photon;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -20,18 +23,37 @@ public enum ViewSynchronization { Off, ReliableDeltaCompressed, Unreliable, Unre
 public enum OnSerializeTransform { OnlyPosition, OnlyRotation, OnlyScale, PositionAndRotation, All }
 public enum OnSerializeRigidBody { OnlyVelocity, OnlyAngularVelocity, All }
 
-/// <summary>Defines the OnPhotonSerializeView method, so it's easy to implement (correctly) for observable scripts.</summary>
-public interface IPunObservable { void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info); }
+/// <summary>
+/// Options to define how Ownership Transfer is handled per PhotonView.
+/// </summary>
+/// <remarks>
+/// This setting affects how RequestOwnership and TransferOwnership work at runtime.
+/// </remarks>
+public enum OwnershipOption 
+{ 
+    /// <summary>
+    /// Ownership is fixed. Instantiated objects stick with their creator, scene objects always belong to the Master Client.
+    /// </summary>
+    Fixed, 
+    /// <summary>
+    /// Ownership can be taken away from the current owner who can't object. 
+    /// </summary>
+    Takeover, 
+    /// <summary>
+    /// Ownership can be requested with PhotonView.RequestOwnership but the current owner has to agree to give up ownership.
+    /// </summary>
+    /// <remarks>The current owner has to implement IPunCallbacks.OnOwnershipRequest to react to the ownership request.</remarks>
+    Request 
+}
 
 
 /// <summary>
 /// PUN's NetworkView replacement class for networking. Use it like a NetworkView.
 /// </summary>
 /// \ingroup publicApi
-[AddComponentMenu("Miscellaneous/Photon View &v")]
+[AddComponentMenu("Photon Networking/Photon View &v")]
 public class PhotonView : Photon.MonoBehaviour
 {
-
     #if UNITY_EDITOR
     [ContextMenu("Open PUN Wizard")]
     void OpenPunWizard()
@@ -39,8 +61,6 @@ public class PhotonView : Photon.MonoBehaviour
         EditorApplication.ExecuteMenuItem("Window/Photon Unity Networking");
     }
     #endif
-
-    public int subId;
 
     public int ownerId;
 
@@ -104,17 +124,38 @@ public class PhotonView : Photon.MonoBehaviour
 
     public OnSerializeRigidBody onSerializeRigidBodyOption = OnSerializeRigidBody.All;
 
+    /// <summary>Defines if ownership of this PhotonView is fixed, can be requested or simply taken.</summary>
+    /// <remarks>
+    /// Note that you can't edit this value at runtime. 
+    /// The options are described in enum OwnershipOption.
+    /// The current owner has to implement IPunCallbacks.OnOwnershipRequest to react to the ownership request.
+    /// </remarks>
+    public OwnershipOption ownershipTransfer = OwnershipOption.Fixed;
+
+    public List<Component> ObservedComponents;
+    Dictionary<Component, MethodInfo> m_OnSerializeMethodInfos = new Dictionary<Component, MethodInfo>();
+
+    //These fields are only used in the CustomEditor for this script and would trigger a 
+    //"this variable is never used" warning, which I am suppressing here
+#pragma warning disable 0414
+    [SerializeField]
+    bool ObservedComponentsFoldoutOpen = true;
+#pragma warning restore 0414
+
+    [SerializeField]
+    private int viewIdField = 0;
+
     /// <summary>
     /// The ID of the PhotonView. Identifies it in a networked game (per room).
     /// </summary>
     /// <remarks>See: [Network Instantiation](@ref instantiateManual)</remarks>
     public int viewID
     {
-        get { return ownerId * PhotonNetwork.MAX_VIEW_IDS + subId; }
+        get { return this.viewIdField; }
         set
         {
             // if ID was 0 for an awakened PhotonView, the view should add itself into the networkingPeer.photonViewList after setup
-            bool viewMustRegister = this.didAwake && this.subId == 0;
+            bool viewMustRegister = this.didAwake && this.viewIdField == 0;
 
             // TODO: decide if a viewID can be changed once it wasn't 0. most likely that is not a good idea
             // check if this view is in networkingPeer.photonViewList and UPDATE said list (so we don't keep the old viewID with a reference to this object)
@@ -122,7 +163,7 @@ public class PhotonView : Photon.MonoBehaviour
 
             this.ownerId = value / PhotonNetwork.MAX_VIEW_IDS;
 
-            this.subId = value % PhotonNetwork.MAX_VIEW_IDS;
+            this.viewIdField = value;
 
             if (viewMustRegister)
             {
@@ -142,12 +183,19 @@ public class PhotonView : Photon.MonoBehaviour
     /// </remarks>
     public bool isSceneView
     {
-        get { return this.ownerId == 0; }
+        get { return this.CreatorActorNr == 0; }
     }
 
     /// <summary>
     /// The owner of a PhotonView is the player who created the GameObject with that view. Objects in the scene don't have an owner.
     /// </summary>
+    /// <remarks>
+    /// The owner/controller of a PhotonView is also the client which sends position updates of the GameObject.
+    /// 
+    /// Ownership can be transferred to another player with PhotonView.TransferOwnership or any player can request 
+    /// ownership by calling the PhotonView's RequestOwnership method.
+    /// The current owner has to implement IPunCallbacks.OnOwnershipRequest to react to the ownership request.
+    /// </remarks>
     public PhotonPlayer owner
     {
         get { return PhotonPlayer.Find(this.ownerId); }
@@ -156,6 +204,16 @@ public class PhotonView : Photon.MonoBehaviour
     public int OwnerActorNr
     {
         get { return this.ownerId; }
+    }
+
+    public bool isOwnerActive
+    {
+        get { return this.ownerId != 0 && PhotonNetwork.networkingPeer.mActors.ContainsKey(this.ownerId); }
+    }
+
+    public int CreatorActorNr
+    {
+        get { return this.viewIdField / PhotonNetwork.MAX_VIEW_IDS; }
     }
 
     /// <summary>
@@ -170,12 +228,12 @@ public class PhotonView : Photon.MonoBehaviour
     {
         get
         {
-            return (this.ownerId == PhotonNetwork.player.ID) || (this.isSceneView && PhotonNetwork.isMasterClient);
+            return (this.ownerId == PhotonNetwork.player.ID) || (!this.isOwnerActive && PhotonNetwork.isMasterClient);
         }
     }
-
+    
     protected internal bool didAwake;
-
+    
     protected internal bool destroyedByPhotonNetworkOrQuit;
 
     /// <summary>Called by Unity on start of the application and does a setup the PhotonView.</summary>
@@ -187,6 +245,44 @@ public class PhotonView : Photon.MonoBehaviour
         this.instantiationDataField = PhotonNetwork.networkingPeer.FetchInstantiationData(this.instantiationId);
         this.didAwake = true;
     }
+
+    /// <summary>
+    /// Depending on the PhotonView's ownershipTransfer setting, any client can request to become owner of the PhotonView.
+    /// </summary>
+    /// <remarks>
+    /// Requesting ownership can give you control over a PhotonView, if the ownershipTransfer setting allows that.
+    /// The current owner might have to implement IPunCallbacks.OnOwnershipRequest to react to the ownership request.
+    /// 
+    /// The owner/controller of a PhotonView is also the client which sends position updates of the GameObject.
+    /// </remarks>
+    public void RequestOwnership()
+    {
+        PhotonNetwork.networkingPeer.RequestOwnership(this.viewID, this.ownerId);
+    }
+
+    /// <summary>
+    /// Transfers the ownership of this PhotonView (and GameObject) to another player.
+    /// </summary>
+    /// <remarks>
+    /// The owner/controller of a PhotonView is also the client which sends position updates of the GameObject.
+    /// </remarks>
+    public void TransferOwnership(PhotonPlayer newOwner)
+    {
+        this.TransferOwnership(newOwner.ID);
+    }
+
+    /// <summary>
+    /// Transfers the ownership of this PhotonView (and GameObject) to another player.
+    /// </summary>
+    /// <remarks>
+    /// The owner/controller of a PhotonView is also the client which sends position updates of the GameObject.
+    /// </remarks>
+    public void TransferOwnership(int newOwnerId)
+    {
+        PhotonNetwork.networkingPeer.TransferOwnership(this.viewID, newOwnerId);
+        this.ownerId = newOwnerId;  // immediately switch ownership locally, to avoid more updates sent from this client.
+    }
+
 
     protected internal void OnApplicationQuit()
     {
@@ -220,41 +316,214 @@ public class PhotonView : Photon.MonoBehaviour
                 }
             }
         }
-
-        if (PhotonNetwork.networkingPeer.instantiatedObjects.ContainsKey(this.instantiationId))
-        {
-            // Unity destroys GOs and PVs at the end of a frame. In worst case, a instantiate created a new view with the same id. Let's compare the associated GameObject.
-            GameObject instGo = PhotonNetwork.networkingPeer.instantiatedObjects[this.instantiationId];
-            bool instanceIsThisOne = (instGo == this.gameObject);
-            if (instanceIsThisOne)
-            {
-                Debug.LogWarning(string.Format("OnDestroy for PhotonView {0} but GO is still in instantiatedObjects. instantiationId: {1}. Use PhotonNetwork.Destroy(). {2} Identical with this: {3} PN.Destroyed called for this PV: {4}", this, this.instantiationId, Application.isLoadingLevel ? "Loading new scene caused this." : "", instanceIsThisOne, destroyedByPhotonNetworkOrQuit));
-            }
-        }
     }
 
     private MethodInfo OnSerializeMethodInfo;
 
     private bool failedToFindOnSerialize;
 
-    internal protected void ExecuteOnSerialize(PhotonStream pStream, PhotonMessageInfo info)
+    public void SerializeView( PhotonStream stream, PhotonMessageInfo info )
     {
-        if (this.failedToFindOnSerialize)
+        SerializeComponent( observed, stream, info );
+
+        for( int i = 0; i < ObservedComponents.Count; ++i )
+        {
+            SerializeComponent( ObservedComponents[ i ], stream, info );
+        }
+    }
+
+    public void DeserializeView( PhotonStream stream, PhotonMessageInfo info )
+    {
+        DeserializeComponent( observed, stream, info );
+
+        for( int i = 0; i < ObservedComponents.Count; ++i )
+        {
+            DeserializeComponent( ObservedComponents[ i ], stream, info );
+        }
+    }
+
+    internal protected void DeserializeComponent( Component component, PhotonStream stream, PhotonMessageInfo info )
+    {
+        if( component == null )
         {
             return;
         }
 
-        if (this.OnSerializeMethodInfo == null)
+        // Use incoming data according to observed type
+        if( component is MonoBehaviour )
         {
-            if (!NetworkingPeer.GetMethod(this.observed as MonoBehaviour, PhotonNetworkingMessage.OnPhotonSerializeView.ToString(), out this.OnSerializeMethodInfo))
+            ExecuteComponentOnSerialize( component, stream, info );
+        }
+        else if( component is Transform )
+        {
+            Transform trans = (Transform)component;
+
+            switch( onSerializeTransformOption )
             {
-                Debug.LogError("The observed monobehaviour (" + this.observed.name + ") of this PhotonView does not implement OnPhotonSerializeView()!");
-                this.failedToFindOnSerialize = true;
-                return;
+            case OnSerializeTransform.All:
+                trans.localPosition = (Vector3)stream.ReceiveNext();
+                trans.localRotation = (Quaternion)stream.ReceiveNext();
+                trans.localScale = (Vector3)stream.ReceiveNext();
+                break;
+            case OnSerializeTransform.OnlyPosition:
+                trans.localPosition = (Vector3)stream.ReceiveNext();
+                break;
+            case OnSerializeTransform.OnlyRotation:
+                trans.localRotation = (Quaternion)stream.ReceiveNext();
+                break;
+            case OnSerializeTransform.OnlyScale:
+                trans.localScale = (Vector3)stream.ReceiveNext();
+                break;
+            case OnSerializeTransform.PositionAndRotation:
+                trans.localPosition = (Vector3)stream.ReceiveNext();
+                trans.localRotation = (Quaternion)stream.ReceiveNext();
+                break;
             }
         }
+        else if( component is Rigidbody )
+        {
+            Rigidbody rigidB = (Rigidbody)component;
 
-        this.OnSerializeMethodInfo.Invoke((object)this.observed, new object[] { pStream, info });
+            switch( onSerializeRigidBodyOption )
+            {
+            case OnSerializeRigidBody.All:
+                rigidB.velocity = (Vector3)stream.ReceiveNext();
+                rigidB.angularVelocity = (Vector3)stream.ReceiveNext();
+                break;
+            case OnSerializeRigidBody.OnlyAngularVelocity:
+                rigidB.angularVelocity = (Vector3)stream.ReceiveNext();
+                break;
+            case OnSerializeRigidBody.OnlyVelocity:
+                rigidB.velocity = (Vector3)stream.ReceiveNext();
+                break;
+            }
+        }
+        else if( component is Rigidbody2D )
+        {
+            Rigidbody2D rigidB = (Rigidbody2D)component;
+
+            switch( onSerializeRigidBodyOption )
+            {
+            case OnSerializeRigidBody.All:
+                rigidB.velocity = (Vector2)stream.ReceiveNext();
+                rigidB.angularVelocity = (float)stream.ReceiveNext();
+                break;
+            case OnSerializeRigidBody.OnlyAngularVelocity:
+                rigidB.angularVelocity = (float)stream.ReceiveNext();
+                break;
+            case OnSerializeRigidBody.OnlyVelocity:
+                rigidB.velocity = (Vector2)stream.ReceiveNext();
+                break;
+            }
+        }
+        else
+        {
+            Debug.LogError( "Type of observed is unknown when receiving." );
+        }
+    }
+
+    internal protected void SerializeComponent( Component component, PhotonStream stream, PhotonMessageInfo info )
+    {
+        if( component == null )
+        {
+            return;
+        }
+
+        if( component is MonoBehaviour )
+        {
+            ExecuteComponentOnSerialize( component, stream, info );
+        }
+        else if( component is Transform )
+        {
+            Transform trans = (Transform)component;
+
+            switch( onSerializeTransformOption )
+            {
+            case OnSerializeTransform.All:
+                stream.SendNext( trans.localPosition );
+                stream.SendNext( trans.localRotation );
+                stream.SendNext( trans.localScale );
+                break;
+            case OnSerializeTransform.OnlyPosition:
+                stream.SendNext( trans.localPosition );
+                break;
+            case OnSerializeTransform.OnlyRotation:
+                stream.SendNext( trans.localRotation );
+                break;
+            case OnSerializeTransform.OnlyScale:
+                stream.SendNext( trans.localScale );
+                break;
+            case OnSerializeTransform.PositionAndRotation:
+                stream.SendNext( trans.localPosition );
+                stream.SendNext( trans.localRotation );
+                break;
+            }
+        }
+        else if( component is Rigidbody )
+        {
+            Rigidbody rigidB = (Rigidbody)component;
+
+            switch( onSerializeRigidBodyOption )
+            {
+            case OnSerializeRigidBody.All:
+                stream.SendNext( rigidB.velocity );
+                stream.SendNext( rigidB.angularVelocity );
+                break;
+            case OnSerializeRigidBody.OnlyAngularVelocity:
+                stream.SendNext( rigidB.angularVelocity );
+                break;
+            case OnSerializeRigidBody.OnlyVelocity:
+                stream.SendNext( rigidB.velocity );
+                break;
+            }
+        }
+        else if( component is Rigidbody2D )
+        {
+            Rigidbody2D rigidB = (Rigidbody2D)component;
+
+            switch( onSerializeRigidBodyOption )
+            {
+            case OnSerializeRigidBody.All:
+                stream.SendNext( rigidB.velocity );
+                stream.SendNext( rigidB.angularVelocity );
+                break;
+            case OnSerializeRigidBody.OnlyAngularVelocity:
+                stream.SendNext( rigidB.angularVelocity );
+                break;
+            case OnSerializeRigidBody.OnlyVelocity:
+                stream.SendNext( rigidB.velocity );
+                break;
+            }
+        }
+        else
+        {
+            Debug.LogError( "Observed type is not serializable: " + component.GetType() );
+        }
+    }
+
+    internal protected void ExecuteComponentOnSerialize( Component component, PhotonStream stream, PhotonMessageInfo info )
+    {
+        if( component != null )
+        {
+            if( m_OnSerializeMethodInfos.ContainsKey( component ) == false )
+            {
+                MethodInfo newMethod = null;
+                bool foundMethod = NetworkingPeer.GetMethod( component as MonoBehaviour, PhotonNetworkingMessage.OnPhotonSerializeView.ToString(), out newMethod );
+
+                if( foundMethod == false )
+                {
+                    Debug.LogError( "The observed monobehaviour (" + component.name + ") of this PhotonView does not implement OnPhotonSerializeView()!" );
+                    newMethod = null;
+                }
+
+                m_OnSerializeMethodInfos.Add( component, newMethod );
+            }
+
+            if( m_OnSerializeMethodInfos[ component ] != null )
+            {
+                m_OnSerializeMethodInfos[ component ].Invoke( component, new object[] { stream, info } );
+            }
+        }
     }
 
     /// <summary>
@@ -279,14 +548,14 @@ public class PhotonView : Photon.MonoBehaviour
     /// <param name="parameters">The parameters that the RPC method has (must fit this call!).</param>
     public void RPC(string methodName, PhotonTargets target, params object[] parameters)
     {
-		if(PhotonNetwork.networkingPeer.hasSwitchedMC && target == PhotonTargets.MasterClient)
+        if(PhotonNetwork.networkingPeer.hasSwitchedMC && target == PhotonTargets.MasterClient)
         {
-			PhotonNetwork.RPC(this, methodName, PhotonNetwork.masterClient, parameters);
-		}
+            PhotonNetwork.RPC(this, methodName, PhotonNetwork.masterClient, parameters);
+        }
         else
         {
-        	PhotonNetwork.RPC(this, methodName, target, parameters);
-		}
+            PhotonNetwork.RPC(this, methodName, target, parameters);
+        }
     }
 
     /// <summary>

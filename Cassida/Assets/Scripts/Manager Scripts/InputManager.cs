@@ -14,26 +14,20 @@ public class InputManager : Photon.MonoBehaviour
         private set { _moveableTileObject = value; }
     }
 
-    // Scripts		
-    private MouseController MouseController { get; set; }
-    private FleetManager FleetManager { get; set; }
-    private MapManager MapManager { get; set; }
-    private TileManager TileManager { get; set; }
+    // Tiles
+    private Tile CurrentHighlightedTile { get { return TileManager.Get().CurrentHighlightedTile; } }
+    private Tile CurrentSelectedTile { get { return TileManager.Get().CurrentSelectedTile; } }
 
     // Lists
     private List<Tile> MoveableTileList { get; set; }
     private List<Transform> MoveableTileObjectList { get; set; }
-    private List<Fleet> FleetList { get { return FleetManager.FleetList; } }
-    private List<Tile> TileList { get { return TileManager.TileList; } }
-
-    // Tiles
-    private Tile CurrentHighlightedTile { get { return TileManager.CurrentHighlightedTile; } }
-    private Tile CurrentSelectedTile { get { return TileManager.CurrentSelectedTile; } }
+    private List<Fleet> FleetList { get { return FleetManager.Get().FleetList; } }
+    private List<Tile> TileList { get { return TileManager.Get().TileList; } }
     #endregion
 
     private void CheckTileSelection()
     {
-        var clickedTile = MapManager.NearestTileToMousePosition;
+        var clickedTile = MapManager.Get().NearestTileToMousePosition;
 
         if (clickedTile == null)
         {
@@ -42,16 +36,240 @@ public class InputManager : Photon.MonoBehaviour
 
         if (CurrentSelectedTile == clickedTile)
         {
-            RotateFleet(CurrentSelectedTile.Fleet.ID);
+            // Rotate Fleet
+            TryToRotateFleet(CurrentSelectedTile.FleetID);
             return;
         }
 
-        TileManager.SelectTile(MapManager.NearestTileToMousePosition);
+        TileManager.Get().SelectTile(clickedTile);
 
         CheckShowMovementArea();
     }
 
-    #region Movement and Rotation
+    private void CheckFleetAction()
+    {
+        var targetTile = MapManager.Get().NearestTileToMousePosition;
+
+        if (targetTile == null || CurrentSelectedTile == null)
+        {
+            return;
+        }
+
+        if (CurrentSelectedTile == targetTile)
+        {
+            // Rotate Fleet
+            TryToRotateFleet(CurrentSelectedTile.FleetID, false);
+            return;
+        }
+
+        if (targetTile.FleetID > -1)
+        {
+            // Attack 
+            TryToAttackFleet(CurrentSelectedTile.FleetID, targetTile.FleetID);
+            return;
+        }
+
+        if (MoveableTileList.Exists(t => t == targetTile))
+        {
+            // Move fleet
+            TryToMoveFleet(CurrentSelectedTile.FleetID, targetTile.Position);
+        }
+    }
+
+    #region Movement
+    private void TryToMoveFleet(int fleetID, Position targetTilePosition)
+    {
+        if (!CheckMovement(fleetID, targetTilePosition))
+        {
+            return;
+        }
+
+        if (!PhotonNetwork.isMasterClient)
+        {
+            MoveFleet(fleetID, targetTilePosition);
+        }
+
+        photonView.RPC(RPCs.AskForMoveFleet, PhotonTargets.MasterClient, fleetID, targetTilePosition.X, targetTilePosition.Y);
+    }
+
+    private void MoveFleet(int fleetID, Position targetTilePosition)
+    {
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null)
+        {
+            return; // TODO ask for refresh complete data
+        }
+
+        var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
+        var targetTile = TileList.Find(t => t.Position.IsSameAs(targetTilePosition));
+
+        if (currentTile == null || targetTile == null)
+        {
+            return; // TODO ask for refresh complete data
+        }
+
+        targetTile.FleetID = fleetID;
+        currentTile.FleetID = -1;
+
+        fleet.MoveFleet(targetTile.Position);
+
+        if (PlayerManager.Get().CurrentPlayer.PhotonPlayer == PhotonNetwork.player)
+        {
+            CheckShowMovementArea();
+
+            TileManager.Get().SelectTile(targetTile);
+        }
+    }
+
+    private bool CheckMovement(int fleetID, Position targetTilePosition)
+    {
+        if (fleetID < 0)
+        {
+            return false;
+        }
+
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null || !fleet.AllowMovement || fleet.Player.ID != PlayerManager.Get().CurrentPlayer.ID)
+        {
+            return false;
+        }
+
+        var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
+        var targetTile = TileList.Find(t => t.Position.IsSameAs(targetTilePosition));
+
+        if (currentTile == null || targetTile == null || currentTile.FleetID < 0 || targetTile.FleetID > -1
+            || Vector3.Distance(currentTile.TileParent.position, targetTile.TileParent.position) > 2f)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    [RPC]
+    private void AskForMoveFleet(int fleetID, int targetTilePositionX, int targetTilePositionY, PhotonMessageInfo info)
+    {
+        if (!PhotonNetwork.isMasterClient || info.sender != PlayerManager.Get().CurrentPlayer.PhotonPlayer)
+        {
+            return;
+        }
+
+        var targetTilePosition = new Position(targetTilePositionX, targetTilePositionY);
+
+        if (!CheckMovement(fleetID, targetTilePosition))
+        {
+            return; // TODO refresh complete data at info.sender
+        }
+
+        photonView.RPC(RPCs.MoveFleet, PhotonTargets.All, fleetID, targetTilePositionX, targetTilePositionY);
+    }
+
+    [RPC]
+    private void MoveFleet(int fleetID, int targetTilePositionX, int targetTilePositionY, PhotonMessageInfo info)
+    {
+        if (!info.sender.isMasterClient)
+        {
+            return;
+        }
+
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null || (fleet.Position.X == targetTilePositionX && fleet.Position.Y == targetTilePositionY))
+        {
+            return;
+        }
+
+        var targetTilePosition = new Position(targetTilePositionX, targetTilePositionY);
+
+        MoveFleet(fleetID, targetTilePosition);
+    }
+    #endregion
+
+    #region Rotation
+    private void TryToRotateFleet(int fleetID, bool rotateRight = true)
+    {
+        if (!CheckRotation(fleetID))
+        {
+            return;
+        }
+
+        var rotationTarget = FleetList.Find(f => f.ID == fleetID).Rotation + (rotateRight ? 1 : -1);
+
+        if (!PhotonNetwork.isMasterClient)
+        {
+            RotateFleet(fleetID, rotationTarget);
+        }
+
+        photonView.RPC(RPCs.AskForRotateFleet, PhotonTargets.MasterClient, fleetID, rotationTarget);
+    }
+
+    private void RotateFleet(int fleetID, int rotationTarget)
+    {
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null)
+        {
+            return; // TODO ask for refresh complete data
+        }
+
+        fleet.RotateFleet(rotationTarget);
+    }
+
+    private bool CheckRotation(int fleetID)
+    {
+        if (fleetID < 0)
+        {
+            return false;
+        }
+
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null || !fleet.AllowRotation || fleet.Player.ID != PlayerManager.Get().CurrentPlayer.ID)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    [RPC]
+    private void AskForRotateFleet(int fleetID, int rotationTarget, PhotonMessageInfo info)
+    {
+        if (!PhotonNetwork.isMasterClient || info.sender != PlayerManager.Get().CurrentPlayer.PhotonPlayer)
+        {
+            return;
+        }
+
+        if (!CheckRotation(fleetID))
+        {
+            return; // TODO refresh complete data at info.sender
+        }
+
+        photonView.RPC(RPCs.RotateFleet, PhotonTargets.All, fleetID, rotationTarget);
+    }
+
+    [RPC]
+    private void RotateFleet(int fleetID, int rotationTarget, PhotonMessageInfo info)
+    {
+        if (!info.sender.isMasterClient)
+        {
+            return;
+        }
+
+        var fleet = FleetList.Find(f => f.ID == fleetID);
+
+        if (fleet == null || fleet.Rotation == rotationTarget)
+        {
+            return;
+        }
+
+        RotateFleet(fleetID, rotationTarget);
+    }
+    #endregion
+
+    #region Movement area
     private void CheckShowMovementArea()
     {
         ResetMovementArea();
@@ -61,15 +279,24 @@ public class InputManager : Photon.MonoBehaviour
             return;
         }
 
-        if (CurrentSelectedTile.Fleet.MovementPointsLeft > 0)
+        var fleet = FleetList.Find(f => f.ID == CurrentSelectedTile.FleetID);
+
+        if (fleet == null)
         {
-            ShowMovementArea();
+            return;
+        }
+
+        if (fleet.AllowMovement)
+        {
+            SetMovementArea();
         }
     }
 
-    private void ShowMovementArea()
+    private void SetMovementArea()
     {
-        if (CurrentSelectedTile.Fleet.MovementPointsLeft == 0)
+        var fleet = FleetList.Find(f => f.ID == CurrentSelectedTile.FleetID);
+
+        if (!fleet.AllowMovement)
         {
             return;
         }
@@ -93,183 +320,205 @@ public class InputManager : Photon.MonoBehaviour
 
         MoveableTileObjectList.Clear();
     }
-
-    private void CheckFleetMovement()
-    {
-        var targetTile = MapManager.NearestTileToMousePosition;
-
-        if (targetTile == null || CurrentSelectedTile == null)
-        {
-            return;
-        }
-
-        if (CurrentSelectedTile == targetTile)
-        {
-            // Rotate Fleet
-            RotateFleet(CurrentSelectedTile.Fleet.ID, false);
-            //RotateFleetToPosition(CurrentSelectedTile.Fleet.ID, CurrentSelectedTile.Fleet.RotationPosition - 1);
-            return;
-        }
-
-        if (CurrentSelectedTile != null && targetTile.Fleet != null)
-        {
-            // Attack 
-            AttackEnemyFleet();
-            return;
-        }
-
-        // Move fleet
-        if (MoveableTileList.Exists(t => t == targetTile))
-        {
-            MoveFleet(CurrentSelectedTile.Fleet.ID, targetTile.Position);
-
-            TileManager.SelectTile(targetTile);
-
-            CheckShowMovementArea();
-        }
-    }
-
-    private void RotateFleet(int fleetID, bool rotateRight = true)
-    {
-        photonView.RPC("NetworkRotateFleet", PhotonTargets.AllBuffered, fleetID, rotateRight);
-    }
-
-    //private void RotateFleetToPosition(int fleetID, int rotationPosition)
-    //{
-    //    photonView.RPC("NetworkRotateFleetToPosition", PhotonTargets.All, fleetID, rotationPosition);
-    //}
-
-    [RPC]
-    private void NetworkRotateFleet(int fleetID, bool rotateRight)
-    {
-        var fleet = FleetList.Find(f => f.ID == fleetID);
-
-        fleet.RotateFleet(rotateRight ? 1 : -1);
-    }
-
-    //[RPC]
-    //private void NetworkRotateFleetToPosition(int fleetID, int rotationPosition)
-    //{
-    //    var fleet = FleetList.Find(f => f.ID == fleetID);
-
-    //    fleet.RotateFleetToPosition(rotationPosition);
-    //}
-
-    private void MoveFleet(int fleetID, Vector2 targetTilePosition)
-    {
-        ResetMovementArea();
-
-        photonView.RPC("NetworkMoveFleet", PhotonTargets.AllBuffered, fleetID, targetTilePosition);
-    }
-
-    [RPC]
-    private void NetworkMoveFleet(int fleetID, Vector2 targetTilePosition)
-    {
-        var fleet = FleetList.Find(f => f.ID == fleetID);
-        if (fleet == null)
-        {
-            return;
-        }
-
-        var currentTile = TileList.Find(t => t.Fleet == fleet);
-        var targetTile = TileList.Find(t => t.Position == targetTilePosition);
-
-        targetTile.Fleet = fleet;
-        currentTile.Fleet = null;
-
-        fleet.MoveFleet(targetTile.TileParent.position);
-    }
     #endregion
 
     #region Fight
-    private void AttackEnemyFleet()
+    private void TryToAttackFleet(int ownFleetID, int enemyFleetID)
     {
-        if (!TileManager.CheckAttackEnemyFleet())
+        if (!CheckAttack(ownFleetID, enemyFleetID))
         {
             return;
         }
 
-        var ownUnitDirection = TileManager.GetOwnUnitInDirection();
-        var enemyUnitDirection = ownUnitDirection < 3 ? ownUnitDirection + 3 : ownUnitDirection - 3;
+        // TODO start fight animation here
 
-        var ownFleetTile = CurrentSelectedTile;
-        var enemyFleetTile = CurrentHighlightedTile;
-
-        var ownFleet = ownFleetTile.Fleet;
-        var enemyFleet = enemyFleetTile.Fleet;
-
-        var ownUnitStrength = ownFleet.Units[ownUnitDirection].UnitValues.Strength;
-        var enemyUnit = enemyFleet.Units[enemyUnitDirection];
-
-        if (enemyUnit == null)
-        {
-            for (int i = 0; i < enemyFleet.Units.Length; i++)
-            {
-                AttackUnitOfFleet(enemyFleet.ID, i, ownUnitStrength);
-            }
-        }
-        else
-        {
-            AttackUnitOfFleet(ownFleetTile.Fleet.ID, ownUnitDirection, enemyUnit.UnitValues.Strength);
-            AttackUnitOfFleet(enemyFleetTile.Fleet.ID, enemyUnitDirection, ownUnitStrength);
-        }
-
-        TileManager.ResetHighlightedTile();
+        photonView.RPC(RPCs.AskForAttackFleet, PhotonTargets.MasterClient, ownFleetID, enemyFleetID);
     }
 
-    private void AttackUnitOfFleet(int fleetID, int unitPosition, int strength)
+    private void AttackFleet(int ownFleetID, int enemyFleetID)
     {
-        photonView.RPC("NetworkAttackUnitOfFleet", PhotonTargets.AllBuffered, fleetID, unitPosition, strength);
+        var ownFleet = FleetList.Find(f => f.ID == ownFleetID);
+
+        if (ownFleet == null)
+        {
+            return; // TODO ask for refresh complete data
+        }
+
+        ownFleet.AttackWithFleet(enemyFleetID);
+
+        if (PlayerManager.Get().CurrentPlayer.PhotonPlayer == PhotonNetwork.player)
+        {
+            ResetMovementArea();
+            TileManager.Get().ResetHighlightedTile();
+        }
     }
 
     [RPC]
-    private void NetworkAttackUnitOfFleet(int fleetID, int unitPosition, int strength)
+    private void AskForAttackFleet(int ownFleetID, int enemyFleetID, PhotonMessageInfo info)
     {
-        var fleet = FleetList.Find(f => f.ID == fleetID);
-        if (fleet == null)
+        if (!PhotonNetwork.isMasterClient || info.sender != PlayerManager.Get().CurrentPlayer.PhotonPlayer)
         {
             return;
         }
 
-        fleet.AttackUnit(unitPosition, strength);
+        if (!CheckAttack(ownFleetID, enemyFleetID))
+        {
+            return; // TODO refresh complete data at info.sender
+        }
+
+        photonView.RPC(RPCs.AttackFleet, PhotonTargets.All, ownFleetID, enemyFleetID);
+    }
+
+    [RPC]
+    private void AttackFleet(int ownFleetID, int enemyFleetID, PhotonMessageInfo info)
+    {
+        if (!info.sender.isMasterClient)
+        {
+            return;
+        }
+
+        // Achtung keine Überprüfung ob jetzt alle gleich syncronisiert sind!
+
+        AttackFleet(ownFleetID, enemyFleetID);
+    }
+    #region Check attack
+    public bool CheckAttack(int ownFleetID, int enemyFleetID)
+    {
+        var ownFleet = FleetList.Find(f => f.ID == ownFleetID);
+        var enemyFleet = FleetList.Find(f => f.ID == enemyFleetID);
+
+        if (ownFleet == null || enemyFleet == null || ownFleet.Player.ID != PlayerManager.Get().CurrentPlayer.ID || enemyFleet.Player.ID == PlayerManager.Get().CurrentPlayer.ID)
+        {
+            return false;
+        }
+
+        var unitDirection = GetOwnUnitPosition(ownFleet.Position, enemyFleet.Position);
+
+        if (unitDirection < 0)
+        {
+            return false;
+        }
+
+        var ownUnit = ownFleet.Units[unitDirection];
+
+        if (ownUnit == null)
+        {
+            return false;
+        }
+
+        if (ownUnit.UnitController == null || ownUnit.AllowAttack == false) //FUNktionier nicht nicht.. Angriffe funktionieren nicht mehr!!
+        {
+            return false;
+        }
+
+        var distanceBetweenFleets = Vector3.Distance(ownFleet.FleetParent.position, enemyFleet.FleetParent.position);
+
+        if (ownUnit.UnitValues.UnitType == UnitType.Meele
+            && distanceBetweenFleets <= 2)
+        {
+            return true;
+        }
+        else if (ownUnit.UnitValues.UnitType == UnitType.Range
+            && distanceBetweenFleets > 2 && distanceBetweenFleets <= 4)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public int GetOwnUnitPosition(Position ownFleetPosition, Position enemyFleetPosition)
+    {
+        if (enemyFleetPosition.X == ownFleetPosition.X)
+        {
+            if (enemyFleetPosition.Y > ownFleetPosition.Y)
+            {
+                return 0;
+            }
+
+            return 3;
+        }
+        else if (enemyFleetPosition.Y == ownFleetPosition.Y)
+        {
+            if (enemyFleetPosition.X > ownFleetPosition.X)
+            {
+                return 1;
+            }
+
+            return 4;
+        }
+        else if(enemyFleetPosition.X + enemyFleetPosition.Y == ownFleetPosition.X + ownFleetPosition.Y)
+        {
+            if (enemyFleetPosition.X < ownFleetPosition.X
+                && enemyFleetPosition.Y > ownFleetPosition.Y)
+            {
+                return 5;
+            }
+            else if (enemyFleetPosition.X > ownFleetPosition.X
+                && enemyFleetPosition.Y < ownFleetPosition.Y)
+            {
+                return 2;
+            }
+        }
+
+        return -1;
     }
     #endregion
+    #endregion
 
-    private void AddMouseEvents()
+    public void AddMouseEvents()
     {
         // Add events
-        MouseController.LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);
-        MouseController.RightMouseclickEvent += new MouseclickHandler(CheckFleetMovement);
+        MouseController.Get().LeftMousecklickEvent += new MouseclickHandler(CheckTileSelection);
+        MouseController.Get().RightMouseclickEvent += new MouseclickHandler(CheckFleetAction);
+    }
+
+    public void RemoveMouseEvents()
+    {
+        // Remove events
+        MouseController.Get().LeftMousecklickEvent -= new MouseclickHandler(CheckTileSelection);
+        MouseController.Get().RightMouseclickEvent -= new MouseclickHandler(CheckFleetAction);
     }
 
     private void Init()
     {
-        MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
-        FleetManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<FleetManager>();
-        MapManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<MapManager>();
-        TileManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<TileManager>();
-
-        if (!MouseController || !FleetManager || !MapManager || !TileManager)
-        {
-            Debug.LogError("MissedComponents!");
-        }
+        MoveableTileList = new List<Tile>();
+        MoveableTileObjectList = new List<Transform>();
     }
 
     private void Start()
     {
-        MoveableTileList = new List<Tile>();
-        MoveableTileObjectList = new List<Transform>();
-
-        AddMouseEvents();
+        Init();
     }
 
     private void Awake()
     {
-        Init();
+        //Check for Singleton
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+        else if (_instance != this)
+        {
+            Debug.LogError("Second instance!");
+            return;
+        }
     }
 
     private void Update()
     {
 
+    }
+
+    private static InputManager _instance = null;
+    public static InputManager Get()
+    {
+        if (_instance == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag(Tags.Manager);
+            _instance = obj.AddComponent<InputManager>();
+        }
+
+        return _instance;
     }
 }
