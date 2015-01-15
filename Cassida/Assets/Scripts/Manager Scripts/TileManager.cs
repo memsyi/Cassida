@@ -343,14 +343,14 @@ public class TileManager : MonoBehaviour, IJSON
         {
             foreach (var selectionObject in TileAnimation.SelectionObjects)
             {
-                selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 + (currentAnimatedObjectPosition / TileAnimation.AnimationRange) * TileAnimation.AnimationFadeOut);
+                //selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 + (currentAnimatedObjectPosition / TileAnimation.AnimationRange) * TileAnimation.AnimationFadeOut);
             }
         }
         else
         {
             foreach (var selectionObject in TileAnimation.SelectionObjects)
             {
-                selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 - (currentAnimatedObjectPosition / TileAnimation.AnimationRange) *TileAnimation.AnimationFadeOut);
+                //selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 - (currentAnimatedObjectPosition / TileAnimation.AnimationRange) *TileAnimation.AnimationFadeOut);
             }
         }
     }
