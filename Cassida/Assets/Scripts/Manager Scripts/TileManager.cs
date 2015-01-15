@@ -158,7 +158,8 @@ public class SettingsTileAnimation
     [SerializeField]
     private float
         _animationSpeed = 1.0f,
-        _animationRange = 1.0f;
+        _animationRange = 1.0f,
+        _animationFadeOut = 1.0f;
 
     [SerializeField]
     private int _animatedObjectCount = 2;
@@ -193,13 +194,18 @@ public class SettingsTileAnimation
         get { return _smothAnimation; }
         set { _smothAnimation = value; }
     }
+    public float AnimationFadeOut
+    {
+        get { return _animationFadeOut; }
+        set { _animationFadeOut = value; }
+    }
     #endregion
 
     private bool _backwardAnimation;
 
-    public bool BackwardAnimation 
-    { 
-        get 
+    public bool BackwardAnimation
+    {
+        get
         {
             if (!SmothAnimation) return false;
 
@@ -343,14 +349,14 @@ public class TileManager : MonoBehaviour, IJSON
         {
             foreach (var selectionObject in TileAnimation.SelectionObjects)
             {
-                //selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 + (currentAnimatedObjectPosition / TileAnimation.AnimationRange) * TileAnimation.AnimationFadeOut);
+                selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 + (currentAnimatedObjectPosition / TileAnimation.AnimationRange) * TileAnimation.AnimationFadeOut);
             }
         }
         else
         {
             foreach (var selectionObject in TileAnimation.SelectionObjects)
             {
-                //selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 - (currentAnimatedObjectPosition / TileAnimation.AnimationRange) *TileAnimation.AnimationFadeOut);
+                selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 - (currentAnimatedObjectPosition / TileAnimation.AnimationRange) * TileAnimation.AnimationFadeOut);
             }
         }
     }

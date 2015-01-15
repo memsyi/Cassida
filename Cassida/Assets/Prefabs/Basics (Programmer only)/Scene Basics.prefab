@@ -381,21 +381,21 @@ MonoBehaviour:
     _lookAtObject: {fileID: 0}
     _movementArea:
       serializedVersion: 2
-      x: -5
-      y: -5
-      width: 10
-      height: 10
+      x: -50
+      y: -50
+      width: 100
+      height: 100
     _borderStrength: 5
   _cameraSettings:
-    _movementSpeed: 1
-    _rotationSpeed: 1
+    _movementSpeed: .200000003
+    _rotationSpeed: .5
     _zoomSpeed: 1
-    _buttonSpeed: 2
-    _mouseButtonSpeed: 2
+    _buttonSpeed: 1
+    _mouseButtonSpeed: 1
     _minimumZoom: 20
-    _maximumZoom: 3
-    _zoomDownAngle: 20
-    _heightMultiplier: 1.29999995
+    _maximumZoom: .75
+    _zoomDownAngle: 40
+    _heightMultiplier: 1
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -586,8 +586,18 @@ MonoBehaviour:
     _slowFleetObject: {fileID: 400002, guid: db744df7a6f473743949217f076427f1, type: 2}
     _fastFleetObject: {fileID: 400002, guid: f28917b255eeb5042966bb9d78490456, type: 2}
   _unitSettgins:
-    _meeleUnitObject: {fileID: 400000, guid: 8d7420edd65ff684581ad10491fb2eed, type: 2}
-    _rangeUnitObject: {fileID: 400000, guid: 835014c0234881f4caee7da2c6684102, type: 2}
+    _meeleUnitOneObject: {fileID: 400000, guid: 8d7420edd65ff684581ad10491fb2eed,
+      type: 2}
+    _meeleUnitTwoObject: {fileID: 400004, guid: a30372dcbd98c404098e1be8764c72ca,
+      type: 2}
+    _meeleUnitThreeObject: {fileID: 400004, guid: b07d48d4b4a2f05419b589003e3a865a,
+      type: 2}
+    _rangeUnitOneObject: {fileID: 400000, guid: 835014c0234881f4caee7da2c6684102,
+      type: 2}
+    _rangeUnitTwoObject: {fileID: 400004, guid: a0aa97cbb1a9c864eb51eb98866c9c09,
+      type: 2}
+    _rangeUnitThreeObject: {fileID: 400004, guid: d6d8f511e06f50c45b242b06c2e98f83,
+      type: 2}
 --- !u!114 &11400026
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -658,9 +668,10 @@ MonoBehaviour:
   _tileAnimation:
     _allowAnimation: 1
     _smothAnimation: 1
-    _animationSpeed: 1
-    _animationRange: 1
-    _animatedObjectCount: 4
+    _animationSpeed: 2.5
+    _animationRange: 1.5
+    _animationFadeOut: 1
+    _animatedObjectCount: 2
 --- !u!114 &11400032
 MonoBehaviour:
   m_ObjectHideFlags: 1
