@@ -127,11 +127,11 @@ public class MapGenerator : Photon.MonoBehaviour
     private TerrainType CalculateTerrainType(Position position)
     {
         // TODO not mirrowed!!!!!
-        int _randomValue = Random.Range(0, 4);
-        if (_randomValue == 0)
-        {
-            return TerrainType.Asteroids;
-        }
+        //int _randomValue = Random.Range(0, 4);
+        //if (_randomValue == 0)
+        //{
+        //    return TerrainType.Asteroids;
+        //}
 
         return TerrainType.Empty;
     }

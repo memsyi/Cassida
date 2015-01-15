@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public enum UnitType
 {
@@ -42,7 +43,7 @@ public class Unit : IJSON
         {
             if (value == null) { return; }
 
-            UnitController.InstantiateUnit(value.UnitType, FleetManager.Get().FleetList.Find(f => f.ID == FleetID).Player.Color);
+            UnitController.InstantiateUnit(value.UnitType, value.Strength, FleetManager.Get().FleetList.Find(f => f.ID == FleetID).Player.Color);
             unitValues = value;
         }
     }
@@ -111,17 +112,43 @@ public class UnitController : MonoBehaviour
         return unitParent;
     }
 
-    public void InstantiateUnit(UnitType type, Color color)
+    public void InstantiateUnit(UnitType type, int strength, Color color)
     {
-        var fleetManager = FleetManager.Get();
+        var unitSettings = FleetManager.Get().UnitSettings;
 
         switch (type)
         {
             case UnitType.Meele:
-                InstantiateUnitObject(fleetManager.UnitSettings.MeeleUnitObject, type);
+                switch (strength)
+                {
+                    case 1:
+                        InstantiateUnitObject(unitSettings.MeeleUnitOneObject, type);
+                        break;
+                    case 2:
+                        InstantiateUnitObject(unitSettings.MeeleUnitTwoObject, type);
+                        break;
+                    case 3:
+                        InstantiateUnitObject(unitSettings.MeeleUnitThreeObject, type);
+                        break;
+                    default:
+                        break;
+                }
                 break;
             case UnitType.Range:
-                InstantiateUnitObject(fleetManager.UnitSettings.RangeUnitObject, type);
+                switch (strength)
+                {
+                    case 1:
+                        InstantiateUnitObject(unitSettings.RangeUnitOneObject, type);
+                        break;
+                    case 2:
+                        InstantiateUnitObject(unitSettings.RangeUnitTwoObject, type);
+                        break;
+                    case 3:
+                        InstantiateUnitObject(unitSettings.RangeUnitThreeObject, type);
+                        break;
+                    default:
+                        break;
+                }
                 break;
             default:
                 break;
@@ -132,6 +159,12 @@ public class UnitController : MonoBehaviour
 
     private void InstantiateUnitObject(Transform model, UnitType type)
     {
+        // Destroy old
+        if (UnitObject != null)
+        {
+            Destroy(UnitObject);
+        }
+
         // Instantiate unit
         UnitObject = Instantiate(model, transform.position, transform.rotation) as Transform;
 
@@ -141,7 +174,12 @@ public class UnitController : MonoBehaviour
 
     private void SetColorOfUnit(Color color)
     {
-        UnitObject.GetChild(0).renderer.material.color = color;
+        var colorComponentList = new List<Renderer>(UnitObject.GetComponentsInChildren<Renderer>());
+        var colorObjectList = new List<Renderer>(colorComponentList.FindAll(t => t.transform.parent.tag == Tags.PlayerColorObjects));
+        foreach (var colorObject in colorObjectList)
+        {
+            colorObject.renderer.material.color = color;
+        }
     }
     #endregion
 

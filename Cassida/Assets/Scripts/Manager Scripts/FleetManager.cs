@@ -27,20 +27,52 @@ public struct UnitSettings
 {
     [SerializeField]
     private Transform
-        _meeleUnitObject,
-        _rangeUnitObject;
+        _meeleUnitOneObject,
+        _meeleUnitTwoObject,
+        _meeleUnitThreeObject,
+        _rangeUnitOneObject,
+        _rangeUnitTwoObject,
+        _rangeUnitThreeObject;
 
-    public Transform MeeleUnitObject
+    #region Meele
+    public Transform MeeleUnitThreeObject
     {
-        get { return _meeleUnitObject; }
-        private set { _meeleUnitObject = value; }
+        get { return _meeleUnitThreeObject; }
+        set { _meeleUnitThreeObject = value; }
     }
 
-    public Transform RangeUnitObject
+    public Transform MeeleUnitTwoObject
     {
-        get { return _rangeUnitObject; }
-        private set { _rangeUnitObject = value; }
+        get { return _meeleUnitTwoObject; }
+        set { _meeleUnitTwoObject = value; }
     }
+
+    public Transform MeeleUnitOneObject
+    {
+        get { return _meeleUnitOneObject; }
+        private set { _meeleUnitOneObject = value; }
+    } 
+    #endregion
+
+    #region Range
+    public Transform RangeUnitThreeObject
+    {
+        get { return _rangeUnitThreeObject; }
+        set { _rangeUnitThreeObject = value; }
+    }
+
+    public Transform RangeUnitTwoObject
+    {
+        get { return _rangeUnitTwoObject; }
+        set { _rangeUnitTwoObject = value; }
+    }
+
+    public Transform RangeUnitOneObject
+    {
+        get { return _rangeUnitOneObject; }
+        private set { _rangeUnitOneObject = value; }
+    } 
+    #endregion
 }
 
 [RequireComponent(typeof(PhotonView))]
@@ -252,7 +284,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     {
         if (GUI.Button(new Rect(200, 0, 100, 20), "Add Fleet"))
         {
-            var testUnits = new UnitValues[] { new UnitValues(UnitType.Meele, 1), new UnitValues(UnitType.Range, 1), null, null, null, null };
+            var testUnits = new UnitValues[] { new UnitValues(UnitType.Meele, 2), new UnitValues(UnitType.Range, 1), null, null, null, null };
             InstantiateNewFleet(new Position(0, 0), FleetType.Slow, testUnits);
         }
     }

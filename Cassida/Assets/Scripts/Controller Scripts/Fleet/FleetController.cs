@@ -282,6 +282,12 @@ public class FleetController : MonoBehaviour
 
     private void InstantiateFleetObject(Transform model, FleetType type)
     {
+        // Destroy old
+        if (FleetObject != null)
+        {
+            Destroy(FleetObject);
+        }
+
         // Instantiate fleet
         FleetObject = Instantiate(model, transform.position, transform.rotation) as Transform;
 
@@ -291,7 +297,12 @@ public class FleetController : MonoBehaviour
 
     private void SetColorOfFleet(Color color)
     {
-        FleetObject.GetChild(0).renderer.material.color = color;
+        var colorComponentList = new List<Renderer>(FleetObject.GetComponentsInChildren<Renderer>());
+        var colorObjectList = new List<Renderer>(colorComponentList.FindAll(t => t.transform.parent.tag == Tags.PlayerColorObjects));
+        foreach (var colorObject in colorObjectList)
+        {
+            colorObject.renderer.material.color = color;
+        }
     }
     #endregion
 

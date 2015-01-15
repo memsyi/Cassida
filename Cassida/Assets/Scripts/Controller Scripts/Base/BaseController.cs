@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class BaseValues : IJSON
 {
@@ -95,7 +96,12 @@ public class BaseController : MonoBehaviour
     }
     private void SetColorOfBase(Color color)
     {
-        BaseObject.GetChild(0).renderer.material.color = color;
+        var colorComponentList = new List<Renderer>(BaseObject.GetComponentsInChildren<Renderer>());
+        var colorObjectList = new List<Renderer>(colorComponentList.FindAll(t => t.transform.parent.tag == Tags.PlayerColorObjects));
+        foreach (var colorObject in colorObjectList)
+        {
+            colorObject.renderer.material.color = color;
+        }
     }
     #endregion
 
