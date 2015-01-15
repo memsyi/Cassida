@@ -30,6 +30,7 @@ public class ProfileManager : MonoBehaviour
 
     void Start()
     {
+        //ClearAllProfiles();
         profileMaxID = PlayerPrefs.GetInt(MAXID);
         profilesCount = PlayerPrefs.GetInt(PROFILESCOUNT);
         deleteProfile.gameObject.SetActive(false);
@@ -146,7 +147,6 @@ public class ProfileManager : MonoBehaviour
     public void SelectedProfile(ProfileInput profile)
     {
         deleteProfile.gameObject.SetActive(true);
-
         if (currentSelection != null)
         {
             currentSelection.DeactivateSelection();
