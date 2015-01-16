@@ -66,7 +66,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        FleetManager.Get().DestroyAllFleetsOfDisconnectedPlayers(playerID);
+        FleetManager.Get().DestroyAllFleetsOfPlayers(playerID);
     }
     #endregion
 
@@ -87,17 +87,16 @@ public class GameController : Photon.MonoBehaviour, IJSON
 
         if (GUI.Button(new Rect(300, 0, 100, 20), "Save"))
         {
-            PlayerPrefs.SetString("Fleets", FleetManager.Get().ToJSON().print());
-            PlayerPrefs.SetString("Tiles", TileManager.Get().ToJSON().print());
+            PlayerPrefs.SetString("Game", ToJSON().print());
             print(FleetManager.Get().ToJSON().print());
             print(TileManager.Get().ToJSON().print());
         }
         if (GUI.Button(new Rect(400, 0, 100, 20), "Load"))
         {
             //PlayerPrefs.DeleteAll();
-            FleetManager.Get().DestroyAllFleetsOfDisconnectedPlayers(0);
-            var fleetString = JSONParser.parse(PlayerPrefs.GetString("Fleets"));
-            FleetManager.Get().FromJSON(fleetString);
+            FleetManager.Get().DestroyAllFleetsOfPlayers(0);
+
+            FromJSON(JSONParser.parse(PlayerPrefs.GetString("Game")));
         }
         if (GUI.Button(new Rect(500, 0, 100, 20), "Print"))
         {
@@ -171,14 +170,17 @@ public class GameController : Photon.MonoBehaviour, IJSON
     //    //size = (float)x["size"];
     //}
 
-    JSONObject IJSON.ToJSON()
+    public JSONObject ToJSON()
     {
-        //var 
-        return null;
+        var jsonObject = JSONObject.obj;
+        jsonObject[JSONs.Army] = FleetManager.Get().ToJSON();
+        jsonObject[JSONs.Map] = TileManager.Get().ToJSON();
+        return jsonObject;
     }
 
-    void IJSON.FromJSON(JSONObject o)
+    public void FromJSON(JSONObject jsonObject)
     {
-        throw new System.NotImplementedException();
+        FleetManager.Get().FromJSON(jsonObject[JSONs.Army]);
+        TileManager.Get().FromJSON(jsonObject[JSONs.Map]);
     }
 }

@@ -3,6 +3,10 @@ using System.Collections;
 
 public struct JSONs
 {
+    public const string Army = "Army";
+    public const string Map = "Map";
+    public const string Players = "Players";
+
     public const string Player = "Player";
     public const string PlayerID = "PlayerID";
     public const string ID = "ID";

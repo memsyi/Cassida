@@ -40,7 +40,6 @@ public class Tile : IJSON
         TileObject = MapGenerator.Get().InstatiateTileObject(TileParent);
 
         Position = position;
-        //FleetID = -1;
         TerrainType = terrain;
         ObjectiveType = objective;
 
@@ -83,7 +82,6 @@ public class Tile : IJSON
     {
         var jsonObject = JSONObject.obj;
         jsonObject[JSONs.Position] = Position.ToJSON();
-        //jsonObject[JSONs.FleetID] = new JSONObject(FleetID);
         jsonObject[JSONs.TerrainType] = new JSONObject((int)TerrainType);
         jsonObject[JSONs.ObjectiveType] = new JSONObject((int)ObjectiveType);
         return jsonObject;
@@ -268,14 +266,14 @@ public class TileManager : MonoBehaviour, IJSON
 
         CurrentSelectedTile = tile;
         SetTileBorderColor(CurrentSelectedTile, TileColor.MouseOverSelectionColor);
+
         if (TileAnimation.AllowAnimation)
         {
             InitiateSelectionAnimation(tile);
         }
-
     }
 
-    public void ResetAllTiles()
+    public void ResetAllTiles() // TODO event
     {
         ResetSelectedTile();
         ResetHighlightedTile();
@@ -367,14 +365,15 @@ public class TileManager : MonoBehaviour, IJSON
     #region Highlight tiles
     private void HighLightNearestTile()
     {
-        if (CurrentHighlightedTile == MapManager.Get().NearestTileToMousePosition)
+        var nearestTile = MapManager.Get().NearestTileToMousePosition;
+        if (CurrentHighlightedTile == nearestTile)
         {
             return;
         }
 
         ResetHighlightedTile();
 
-        CurrentHighlightedTile = MapManager.Get().NearestTileToMousePosition;
+        CurrentHighlightedTile = nearestTile;
 
         HighlightTile();
     }
@@ -455,11 +454,7 @@ public class TileManager : MonoBehaviour, IJSON
 
     private void SetTileBorderColor(Tile tile, Color color)
     {
-        if (tile == null)
-        {
-            return;
-        }
-
+        if (tile == null) { return; } 
         tile.TileObject.renderer.material.color = color;
     }
 

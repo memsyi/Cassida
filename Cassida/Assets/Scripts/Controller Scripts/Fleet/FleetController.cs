@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public enum FleetType
 {
@@ -40,12 +41,12 @@ public class FleetValues : IJSON
 public class Fleet : IJSON
 {
     public int ID { get; private set; }
-    public Player Player { get; private set; }
+    public Player Player { get; private set; } // TODO change to playerID
     public Position Position { get; private set; }
     private int rotation;
     public int Rotation { get { return rotation; } private set { rotation = value; if (rotation < 0) rotation += 6; if (rotation >= 6) rotation -= 6; } }
     public FleetValues FleetValues { get; private set; }
-    public List<Unit> Units { get; private set; } // TODO set private
+    public List<Unit> UnitList { get; private set; } // TODO set private
 
     public Transform FleetParent { get; protected set; }
     public FleetController FleetController { get; protected set; }
@@ -73,12 +74,12 @@ public class Fleet : IJSON
 
     }
 
-    private void InitiateValues()//int id, Player player, Position position, FleetValues fleetValues)
+    private void InitiateValues()
     {
         // Parent object and controller must be first!
         FleetParent = FleetController.InstatiateParentObject(Position, Player.Name);
         FleetController = FleetParent.gameObject.AddComponent<FleetController>();
-        Units = new List<Unit>();
+        UnitList = new List<Unit>();
 
         FleetController.InstantiateFleet(FleetValues.FleetType, Player.Color);
     }
@@ -109,7 +110,7 @@ public class Fleet : IJSON
         MovementPointsLeft = (int)FleetValues.FleetType;
         AllowRotation = true;
 
-        foreach (var unit in Units)
+        foreach (var unit in UnitList)
         {
             if (unit != null)
             {
@@ -120,7 +121,7 @@ public class Fleet : IJSON
 
     public Unit FindUnit(int position)
     {
-        return Units.Find(u => (u.Position + Rotation) % 6 == position);
+        return UnitList.Find(u => (u.Position + Rotation) % 6 == position);
     }
 
     public void AttackWithFleet(int enemyFleetID)
@@ -150,9 +151,9 @@ public class Fleet : IJSON
         // damage to all enemy units
         if (enemyUnit == null)
         {
-            for (int i = enemyFleet.Units.Count - 1; i >= 0; i--)
+            for (int i = enemyFleet.UnitList.Count - 1; i >= 0; i--)
             {
-                AttackUnitOfFleet(enemyFleet, enemyFleet.Units[i], unit.UnitValues.Strength);
+                AttackUnitOfFleet(enemyFleet, enemyFleet.UnitList[i], unit.UnitValues.Strength);
             }
         }
         else
@@ -191,7 +192,7 @@ public class Fleet : IJSON
 
         if (!attackedUnit.CheckWhetherUnitIsAlive())
         {
-            Units.Remove(attackedUnit);
+            UnitList.Remove(attackedUnit);
             CheckWhetherFleetIsAlive();
             return;
         }
@@ -199,7 +200,7 @@ public class Fleet : IJSON
 
     private bool CheckWhetherFleetIsAlive()
     {
-        foreach (var unit in Units)
+        foreach (var unit in UnitList)
         {
             if (unit != null) { return true; }
         }
@@ -216,7 +217,7 @@ public class Fleet : IJSON
         jsonObject[JSONs.Position] = Position.ToJSON();
         jsonObject[JSONs.Rotation] = new JSONObject(Rotation);
         jsonObject[JSONs.FleetValues] = FleetValues.ToJSON();
-        jsonObject[JSONs.Units] = JSONObject.CreateList(Units);
+        jsonObject[JSONs.Units] = JSONObject.CreateList(UnitList);
         jsonObject[JSONs.AllowRotation] = new JSONObject(AllowRotation);
         jsonObject[JSONs.MovementPointsLeft] = new JSONObject(MovementPointsLeft);
 
@@ -238,7 +239,7 @@ public class Fleet : IJSON
         FleetManager.Get().AddFleet(this);
         FleetController.RotateFleet(Rotation);
 
-        Units = JSONObject.ReadList<Unit>(jsonObject[JSONs.Units]);
+        UnitList = JSONObject.ReadList<Unit>(jsonObject[JSONs.Units]);
     }
 }
 
@@ -333,6 +334,7 @@ public class FleetController : MonoBehaviour
     public void MoveFleet(Position target)
     {
         MovementTarget = TileManager.Get().TileList.Find(t => t.Position == target).TileParent.position;
+        //StartCoroutine("MoveToTarget", TileManager.Get().TileList.Find(t => t.Position == target).TileParent.position);
     }
 
     public void RotateFleet(int rotationDirection)
@@ -340,20 +342,27 @@ public class FleetController : MonoBehaviour
         RotationTarget = Quaternion.AngleAxis(rotationDirection * 60f, Vector3.up);
     }
 
+    //IEnumerator MoveToTarget(Vector3 target)
     private void MoveToTarget()
     {
-        if (!Move)
-        {
-            return;
-        }
+        //while (true)
+        //{
+            if (!Move)
+            {
+                return;
+            }
 
-        transform.position = Vector3.Lerp(transform.position, MovementTarget, Time.deltaTime * 3);
+            transform.position = Vector3.Lerp(transform.position, MovementTarget, Time.deltaTime * 3);
 
-        if (Vector3.Distance(transform.position, MovementTarget) < 0.01f)
-        {
-            transform.position = MovementTarget;
-            Move = false;
-        }
+            if (Vector3.Distance(transform.position, MovementTarget) < 0.01f)
+            {
+                transform.position = MovementTarget;
+                Move = false;
+                //break;
+            }
+        //}
+
+        //yield return null;
     }
 
     private void RotateToTarget()

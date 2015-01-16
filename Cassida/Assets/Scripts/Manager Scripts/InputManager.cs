@@ -109,9 +109,6 @@ public class InputManager : Photon.MonoBehaviour
             return; // TODO ask for refresh complete data
         }
 
-        //targetTile.FleetID = fleetID;
-        //currentTile.FleetID = -1;
-
         fleet.MoveFleet(targetTile.Position);
 
         if (PlayerManager.Get().CurrentPlayer.PhotonPlayer == PhotonNetwork.player)
@@ -399,7 +396,7 @@ public class InputManager : Photon.MonoBehaviour
             return false;
         }
 
-        var ownUnit = ownFleet.Units.Find(u => (u.Position + ownFleet.Rotation) % 6 == unitDirection); ;
+        var ownUnit = ownFleet.UnitList.Find(u => (u.Position + ownFleet.Rotation) % 6 == unitDirection); ;
 
         if (ownUnit == null)
         {

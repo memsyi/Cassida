@@ -154,7 +154,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     }
 
     [RPC]
-    private void AddNewFleet(int ID, PhotonPlayer photonPlayer, int positionX, int positionY, int fleetType, PhotonMessageInfo info)
+    private void AddNewFleet(int id, PhotonPlayer photonPlayer, int positionX, int positionY, int fleetType, PhotonMessageInfo info)
     {
         if (!info.sender.isMasterClient)
         {
@@ -162,23 +162,20 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         }
 
         var position = new Position(positionX, positionY);
+        var player = PlayerManager.Get().PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
 
-        if (!TileList.Exists(t => t.Position == position) || FleetList.Exists(f => f.Position == position))
+        AddFleet(new Fleet(id, player, position, new FleetValues((FleetType)fleetType)));
+    }
+
+    public void AddFleet(Fleet fleet)
+    {
+        if (FleetList.Exists(f => f.ID == fleet.ID || f.Position == fleet.Position) || !TileList.Exists(t => t.Position == fleet.Position))
         {
             return;
         }
 
-        HighestFleetID = ID;
+        HighestFleetID = fleet.ID;
 
-        var player = PlayerManager.Get().PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
-
-        AddFleet(new Fleet(ID, player, position, new FleetValues((FleetType)fleetType)));
-
-        //tile.FleetID = ID;
-    }
-
-    public void AddFleet(Fleet fleet) // TODO check id...
-    {
         FleetList.Add(fleet);
     }
 
@@ -193,12 +190,9 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         {
             photonView.RPC(RPCs.AddNewFleet, photonPlayer, fleet.ID, fleet.Player.PhotonPlayer, fleet.Position.X, fleet.Position.Y, (int)fleet.FleetValues.FleetType);
 
-            for (int i = 0; i < fleet.Units.Count; i++)
+            foreach(var unit in fleet.UnitList)
             {
-                if (fleet.Units[i] != null)
-                {
-                    photonView.RPC(RPCs.AddNewUnit, photonPlayer, fleet.ID, i, (int)fleet.Units[i].UnitValues.UnitType, fleet.Units[i].UnitValues.Strength);
-                }
+                    photonView.RPC(RPCs.AddNewUnit, photonPlayer, fleet.ID, unit.Position, (int)unit.UnitValues.UnitType, unit.UnitValues.Strength);
             }
         }
     }
@@ -220,7 +214,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null || fleet.Units.Exists(u => u.Position == position) || fleet.Player.PhotonPlayer != info.sender)
+        if (fleet == null || fleet.UnitList.Exists(u => u.Position == position) || fleet.Player.PhotonPlayer != info.sender)
         {
             return;
         }
@@ -240,16 +234,16 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null || fleet.Units.Exists(u => u.Position == position))
+        if (fleet == null || fleet.UnitList.Exists(u => u.Position == position))
         {
             return;
         }
 
-        fleet.Units.Add(new Unit(fleet.ID, position, new UnitValues((UnitType)unitType, strength)));
+        fleet.UnitList.Add(new Unit(fleet.ID, position, new UnitValues((UnitType)unitType, strength)));
     }
     #endregion
 
-    // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! by event?!?!?!
     #region Destroy or reset fleets
     public void ResetMovementOfAllFleets()
     {
@@ -261,9 +255,6 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
     public void DestroyFleet(Fleet fleet)
     {
-        //var tile = FleetList.Find(f => f.== fleet.ID);
-        //tile.FleetID = -1;
-
         Destroy(fleet.FleetParent.gameObject);
 
         TileManager.Get().ResetHighlightedTile();
@@ -271,7 +262,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         FleetList.Remove(fleet);
     }
 
-    public void DestroyAllFleetsOfDisconnectedPlayers(int playerID)
+    public void DestroyAllFleetsOfPlayers(int playerID)
     {
         for (int i = FleetList.Count - 1; i >= 0; i--)
         {
