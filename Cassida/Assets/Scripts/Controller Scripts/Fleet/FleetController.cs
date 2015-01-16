@@ -42,7 +42,8 @@ public class Fleet : IJSON
     public int ID { get; private set; }
     public Player Player { get; private set; }
     public Position Position { get; private set; }
-    public int Rotation { get; private set; }
+    private int rotation;
+    public int Rotation { get { return rotation; } private set { rotation = value; if (rotation < 0) rotation += 6; if (rotation >= 6) rotation -= 6; } }
     public FleetValues FleetValues { get; private set; }
     public List<Unit> Units { get; private set; } // TODO set private
 
@@ -62,6 +63,9 @@ public class Fleet : IJSON
         FleetValues = fleetValues;
 
         InitiateValues();
+
+        ResetMovementRotationAndAttack();
+        AllowRotation = true;
     }
 
     public Fleet()
@@ -75,9 +79,6 @@ public class Fleet : IJSON
         FleetParent = FleetController.InstatiateParentObject(Position, Player.Name);
         FleetController = FleetParent.gameObject.AddComponent<FleetController>();
         Units = new List<Unit>();
-
-        ResetMovementRotationAndAttack();
-        AllowRotation = true;
 
         FleetController.InstantiateFleet(FleetValues.FleetType, Player.Color);
     }
@@ -100,11 +101,6 @@ public class Fleet : IJSON
 
         FleetController.RotateFleet(rotationTarget);
 
-        foreach (var unit in Units)
-        {
-            unit.Position += rotation;
-        }
-
         Rotation = rotationTarget % 6;
     }
 
@@ -122,6 +118,11 @@ public class Fleet : IJSON
         }
     }
 
+    public Unit FindUnit(int position)
+    {
+        return Units.Find(u => (u.Position + Rotation) % 6 == position);
+    }
+
     public void AttackWithFleet(int enemyFleetID)
     {
         var enemyFleet = FleetManager.Get().FleetList.Find(f => f.ID == enemyFleetID);
@@ -132,7 +133,7 @@ public class Fleet : IJSON
         }
 
         var unitPosition = InputManager.Get().GetOwnUnitPosition(Position, enemyFleet.Position);
-        var unit = Units[unitPosition];
+        var unit = FindUnit(unitPosition);
 
         if (unit == null)
         {
@@ -140,8 +141,7 @@ public class Fleet : IJSON
         }
 
         var enemyUnitPosition = unitPosition < 3 ? unitPosition + 3 : unitPosition - 3;
-        var enemyUnit = enemyFleet.Units[enemyUnitPosition];
-
+        var enemyUnit = enemyFleet.FindUnit(enemyUnitPosition);
 
         MovementPointsLeft = 0;
         AllowRotation = false;
@@ -150,9 +150,9 @@ public class Fleet : IJSON
         // damage to all enemy units
         if (enemyUnit == null)
         {
-            for (int i = 0; i < enemyFleet.Units.Count; i++)
+            for (int i = enemyFleet.Units.Count - 1; i >= 0; i--)
             {
-                AttackUnitOfFleet(enemyFleet, i, unit.UnitValues.Strength);
+                AttackUnitOfFleet(enemyFleet, enemyFleet.Units[i], unit.UnitValues.Strength);
             }
         }
         else
@@ -161,28 +161,26 @@ public class Fleet : IJSON
             // damage to own unit
             if (unit.UnitValues.UnitType == enemyUnit.UnitValues.UnitType)
             {
-                AttackUnitOfFleet(this, unitPosition, enemyUnit.UnitValues.Strength);
+                AttackUnitOfFleet(this, unit, enemyUnit.UnitValues.Strength);
             }
 
             // damage to enemy unit
-            AttackUnitOfFleet(enemyFleet, enemyUnitPosition, ownStrength);
+            AttackUnitOfFleet(enemyFleet, enemyUnit, ownStrength);
         }
     }
 
-    private void AttackUnitOfFleet(Fleet fleet, int unitPosition, int strength)
+    private void AttackUnitOfFleet(Fleet fleet, Unit attackedUnit, int strength)
     {
         if (fleet == null)
         {
             return;
         }
 
-        fleet.BecomeAttacked(unitPosition, strength);
+        fleet.BecomeAttacked(attackedUnit, strength);
     }
 
-    public void BecomeAttacked(int unitPosition, int damage)
+    public void BecomeAttacked(Unit attackedUnit, int damage)
     {
-        var attackedUnit = Units[unitPosition];
-
         if (attackedUnit == null)
         {
             CheckWhetherFleetIsAlive();
@@ -193,7 +191,7 @@ public class Fleet : IJSON
 
         if (!attackedUnit.CheckWhetherUnitIsAlive())
         {
-            Units[unitPosition] = null;
+            Units.Remove(attackedUnit);
             CheckWhetherFleetIsAlive();
             return;
         }
@@ -238,6 +236,7 @@ public class Fleet : IJSON
 
         InitiateValues();
         FleetManager.Get().AddFleet(this);
+        FleetController.RotateFleet(Rotation);
 
         Units = JSONObject.ReadList<Unit>(jsonObject[JSONs.Units]);
     }

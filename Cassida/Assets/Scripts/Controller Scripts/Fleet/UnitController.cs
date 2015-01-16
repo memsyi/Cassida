@@ -66,10 +66,11 @@ public class Unit : IJSON
 
     private void InitiateValues()
     {
-        UnitParent = UnitController.InstatiateParentObject(FleetID, Position);
+        var fleet = FleetManager.Get().GetFleet(FleetID);
+        UnitParent = UnitController.InstatiateParentObject(FleetID, Position /*- fleet.Rotation*/);
         UnitController = UnitParent.gameObject.AddComponent<UnitController>(); // TODO change controller to specific unit controller
 
-        UnitController.InstantiateUnit(UnitValues.UnitType, UnitValues.Strength, FleetManager.Get().GetFleet(FleetID).Player.Color);
+        UnitController.InstantiateUnit(UnitValues.UnitType, UnitValues.Strength, fleet.Player.Color);
     }
 
     public bool CheckWhetherUnitIsAlive()
@@ -114,15 +115,11 @@ public class UnitController : MonoBehaviour
 
         if (fleetParent == null) { return null; }
 
-        //fleetParent.rotation = Quaternion.Euler(Vector3.up * (position * -60 - 30));
-
         var unitParent = new GameObject("Unit: " + position).transform;
+        unitParent.SetParent(fleetParent);
         var rotation = Quaternion.Euler(Vector3.up * (position * 60 + 30));
         unitParent.localPosition = rotation * Vector3.forward * 0.6f;
         unitParent.localRotation = rotation;
-        unitParent.SetParent(fleetParent);
-
-        //fleetParent.rotation = Quaternion.identity;
 
         return unitParent;
     }

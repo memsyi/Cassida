@@ -399,7 +399,7 @@ public class InputManager : Photon.MonoBehaviour
             return false;
         }
 
-        var ownUnit = ownFleet.Units[unitDirection];
+        var ownUnit = ownFleet.Units.Find(u => (u.Position + ownFleet.Rotation) % 6 == unitDirection); ;
 
         if (ownUnit == null)
         {
