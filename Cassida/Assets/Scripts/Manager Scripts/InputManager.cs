@@ -109,8 +109,8 @@ public class InputManager : Photon.MonoBehaviour
             return; // TODO ask for refresh complete data
         }
 
-        targetTile.FleetID = fleetID;
-        currentTile.FleetID = -1;
+        //targetTile.FleetID = fleetID;
+        //currentTile.FleetID = -1;
 
         fleet.MoveFleet(targetTile.Position);
 

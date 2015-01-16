@@ -18,6 +18,11 @@ public class UnitValues : IJSON
         Strength = strength;
     }
 
+    public UnitValues()
+    {
+
+    }
+
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
@@ -28,45 +33,43 @@ public class UnitValues : IJSON
 
     public void FromJSON(JSONObject jsonObject)
     {
-        var unitType = (UnitType)(int)jsonObject[JSONs.UnitType];
-        var strength = (int)jsonObject[JSONs.Strength];
+        UnitType = (UnitType)(int)jsonObject[JSONs.UnitType];
+        Strength = (int)jsonObject[JSONs.Strength];
     }
 }
 
 public class Unit : IJSON
 {
-    private UnitValues unitValues;
-    public UnitValues UnitValues
-    {
-        get { return unitValues; }
-        set
-        {
-            if (value == null) { return; }
-
-            UnitController.InstantiateUnit(value.UnitType, value.Strength, FleetManager.Get().FleetList.Find(f => f.ID == FleetID).Player.Color);
-            unitValues = value;
-        }
-    }
-
+    public UnitValues UnitValues { get; set; }
     private int FleetID { get; set; }
+    private int position = 0;
+    public int Position { get { return position; } set { position = value; if (position < 0) position += 6; if (position >= 6) position -= 6; } }
     public Transform UnitParent { get; protected set; }
     public UnitController UnitController { get; protected set; }
 
     public bool AllowAttack { get; set; }
 
-    public Unit(int fleetID, int position, UnitValues unitValues = null)
+    public Unit(int fleetID, int position, UnitValues unitValues)
     {
         FleetID = fleetID;
-        UnitParent = UnitController.InstatiateParentObject(fleetID, position);
-        UnitController = UnitParent.gameObject.AddComponent<UnitController>(); // TODO change controller to specific unit controller
-
+        Position = position;
         UnitValues = unitValues;
         AllowAttack = true;
+
+        InitiateValues();
     }
 
     public Unit()
     {
 
+    }
+
+    private void InitiateValues()
+    {
+        UnitParent = UnitController.InstatiateParentObject(FleetID, Position);
+        UnitController = UnitParent.gameObject.AddComponent<UnitController>(); // TODO change controller to specific unit controller
+
+        UnitController.InstantiateUnit(UnitValues.UnitType, UnitValues.Strength, FleetManager.Get().GetFleet(FleetID).Player.Color);
     }
 
     public bool CheckWhetherUnitIsAlive()
@@ -80,16 +83,21 @@ public class Unit : IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-        jsonObject[JSONs.UnitValues] = UnitValues.ToJSON();
         jsonObject[JSONs.FleetID] = new JSONObject(FleetID);
+        jsonObject[JSONs.Position] = new JSONObject(Position);
+        jsonObject[JSONs.UnitValues] = UnitValues.ToJSON();
         jsonObject[JSONs.AllowAttack] = new JSONObject(AllowAttack);
         return jsonObject;
     }
 
     public void FromJSON(JSONObject jsonObject)
     {
+        FleetID = (int)jsonObject[JSONs.FleetID];
+        Position = (int)jsonObject[JSONs.Position];
+        UnitValues = new UnitValues();
         UnitValues.FromJSON(jsonObject[JSONs.UnitValues]);
-        AllowAttack = jsonObject[JSONs.AllowAttack];
+        AllowAttack = (bool)jsonObject[JSONs.AllowAttack];
+        InitiateValues();
     }
 }
 
@@ -102,17 +110,19 @@ public class UnitController : MonoBehaviour
 
     public static Transform InstatiateParentObject(int fleetID, int position)
     {
-        var fleetParent = FleetManager.Get().FleetList.Find(f => f.ID == fleetID).FleetParent;
+        var fleetParent = FleetManager.Get().GetFleet(fleetID).FleetParent;
 
         if (fleetParent == null) { return null; }
 
-        fleetParent.rotation = Quaternion.Euler(Vector3.up * (position * -60 - 30));
+        //fleetParent.rotation = Quaternion.Euler(Vector3.up * (position * -60 - 30));
 
         var unitParent = new GameObject("Unit: " + position).transform;
-        unitParent.position = fleetParent.position + Vector3.forward * 0.6f;
+        var rotation = Quaternion.Euler(Vector3.up * (position * 60 + 30));
+        unitParent.localPosition = rotation * Vector3.forward * 0.6f;
+        unitParent.localRotation = rotation;
         unitParent.SetParent(fleetParent);
 
-        fleetParent.rotation = Quaternion.identity;
+        //fleetParent.rotation = Quaternion.identity;
 
         return unitParent;
     }

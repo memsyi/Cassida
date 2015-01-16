@@ -106,7 +106,8 @@ public class JSONObject : Nullable
                 continue;
             }
             var o = new T();
-            o.FromJSON(l[i]);
+            var x = l[i];
+            o.FromJSON(x);
             list.Add(o);
         }
 

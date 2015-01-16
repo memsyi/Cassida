@@ -16,6 +16,11 @@ public class FleetValues : IJSON
         FleetType = fleetType;
     }
 
+    public FleetValues()
+    {
+
+    }
+
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
@@ -25,7 +30,10 @@ public class FleetValues : IJSON
 
     public void FromJSON(JSONObject jsonObject)
     {
-        var fleetType = (FleetType)(int)jsonObject[JSONs.FleetType];
+        var o = jsonObject[JSONs.FleetType];
+        int i = (int)o;
+        FleetType = (FleetType)i;
+        FleetType = (FleetType)(int)jsonObject[JSONs.FleetType];
     }
 }
 
@@ -36,7 +44,7 @@ public class Fleet : IJSON
     public Position Position { get; private set; }
     public int Rotation { get; private set; }
     public FleetValues FleetValues { get; private set; }
-    public Unit[] Units { get; private set; } // TODO set private
+    public List<Unit> Units { get; private set; } // TODO set private
 
     public Transform FleetParent { get; protected set; }
     public FleetController FleetController { get; protected set; }
@@ -58,7 +66,7 @@ public class Fleet : IJSON
 
     public Fleet()
     {
-        
+
     }
 
     private void InitiateValues()//int id, Player player, Position position, FleetValues fleetValues)
@@ -66,7 +74,7 @@ public class Fleet : IJSON
         // Parent object and controller must be first!
         FleetParent = FleetController.InstatiateParentObject(Position, Player.Name);
         FleetController = FleetParent.gameObject.AddComponent<FleetController>();
-        Units = new Unit[6];
+        Units = new List<Unit>();
 
         ResetMovementRotationAndAttack();
         AllowRotation = true;
@@ -88,28 +96,13 @@ public class Fleet : IJSON
     {
         if (!AllowRotation) { return; }
 
-        var rotationCount = Mathf.Abs(Rotation - rotationTarget);
-        var rotationDirection = (int)Mathf.Sign(Rotation - rotationTarget);
+        var rotation = rotationTarget - Rotation;
 
-        for (int r = 0; r < rotationCount; r++)
+        FleetController.RotateFleet(rotationTarget);
+
+        foreach (var unit in Units)
         {
-            FleetController.RotateFleet(rotationDirection);
-
-            var newUnitPositions = new Unit[6];
-            for (int i = 0; i < newUnitPositions.Length; i++)
-            {
-                if (rotationDirection < 0)
-                {
-                    if (i < 5) { newUnitPositions[i] = Units[i + 1]; }
-                    else { newUnitPositions[5] = Units[0]; }
-                }
-                else
-                {
-                    if (i > 0) { newUnitPositions[i] = Units[i - 1]; }
-                    else { newUnitPositions[0] = Units[5]; }
-                }
-            }
-            Units = newUnitPositions;
+            unit.Position += rotation;
         }
 
         Rotation = rotationTarget % 6;
@@ -157,7 +150,7 @@ public class Fleet : IJSON
         // damage to all enemy units
         if (enemyUnit == null)
         {
-            for (int i = 0; i < enemyFleet.Units.Length; i++)
+            for (int i = 0; i < enemyFleet.Units.Count; i++)
             {
                 AttackUnitOfFleet(enemyFleet, i, unit.UnitValues.Strength);
             }
@@ -225,7 +218,7 @@ public class Fleet : IJSON
         jsonObject[JSONs.Position] = Position.ToJSON();
         jsonObject[JSONs.Rotation] = new JSONObject(Rotation);
         jsonObject[JSONs.FleetValues] = FleetValues.ToJSON();
-        jsonObject[JSONs.Units] = JSONObject.CreateList(new List<Unit>(Units));
+        jsonObject[JSONs.Units] = JSONObject.CreateList(Units);
         jsonObject[JSONs.AllowRotation] = new JSONObject(AllowRotation);
         jsonObject[JSONs.MovementPointsLeft] = new JSONObject(MovementPointsLeft);
 
@@ -238,12 +231,15 @@ public class Fleet : IJSON
         Player = PlayerManager.Get().GetPlayer((int)jsonObject[JSONs.PlayerID]);
         Position = new Position(jsonObject[JSONs.Position]);
         Rotation = (int)jsonObject[JSONs.Rotation];
+        FleetValues = new FleetValues();
         FleetValues.FromJSON(jsonObject[JSONs.FleetValues]);
-        Units = JSONObject.ReadList<Unit>(jsonObject[JSONs.Units]).ToArray();
         AllowRotation = (bool)jsonObject[JSONs.AllowRotation];
         MovementPointsLeft = (int)jsonObject[JSONs.MovementPointsLeft];
 
         InitiateValues();
+        FleetManager.Get().AddFleet(this);
+
+        Units = JSONObject.ReadList<Unit>(jsonObject[JSONs.Units]);
     }
 }
 
@@ -327,7 +323,7 @@ public class FleetController : MonoBehaviour
         get { return _rotationTarget; }
         set
         {
-            _rotationTarget.eulerAngles += value.eulerAngles;
+            _rotationTarget.eulerAngles = value.eulerAngles;
             Turn = true;
         }
     }

@@ -163,9 +163,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var position = new Position(positionX, positionY);
 
-        var tile = TileList.Find(t => t.Position == position);
-
-        if (tile == null)
+        if (!TileList.Exists(t => t.Position == position) || FleetList.Exists(f => f.Position == position))
         {
             return;
         }
@@ -174,9 +172,14 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var player = PlayerManager.Get().PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
 
-        FleetList.Add(new Fleet(ID, player, position, new FleetValues((FleetType)fleetType)));
+        AddFleet(new Fleet(ID, player, position, new FleetValues((FleetType)fleetType)));
 
-        tile.FleetID = ID;
+        //tile.FleetID = ID;
+    }
+
+    public void AddFleet(Fleet fleet) // TODO check id...
+    {
+        FleetList.Add(fleet);
     }
 
     public void InstantiateAllExistingFleetsAtPlayer(PhotonPlayer photonPlayer)
@@ -190,7 +193,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         {
             photonView.RPC(RPCs.AddNewFleet, photonPlayer, fleet.ID, fleet.Player.PhotonPlayer, fleet.Position.X, fleet.Position.Y, (int)fleet.FleetValues.FleetType);
 
-            for (int i = 0; i < fleet.Units.Length; i++)
+            for (int i = 0; i < fleet.Units.Count; i++)
             {
                 if (fleet.Units[i] != null)
                 {
@@ -217,7 +220,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null || fleet.Units[position] != null || fleet.Player.PhotonPlayer != info.sender)
+        if (fleet == null || fleet.Units.Exists(u => u.Position == position) || fleet.Player.PhotonPlayer != info.sender)
         {
             return;
         }
@@ -237,12 +240,12 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null || fleet.Units[position] != null)
+        if (fleet == null || fleet.Units.Exists(u => u.Position == position))
         {
             return;
         }
 
-        fleet.Units[position] = new Unit(fleet.ID, position, new UnitValues((UnitType)unitType, strength));
+        fleet.Units.Add(new Unit(fleet.ID, position, new UnitValues((UnitType)unitType, strength)));
     }
     #endregion
 
@@ -258,8 +261,8 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
     public void DestroyFleet(Fleet fleet)
     {
-        var tile = TileList.Find(t => t.FleetID == fleet.ID);
-        tile.FleetID = -1;
+        //var tile = FleetList.Find(f => f.== fleet.ID);
+        //tile.FleetID = -1;
 
         Destroy(fleet.FleetParent.gameObject);
 
@@ -279,6 +282,11 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         }
     }
     #endregion
+
+    public Fleet GetFleet(int id)
+    {
+        return FleetList.Find(f => f.ID == id);
+    }
 
     private void OnGUI()
     {
@@ -337,9 +345,9 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         return jsonObject;
     }
 
-    public void FromJSON(JSONObject o)
+    public void FromJSON(JSONObject jsonObject)
     {
-        throw new System.NotImplementedException();
+        JSONObject.ReadList<Fleet>(jsonObject[JSONs.Fleets]);
     }
 
     // https://github.com/ChristophPech/servertest/blob/master/src/gamesrv/techtree.cfg

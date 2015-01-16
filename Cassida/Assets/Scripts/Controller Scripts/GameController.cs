@@ -92,10 +92,12 @@ public class GameController : Photon.MonoBehaviour, IJSON
             print(FleetManager.Get().ToJSON().print());
             print(TileManager.Get().ToJSON().print());
         }
-        if (GUI.Button(new Rect(400, 0, 100, 20), "Load(Clear at the moment)"))
+        if (GUI.Button(new Rect(400, 0, 100, 20), "Load"))
         {
-            PlayerPrefs.DeleteAll();
-            //FleetManager.Get().FromJSON(JSONParser.parse(PlayerPrefs.GetString("Save")));
+            //PlayerPrefs.DeleteAll();
+            FleetManager.Get().DestroyAllFleetsOfDisconnectedPlayers(0);
+            var fleetString = JSONParser.parse(PlayerPrefs.GetString("Fleets"));
+            FleetManager.Get().FromJSON(fleetString);
         }
         if (GUI.Button(new Rect(500, 0, 100, 20), "Print"))
         {

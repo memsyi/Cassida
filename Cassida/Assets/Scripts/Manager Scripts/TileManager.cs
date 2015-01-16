@@ -24,7 +24,7 @@ public enum ObjectiveType
 public class Tile : IJSON
 {
     public Position Position { get; protected set; }
-    public int FleetID { get; set; }
+    public int FleetID { get { var fleet = FleetManager.Get().FleetList.Find(f => f.Position == this.Position); return fleet != null ? fleet.ID : -1; } }
     public TerrainType TerrainType { get; private set; }
     public ObjectiveType ObjectiveType { get; private set; }
 
@@ -40,7 +40,7 @@ public class Tile : IJSON
         TileObject = MapGenerator.Get().InstatiateTileObject(TileParent);
 
         Position = position;
-        FleetID = -1;
+        //FleetID = -1;
         TerrainType = terrain;
         ObjectiveType = objective;
 
@@ -83,7 +83,7 @@ public class Tile : IJSON
     {
         var jsonObject = JSONObject.obj;
         jsonObject[JSONs.Position] = Position.ToJSON();
-        jsonObject[JSONs.FleetID] = new JSONObject(FleetID);
+        //jsonObject[JSONs.FleetID] = new JSONObject(FleetID);
         jsonObject[JSONs.TerrainType] = new JSONObject((int)TerrainType);
         jsonObject[JSONs.ObjectiveType] = new JSONObject((int)ObjectiveType);
         return jsonObject;
@@ -258,7 +258,9 @@ public class TileManager : MonoBehaviour, IJSON
             RemoveCurrentSelectionAnimation();
         }
 
-        if (tile == null || tile.FleetID < 0 || FleetList.Find(f => f.ID == tile.FleetID).Player.ID != PlayerManager.Get().Player.ID)
+        var fleet = FleetList.Find(f => f.Position == tile.Position);
+
+        if (tile == null || fleet == null || fleet.Player.ID != PlayerManager.Get().Player.ID)
         {
             CurrentSelectedTile = null;
             return;
