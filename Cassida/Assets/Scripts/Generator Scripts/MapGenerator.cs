@@ -138,7 +138,7 @@ public class MapGenerator : Photon.MonoBehaviour
 
     private ObjectiveType CalculateObjectiveType(Position position)
     {
-        if(position.IsSameAs(new Position(3, 0))) return ObjectiveType.Base;
+        if(position == new Position(3, 0)) return ObjectiveType.Base;
         return ObjectiveType.Empty; // TODO calculate tiles where bases can be place
     }
 

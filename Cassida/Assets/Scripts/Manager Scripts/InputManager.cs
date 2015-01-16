@@ -102,7 +102,7 @@ public class InputManager : Photon.MonoBehaviour
         }
 
         var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
-        var targetTile = TileList.Find(t => t.Position.IsSameAs(targetTilePosition));
+        var targetTile = TileList.Find(t => t.Position == targetTilePosition);
 
         if (currentTile == null || targetTile == null)
         {
@@ -137,7 +137,7 @@ public class InputManager : Photon.MonoBehaviour
         }
 
         var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
-        var targetTile = TileList.Find(t => t.Position.IsSameAs(targetTilePosition));
+        var targetTile = TileList.Find(t => t.Position == targetTilePosition);
 
         if (currentTile == null || targetTile == null || currentTile.FleetID < 0 || targetTile.FleetID > -1
             || Vector3.Distance(currentTile.TileParent.position, targetTile.TileParent.position) > 2f)

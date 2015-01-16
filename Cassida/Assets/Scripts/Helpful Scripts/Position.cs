@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Position :IJSON
+public struct Position : IJSON
 {
     public int X { get; set; }
     public int Y { get; set; }
@@ -12,14 +12,26 @@ public class Position :IJSON
         Y = y;
     }
 
-    public bool IsSameAs(Position position)
+    public Position(JSONObject jsonsObject)
     {
-        return X == position.X && Y == position.Y;
+        X = 0;
+        Y = 0;
+        FromJSON(jsonsObject);
+    }
+
+    public static bool operator ==(Position positionA, Position positionB)
+    {
+        return positionB.X == positionA.X && positionB.Y == positionA.Y;
+    }
+
+    public static bool operator !=(Position positionA, Position positionB)
+    {
+        return !(positionA == positionB);
     }
 
     public override string ToString()
     {
-        return "(" + X + "; " + Y + ")"; 
+        return "(" + X + "; " + Y + ")";
     }
 
     public JSONObject ToJSON()
@@ -32,7 +44,7 @@ public class Position :IJSON
 
     public void FromJSON(JSONObject jsonObject)
     {
-         X = (int)jsonObject[JSONs.X];
-         Y = (int)jsonObject[JSONs.Y];
+        X = (int)jsonObject[JSONs.X];
+        Y = (int)jsonObject[JSONs.Y];
     }
 }

@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public struct Player : IJSON
+public class Player : IJSON
 {
     public int ID { get; private set; }
-    private PhotonPlayer photonPlayer;
+    private PhotonPlayer photonPlayer = null;
     public PhotonPlayer PhotonPlayer { get { return photonPlayer; } set { if (photonPlayer == null) photonPlayer = value; } }
     public string Name { get; private set; }
     public Color Color { get; private set; }
@@ -16,6 +16,11 @@ public struct Player : IJSON
         PhotonPlayer = photonPlayer;
         Name = name;
         Color = color;
+    }
+
+    public Player()
+    {
+        
     }
 
     public JSONObject ToJSON()
@@ -128,6 +133,11 @@ public class PlayerManager : Photon.MonoBehaviour
         photonView.RPC(RPCs.SetCurrentPlayer, PhotonTargets.All, CurrentPlayer.PhotonPlayer);
     }
 
+    public Player GetPlayer(int id)
+    {
+        return PlayerList.Find(p => p.ID == id);
+    }
+
     #region End turn
     public void EndTurn()
     {
@@ -213,6 +223,8 @@ public class PlayerManager : Photon.MonoBehaviour
     private void Init()
     {
         PlayerList = new List<Player>();
+        Player = new Player();
+        CurrentPlayer = new Player();
     }
 
     private void Start()

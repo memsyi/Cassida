@@ -4,6 +4,7 @@ using System.Collections;
 public struct JSONs
 {
     public const string Player = "Player";
+    public const string PlayerID = "PlayerID";
     public const string ID = "ID";
     public const string Name = "Name";
     public const string Color = "Color";

@@ -74,7 +74,7 @@ public class BaseController : MonoBehaviour
     public static Transform InstatiateParentObject(Position position, string playerName)
     {
         var fleetParent = new GameObject("Base of: " + playerName).transform;
-        fleetParent.position = TileManager.Get().TileList.Find(t => t.Position.IsSameAs(position)).TileParent.position;
+        fleetParent.position = TileManager.Get().TileList.Find(t => t.Position == position).TileParent.position;
         fleetParent.SetParent(GameObject.Find(Tags.Bases).transform);
         return fleetParent;
     }

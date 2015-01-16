@@ -136,7 +136,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var position = new Position(positionX, positionY);
 
-        var tile = TileList.Find(t => t.Position.IsSameAs(position));
+        var tile = TileList.Find(t => t.Position == position);
 
         if (tile == null || tile.FleetID > -1)
         {
@@ -163,7 +163,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var position = new Position(positionX, positionY);
 
-        var tile = TileList.Find(t => t.Position.IsSameAs(position));
+        var tile = TileList.Find(t => t.Position == position);
 
         if (tile == null)
         {
@@ -333,12 +333,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-        var fleetObjects = JSONObject.arr;
-        foreach(var fleet in FleetList)
-        {
-            fleetObjects.Add(fleet.ToJSON());
-        }
-        jsonObject[JSONs.Fleets] = fleetObjects;
+        jsonObject[JSONs.Fleets] = JSONObject.CreateList(FleetList);
         return jsonObject;
     }
 

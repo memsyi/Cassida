@@ -82,7 +82,7 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         var tileList = TileManager.Get().TileList.FindAll(t => t.ObjectiveType == ObjectiveType.Base 
             && !BaseList.Exists(b => 
-                b.Position.IsSameAs(t.Position)
+                b.Position == t.Position
                 && b.Player.PhotonPlayer == photonPlayer));
 
         if (tileList == null)

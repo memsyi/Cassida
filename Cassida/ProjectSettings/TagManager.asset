@@ -11,10 +11,24 @@ TagManager:
   - Fleets
   - Bases
   - Buildings
-  - 
+  - Menu
   - 
   - PlayerColorObjects
   - ModulPositionObjects
+  - wecv
+  - wecw
+  - wewec
+  - wec
+  - MainMenu
+  - SettingsMenu
+  - CreditsMenu
+  - LobbyMenu
+  - SinglePlayerMenu
+  - 
+  - MultiplayerLobbyMenu
+  - MultiplayerRoomMenu
+  - ProfileMenu
+  - CreateNewProfileMenu
   - 
   Builtin Layer 0: Default
   Builtin Layer 1: TransparentFX

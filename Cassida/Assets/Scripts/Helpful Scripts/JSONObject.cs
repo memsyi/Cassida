@@ -77,17 +77,41 @@ public class JSONObject : Nullable
             list.Add(new JSONObject { type = Type.STRING, str = kvp.Value });
         }
     }
-    //public static JSONObject CreateList<T>(List<T> l) where T : IJSON
-    //{
-    //    var o = JSONObject.arr;
+    public static JSONObject CreateList<T>(List<T> l) where T : IJSON
+    {
+        var o = JSONObject.arr;
 
-    //    foreach (var e in l)
-    //    {
-    //        o.Add(e.ToJSON());
-    //    }
+        foreach (var e in l)
+        {
+            if (e == null)
+            {
+                o.Add(nullJO);
+                continue;
+            }
+            o.Add(e.ToJSON());
+        }
 
-    //    return o;
-    //}
+        return o;
+    }
+
+    public static List<T> ReadList<T>(JSONObject l) where T : IJSON, new()
+    {
+        var list = new List<T>();
+
+        for (int i = 0; i < l.Count; i++)
+        {
+            if (l[i].type == Type.NULL)
+            {
+                list.Add(default(T));
+                continue;
+            }
+            var o = new T();
+            o.FromJSON(l[i]);
+            list.Add(o);
+        }
+
+        return list;
+    }
 
     public void Absorb(JSONObject obj)
     {

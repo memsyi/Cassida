@@ -47,21 +47,31 @@ public class Fleet : IJSON
 
     public Fleet(int id, Player player, Position position, FleetValues fleetValues)
     {
-        // Parent object and controller must be first!
-        FleetParent = FleetController.InstatiateParentObject(position, player.Name);
-        FleetController = FleetParent.gameObject.AddComponent<FleetController>();
-        Units = new Unit[6];
-
         ID = id;
         Player = player;
         Position = position;
         Rotation = 0;
         FleetValues = fleetValues;
 
+        InitiateValues();
+    }
+
+    public Fleet()
+    {
+        
+    }
+
+    private void InitiateValues()//int id, Player player, Position position, FleetValues fleetValues)
+    {
+        // Parent object and controller must be first!
+        FleetParent = FleetController.InstatiateParentObject(Position, Player.Name);
+        FleetController = FleetParent.gameObject.AddComponent<FleetController>();
+        Units = new Unit[6];
+
         ResetMovementRotationAndAttack();
         AllowRotation = true;
 
-        FleetController.InstantiateFleet(fleetValues.FleetType, player.Color);
+        FleetController.InstantiateFleet(FleetValues.FleetType, Player.Color);
     }
 
     public void MoveFleet(Position target)
@@ -211,17 +221,11 @@ public class Fleet : IJSON
     {
         var jsonObject = JSONObject.obj;
         jsonObject[JSONs.ID] = new JSONObject(ID);
-        jsonObject[JSONs.Player] = Player.ToJSON();
+        jsonObject[JSONs.PlayerID] = new JSONObject(Player.ID);
         jsonObject[JSONs.Position] = Position.ToJSON();
         jsonObject[JSONs.Rotation] = new JSONObject(Rotation);
         jsonObject[JSONs.FleetValues] = FleetValues.ToJSON();
-        var unitObjects = JSONObject.arr;
-        foreach (var unit in Units)
-        {
-            if (unit == null) { unitObjects.Add(false); }
-            else { unitObjects.Add(unit.ToJSON()); }
-        }
-        jsonObject[JSONs.Units] = unitObjects;
+        jsonObject[JSONs.Units] = JSONObject.CreateList(new List<Unit>(Units));
         jsonObject[JSONs.AllowRotation] = new JSONObject(AllowRotation);
         jsonObject[JSONs.MovementPointsLeft] = new JSONObject(MovementPointsLeft);
 
@@ -231,18 +235,15 @@ public class Fleet : IJSON
     public void FromJSON(JSONObject jsonObject)
     {
         ID = (int)jsonObject[JSONs.ID];
-        //Player = 
-        //Position = 
+        Player = PlayerManager.Get().GetPlayer((int)jsonObject[JSONs.PlayerID]);
+        Position = new Position(jsonObject[JSONs.Position]);
         Rotation = (int)jsonObject[JSONs.Rotation];
         FleetValues.FromJSON(jsonObject[JSONs.FleetValues]);
-        //var unitsObject = jsonObject[JSONs.Units].list;
-        //for(int i = 0; i < Units.Length; i++)
-        //{
-        //    Units[i] = new Unit((int)unitsObject.[i][JSONs.FleetID], i);
-        //    unit = new Unit(
-        //}
+        Units = JSONObject.ReadList<Unit>(jsonObject[JSONs.Units]).ToArray();
         AllowRotation = (bool)jsonObject[JSONs.AllowRotation];
         MovementPointsLeft = (int)jsonObject[JSONs.MovementPointsLeft];
+
+        InitiateValues();
     }
 }
 
@@ -256,7 +257,7 @@ public class FleetController : MonoBehaviour
     public static Transform InstatiateParentObject(Position position, string playerName)
     {
         var fleetParent = new GameObject("Fleet of: " + playerName).transform;
-        fleetParent.position = TileManager.Get().TileList.Find(t => t.Position.IsSameAs(position)).TileParent.position;
+        fleetParent.position = TileManager.Get().TileList.Find(t => t.Position == position).TileParent.position;
         fleetParent.SetParent(GameObject.Find(Tags.Fleets).transform);
         return fleetParent;
     }

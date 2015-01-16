@@ -64,6 +64,11 @@ public class Unit : IJSON
         AllowAttack = true;
     }
 
+    public Unit()
+    {
+
+    }
+
     public bool CheckWhetherUnitIsAlive()
     {
         if (UnitValues.Strength > 0) { return true; }
