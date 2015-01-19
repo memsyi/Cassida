@@ -5,22 +5,6 @@ public class MenuManager : MonoBehaviour
 {
     private MenuController CurrentMenu {get; set;}
 
-    //public void CheckProfile(MenuController menu)
-    //{
-    //    if (ProfileManager.Get().AccountCreated)
-    //    {
-    //        ChangeMenu(menu);
-    //    }
-    //}
-
-    //public void CheckCreatedRoom(MenuController menu)
-    //{
-    //    if (LobbyManager.Get().RoomCreated)
-    //    {
-    //        ChangeMenu(menu);
-    //    }
-    //}
-
     public void ShowMenu(MenuController menu)
     {
         ChangeMenu(menu);

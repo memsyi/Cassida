@@ -31,9 +31,6 @@ public class FleetValues : IJSON
 
     public void FromJSON(JSONObject jsonObject)
     {
-        var o = jsonObject[JSONs.FleetType];
-        int i = (int)o;
-        FleetType = (FleetType)i;
         FleetType = (FleetType)(int)jsonObject[JSONs.FleetType];
     }
 }
@@ -77,7 +74,6 @@ public class Fleet : IJSON
     private void InitiateValues()
     {
         var player = PlayerManager.Get().GetPlayer(PlayerID);
-        // Parent object and controller must be first!
         FleetParent = FleetController.InstatiateParentObject(Position, player.Name);
         FleetController = FleetParent.gameObject.AddComponent<FleetController>();
         UnitList = new List<Unit>();
@@ -344,6 +340,7 @@ public class FleetController : MonoBehaviour
     //IEnumerator MoveToTarget(Vector3 target)
     private void MoveToTarget()
     {
+        
         //while (true)
         //{
             if (!Move)

@@ -21,8 +21,6 @@ public class InputManager : Photon.MonoBehaviour
     // Lists
     private List<Tile> MoveableTileList { get; set; }
     private List<Transform> MoveableTileObjectList { get; set; }
-    private List<Fleet> FleetList { get { return FleetManager.Get().FleetList; } }
-    private List<Tile> TileList { get { return TileManager.Get().TileList; } }
     #endregion
 
     private void CheckTileSelection()
@@ -94,15 +92,15 @@ public class InputManager : Photon.MonoBehaviour
 
     private void MoveFleet(int fleetID, Position targetTilePosition)
     {
-        var fleet = FleetList.Find(f => f.ID == fleetID);
+        var fleet = FleetManager.Get().GetFleet(fleetID);
 
         if (fleet == null)
         {
             return; // TODO ask for refresh complete data
         }
 
-        var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
-        var targetTile = TileList.Find(t => t.Position == targetTilePosition);
+        var currentTile = TileManager.Get().GetTile(fleetID);
+        var targetTile = TileManager.Get().GetTile(targetTilePosition);
 
         if (currentTile == null || targetTile == null)
         {
@@ -126,15 +124,15 @@ public class InputManager : Photon.MonoBehaviour
             return false;
         }
 
-        var fleet = FleetList.Find(f => f.ID == fleetID);
+        var fleet = FleetManager.Get().GetFleet(fleetID);
 
         if (fleet == null || !fleet.AllowMovement || fleet.PlayerID != PlayerManager.Get().CurrentPlayer.ID)
         {
             return false;
         }
 
-        var currentTile = TileList.Find(t => t.FleetID == fleet.ID);
-        var targetTile = TileList.Find(t => t.Position == targetTilePosition);
+        var currentTile = TileManager.Get().GetTile(fleetID);
+        var targetTile = TileManager.Get().GetTile(targetTilePosition);
 
         if (currentTile == null || targetTile == null || currentTile.FleetID < 0 || targetTile.FleetID > -1
             || Vector3.Distance(currentTile.TileParent.position, targetTile.TileParent.position) > 2f)
@@ -171,7 +169,7 @@ public class InputManager : Photon.MonoBehaviour
             return;
         }
 
-        var fleet = FleetList.Find(f => f.ID == fleetID);
+        var fleet = FleetManager.Get().GetFleet(fleetID);
 
         if (fleet == null || (fleet.Position.X == targetTilePositionX && fleet.Position.Y == targetTilePositionY))
         {
@@ -192,7 +190,7 @@ public class InputManager : Photon.MonoBehaviour
             return;
         }
 
-        var rotationTarget = FleetList.Find(f => f.ID == fleetID).Rotation + (rotateRight ? 1 : -1);
+        var rotationTarget = FleetManager.Get().GetFleet(fleetID).Rotation + (rotateRight ? 1 : -1);
 
         if (!PhotonNetwork.isMasterClient)
         {
@@ -204,7 +202,7 @@ public class InputManager : Photon.MonoBehaviour
 
     private void RotateFleet(int fleetID, int rotationTarget)
     {
-        var fleet = FleetList.Find(f => f.ID == fleetID);
+        var fleet = FleetManager.Get().GetFleet(fleetID);
 
         if (fleet == null)
         {
@@ -221,7 +219,7 @@ public class InputManager : Photon.MonoBehaviour
             return false;
         }
 
-        var fleet = FleetList.Find(f => f.ID == fleetID);
+        var fleet = FleetManager.Get().GetFleet(fleetID);
 
         if (fleet == null || !fleet.AllowRotation || fleet.PlayerID != PlayerManager.Get().CurrentPlayer.ID)
         {
@@ -255,7 +253,7 @@ public class InputManager : Photon.MonoBehaviour
             return;
         }
 
-        var fleet = FleetList.Find(f => f.ID == fleetID);
+        var fleet = FleetManager.Get().GetFleet(fleetID);
 
         if (fleet == null || fleet.Rotation == rotationTarget)
         {
@@ -276,7 +274,7 @@ public class InputManager : Photon.MonoBehaviour
             return;
         }
 
-        var fleet = FleetList.Find(f => f.ID == CurrentSelectedTile.FleetID);
+        var fleet = FleetManager.Get().GetFleet(CurrentSelectedTile.FleetID);
 
         if (fleet == null)
         {
@@ -291,14 +289,14 @@ public class InputManager : Photon.MonoBehaviour
 
     private void SetMovementArea()
     {
-        var fleet = FleetList.Find(f => f.ID == CurrentSelectedTile.FleetID);
+        var fleet = FleetManager.Get().GetFleet(CurrentSelectedTile.FleetID);
 
         if (!fleet.AllowMovement)
         {
             return;
         }
 
-        MoveableTileList = TileList.FindAll(t => Vector3.Distance(CurrentSelectedTile.TileParent.position, t.TileParent.position) <= 2f);
+        MoveableTileList = TileManager.Get().TileList.FindAll(t => Vector3.Distance(CurrentSelectedTile.TileParent.position, t.TileParent.position) <= 2f);
 
         foreach (var tile in MoveableTileList)
         {
@@ -334,7 +332,7 @@ public class InputManager : Photon.MonoBehaviour
 
     private void AttackFleet(int ownFleetID, int enemyFleetID)
     {
-        var ownFleet = FleetList.Find(f => f.ID == ownFleetID);
+        var ownFleet = FleetManager.Get().GetFleet(ownFleetID);
 
         if (ownFleet == null)
         {
@@ -381,8 +379,8 @@ public class InputManager : Photon.MonoBehaviour
     #region Check attack
     public bool CheckAttack(int ownFleetID, int enemyFleetID)
     {
-        var ownFleet = FleetList.Find(f => f.ID == ownFleetID);
-        var enemyFleet = FleetList.Find(f => f.ID == enemyFleetID);
+        var ownFleet = FleetManager.Get().GetFleet(ownFleetID);
+        var enemyFleet = FleetManager.Get().GetFleet(enemyFleetID);
 
         if (ownFleet == null || enemyFleet == null || ownFleet.PlayerID != PlayerManager.Get().CurrentPlayer.ID || enemyFleet.PlayerID == PlayerManager.Get().CurrentPlayer.ID)
         {
@@ -403,7 +401,7 @@ public class InputManager : Photon.MonoBehaviour
             return false;
         }
 
-        if (ownUnit.UnitController == null || ownUnit.AllowAttack == false) //FUNktionier nicht nicht.. Angriffe funktionieren nicht mehr!!
+        if (ownUnit.UnitController == null || ownUnit.AllowAttack == false)
         {
             return false;
         }

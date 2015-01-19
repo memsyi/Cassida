@@ -49,7 +49,7 @@ public class MapGenerator : Photon.MonoBehaviour
     List<Tile> TileList { get { return TileManager.Get().TileList; } }
     #endregion
 
-    public static Transform InstatiateParentObject(Position position)
+    public static Transform InstatiateTile(Position position)
     {
         var tileParent = new GameObject(position.ToString()).transform;
         tileParent.position = new Vector3(position.X * 1.75f + position.Y * 0.875f, 0, position.Y * 1.515f);
@@ -127,11 +127,11 @@ public class MapGenerator : Photon.MonoBehaviour
     private TerrainType CalculateTerrainType(Position position)
     {
         // TODO not mirrowed!!!!!
-        //int _randomValue = Random.Range(0, 4);
-        //if (_randomValue == 0)
-        //{
-        //    return TerrainType.Asteroids;
-        //}
+        int _randomValue = Random.Range(0, 4);
+        if (_randomValue == 0)
+        {
+            return TerrainType.Asteroids;
+        }
 
         return TerrainType.Empty;
     }

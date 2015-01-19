@@ -19,7 +19,7 @@ public class Player : IJSON
 
     public Player()
     {
-        
+
     }
 
     public JSONObject ToJSON()
@@ -40,10 +40,11 @@ public class Player : IJSON
     public void FromJSON(JSONObject jsonObject)
     {
         ID = (int)jsonObject[JSONs.ID];
+        PhotonPlayer = null;
         Name = (string)jsonObject[JSONs.Name];
         Color = new Color((float)jsonObject[JSONs.Color]["r"], (float)jsonObject[JSONs.Color]["g"], (float)jsonObject[JSONs.Color]["b"]);
 
-        PlayerManager.Get().PlayerList.Add(this);
+        PlayerManager.Get().PlayerList.Add(this); // TODO iwas muss anders.. über AddPlayerINformation damit der richtige Spieler diem zugewiesen wird!
     }
 }
 
@@ -82,6 +83,17 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
         }
     }
 
+    public void SetAllExistingPlayerInformationToAllPlayers()
+    {
+        foreach (var player in PlayerList)
+        {
+            if (player.PhotonPlayer != null)
+            {
+                SetAllExistingPlayerInformationAtPlayer(player.PhotonPlayer);
+            }
+        }
+    }
+
     [RPC]
     private void SetPlayerInformation(int id, PhotonPlayer player, string name, Vector3 color, PhotonMessageInfo info)
     {
@@ -90,8 +102,21 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        var newPlayer = new Player(id, player, name, new Color(color.x, color.y, color.z));
-        PlayerList.Add(newPlayer);
+        var newPlayer = new Player();
+
+        var existingPlayer = PlayerList.Find(p => p.Name == name);
+        if (existingPlayer != null)
+        {
+            newPlayer = existingPlayer;
+            newPlayer.PhotonPlayer = player;
+            print("existing player");
+        }
+        else
+        {
+            newPlayer = new Player(id, player, name, new Color(color.x, color.y, color.z));
+            PlayerList.Add(newPlayer);
+            print("new player");
+        }
 
         if (PhotonNetwork.isMasterClient)
         {
@@ -130,7 +155,7 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        CurrentPlayer = PlayerList.Find(p => p.PhotonPlayer == player);
+        CurrentPlayer = GetPlayer(player);
         photonView.RPC(RPCs.SetCurrentPlayer, PhotonTargets.All, CurrentPlayer.PhotonPlayer);
     }
 
@@ -216,7 +241,20 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
     }
     #endregion
 
-    //private void RemovePlayer
+    #region Remove player
+    private void RemovePlayer(PhotonPlayer photonPlayer)
+    {
+        GetPlayer(photonPlayer).PhotonPlayer = null;
+    }
+
+    private void RemoveAllPlayers()
+    {
+        foreach (var player in PlayerList)
+        {
+            player.PhotonPlayer = null;
+        }
+    } 
+    #endregion
 
     public Player GetPlayer(int playerID)
     {
@@ -274,11 +312,17 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
     {
         var jsonObject = JSONObject.obj;
         jsonObject[JSONs.Players] = JSONObject.CreateList(PlayerList);
+        jsonObject[JSONs.Player] = Player.ToJSON();
+        jsonObject[JSONs.CurrentPlayer] = CurrentPlayer.ToJSON();
         return jsonObject;
     }
 
     public void FromJSON(JSONObject jsonObject)
     {
+        PlayerList.Clear();
+
         JSONObject.ReadList<Player>(jsonObject[JSONs.Players]);
+        //CurrentPlayer = 
+
     }
 }
