@@ -21,8 +21,6 @@ public class InputManager : Photon.MonoBehaviour
     // Lists
     private List<Tile> MoveableTileList { get; set; }
     private List<Transform> MoveableTileObjectList { get; set; }
-    //private List<Fleet> FleetList { get { return FleetManager.Get().FleetList; } }
-    //private List<Tile> TileList { get { return TileManager.Get().TileList; } }
     #endregion
 
     private void CheckTileSelection()

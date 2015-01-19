@@ -38,7 +38,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
 
     private void OnJoinedRoom()
     {
-        //StartNewGame();
+        StartNewGame();
     }
 
     #region Player connect

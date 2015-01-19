@@ -170,7 +170,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
     public void AddFleet(Fleet fleet)
     {
-        if (FleetList.Exists(f => f.ID == fleet.ID || f.Position == fleet.Position) || TileManager.Get().GetTile(fleet.Position) != null)
+        if (FleetList.Exists(f => f.ID == fleet.ID || f.Position == fleet.Position) || TileManager.Get().GetTile(fleet.Position) == null)
         {
             return;
         }
