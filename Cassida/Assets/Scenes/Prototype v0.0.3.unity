@@ -1592,7 +1592,7 @@ GameObject:
   - 124: {fileID: 350190340}
   m_Layer: 5
   m_Name: Menu Camera
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1657,7 +1657,7 @@ Behaviour:
     type: 2}
   m_PrefabInternal: {fileID: 650804338}
   m_GameObject: {fileID: 350190337}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!1 &354227423
 GameObject:
   m_ObjectHideFlags: 0
@@ -2682,6 +2682,14 @@ Prefab:
     - target: {fileID: 11400026, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
       propertyPath: instantiationId
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9200002, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100026, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: m_TagString
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}

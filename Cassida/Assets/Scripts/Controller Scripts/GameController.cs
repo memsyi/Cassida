@@ -14,6 +14,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
     {
         if (PhotonNetwork.isMasterClient)
         {
+            GameObject.FindGameObjectWithTag(Tags.Menu).SetActive(false);
             WorldManager.Get().InitializeWorld();
             PlayerManager.Get().AddPlayerInformation(PhotonNetwork.player, "master", Color.red);
             MapManager.Get().AddBasesToMap();

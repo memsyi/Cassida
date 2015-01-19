@@ -160,7 +160,7 @@ public class LobbyManager : MonoBehaviour
 
         var roomController = room.GetComponent<RoomController>();
 
-        var CurrentRoom = new RoomFoo(roomName, ProfileManager.Get().CurrentProfile.PlayerName, 0, 2, roomController);
+        CurrentRoom = new RoomFoo(roomName, ProfileManager.Get().CurrentProfile.PlayerName, 0, 2, roomController);
         RoomList.Add(CurrentRoom);
     }
 
