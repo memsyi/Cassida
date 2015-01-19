@@ -48,6 +48,8 @@ public class Player : IJSON
     }
 }
 
+public delegate void EndTurnHandler();
+
 [RequireComponent(typeof(PhotonView))]
 public class PlayerManager : Photon.MonoBehaviour, IJSON
 {
@@ -55,6 +57,9 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
     // Player
     public Player Player { get; private set; }
     public Player CurrentPlayer { get; private set; }
+
+    // Events
+    public event EndTurnHandler EndTurnEvent;
 
     // Lists
     public List<Player> PlayerList { get; private set; }
@@ -195,10 +200,7 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
 
         if (PhotonNetwork.player == CurrentPlayer.PhotonPlayer)
         {
-            FleetManager.Get().ResetMovementOfAllFleets();
-            TileManager.Get().ResetAllTiles();
-            InputManager.Get().ResetMovementArea();
-            InputManager.Get().RemoveMouseEvents();
+            EndTurnEvent();
         }
 
         CurrentPlayer = GetPlayer(photonPlayer);
@@ -216,6 +218,8 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
         PhotonPlayer nextPlayer = null;
         var nextPlayerID = CurrentPlayer.ID;
 
+        var playerList = new List<PhotonPlayer>(PhotonNetwork.playerList);
+
         while (nextPlayer == null)
         {
             nextPlayerID++;
@@ -224,8 +228,6 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
             {
                 nextPlayerID = 0;
             }
-
-            var playerList = new List<PhotonPlayer>(PhotonNetwork.playerList);
 
             var possiblePlayer = PlayerList.Find(p => playerList.Exists(pp => pp == p.PhotonPlayer) && (int)p.ID == nextPlayerID).PhotonPlayer;
 

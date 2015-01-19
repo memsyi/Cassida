@@ -475,6 +475,13 @@ public class InputManager : Photon.MonoBehaviour
         MouseController.Get().RightMouseclickEvent -= new MouseclickHandler(CheckFleetAction);
     }
 
+    private void AddEndTurnEvents()
+    {
+        // Add events
+        PlayerManager.Get().EndTurnEvent += new EndTurnHandler(ResetMovementArea);
+        PlayerManager.Get().EndTurnEvent += new EndTurnHandler(RemoveMouseEvents);
+    }
+
     private void Init()
     {
         MoveableTileList = new List<Tile>();

@@ -503,6 +503,12 @@ public class TileManager : MonoBehaviour, IJSON
         MouseController.Get().RightMouseclickEvent += new MouseclickHandler(ResetHighlightedTile);
     }
 
+    public void AddEndTurnEvents()
+    {
+        // Add events
+        PlayerManager.Get().EndTurnEvent += new EndTurnHandler(ResetAllTiles);
+    }
+
     private void Init()
     {
         TileList = new List<Tile>();
@@ -514,6 +520,8 @@ public class TileManager : MonoBehaviour, IJSON
             TileAnimation.SelectionObjects.Add(tileAnimationObject);
             TileAnimation.SelectionObjects[i].gameObject.SetActive(false);
         }
+
+        AddEndTurnEvents();
     }
 
     private void Start()
