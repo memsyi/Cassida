@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class RoomFoo
 {
-    public string Name { get; private set; }
+    public string RoomName { get; private set; }
     public string MasterName { get; private set; }
     public int CurrentPlayerCount { get; private set; }
     public int MaxPlayer { get; set; }
@@ -12,13 +12,13 @@ public class RoomFoo
 
     public RoomInputController RoomController { get; private set; }
 
-    public RoomFoo(string name, string masterName, int playerCount, int maxPlayer, RoomInputController roomController)
+    public RoomFoo(string masterName, int playerCount, int maxPlayer, RoomInputController roomController)
     {
-        Name = name;
+        
         MasterName = masterName;
         CurrentPlayerCount = playerCount;
         MaxPlayer = maxPlayer;
-
+        RoomName = MasterName + " " + CurrentPlayerCount + "/" + MaxPlayer;
         RoomController = roomController;
     }
 }
@@ -164,6 +164,8 @@ public class LobbyManager : MonoBehaviour
         PhotonNetwork.CreateRoom(roomName, defaultSettings, null);
         //RoomCreated = true;
         //RoomInfoList = new List<RoomInfo>(PhotonNetwork.GetRoomList());
+
+        print("Room created: " + roomName);
     }
 
     private void InstantiateRoomObject(string roomName)
@@ -175,7 +177,8 @@ public class LobbyManager : MonoBehaviour
 
         var roomController = room.GetComponent<RoomInputController>();
 
-        var CurrentRoom = new RoomFoo(roomName, ProfileManager.Get().CurrentProfile.PlayerName, 0, 2, roomController);
+        //CurrentRoom = new RoomFoo(ProfileManager.Get().CurrentProfile.PlayerName, 0, 2, roomController);
+        CurrentRoom = new RoomFoo(roomName, 0, 2, roomController);
         RoomList.Add(CurrentRoom);
     }
 
@@ -222,7 +225,7 @@ public class LobbyManager : MonoBehaviour
 
     private void ShowRoom(RoomFoo room)
     {
-        InstantiateRoomObject(room.Name);
+        InstantiateRoomObject(room.RoomName);
         //.OwnRoom = new RoomFoo(roomController.OwnRoom.Name, PlayerManager.Get().Player.Name, roomController.OwnRoom.CurrentPlayerCount, roomController.OwnRoom.MaxPlayer);
     }
 
@@ -230,7 +233,7 @@ public class LobbyManager : MonoBehaviour
     {
         foreach (var roomInfo in RoomInfoList)
         {
-            if(RoomList.Exists(r => r.Name == roomInfo.name))
+            if(RoomList.Exists(r => r.RoomName == roomInfo.name))
             {
                 return;
             }
@@ -267,7 +270,7 @@ public class LobbyManager : MonoBehaviour
     {
         foreach (var roomInfo in RoomInfoList)
         {
-            var room = RoomList.Find(r => r.Name == roomInfo.name);
+            var room = RoomList.Find(r => r.RoomName == roomInfo.name);
             if (room != null)
             {
                 return;

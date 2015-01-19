@@ -264,6 +264,7 @@ public class ProfileManager : MonoBehaviour
     private void Start()
     {
         Init();
+        //AddNewProfile("Maxim");
     }
 
     private void Awake()
