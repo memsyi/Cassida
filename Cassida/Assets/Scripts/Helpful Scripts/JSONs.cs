@@ -8,6 +8,7 @@ public struct JSONs
     public const string Players = "Players";
 
     public const string Player = "Player";
+    public const string CurrentPlayer = "CurrentPlayer";
     public const string PlayerID = "PlayerID";
     public const string ID = "ID";
     public const string Name = "Name";

@@ -38,7 +38,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
 
     private void OnJoinedRoom()
     {
-        StartNewGame();
+        //StartNewGame();
     }
 
     #region Player connect
@@ -106,10 +106,9 @@ public class GameController : Photon.MonoBehaviour, IJSON
 
             FromJSON(JSONParser.parse(PlayerPrefs.GetString("Game")));
         }
-        if (GUI.Button(new Rect(500, 0, 100, 20), "Print"))
+        if (GUI.Button(new Rect(500, 0, 100, 20), "Clear savepoint"))
         {
-            print(PlayerPrefs.GetString("Fleets"));
-            print(PlayerPrefs.GetString("Tiles"));
+            PlayerPrefs.DeleteAll();
         }
     }
 
@@ -157,16 +156,16 @@ public class GameController : Photon.MonoBehaviour, IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-        jsonObject[JSONs.Army] = FleetManager.Get().ToJSON();
-        jsonObject[JSONs.Map] = TileManager.Get().ToJSON();
         jsonObject[JSONs.Players] = PlayerManager.Get().ToJSON();
+        jsonObject[JSONs.Map] = TileManager.Get().ToJSON();
+        jsonObject[JSONs.Army] = FleetManager.Get().ToJSON();
         return jsonObject;
     }
 
     public void FromJSON(JSONObject jsonObject)
     {
-        FleetManager.Get().FromJSON(jsonObject[JSONs.Army]);
-        TileManager.Get().FromJSON(jsonObject[JSONs.Map]);
         PlayerManager.Get().FromJSON(jsonObject[JSONs.Players]);
+        TileManager.Get().FromJSON(jsonObject[JSONs.Map]);
+        FleetManager.Get().FromJSON(jsonObject[JSONs.Army]);
     }
 }

@@ -24,7 +24,7 @@ public enum ObjectiveType
 public class Tile : IJSON
 {
     public Position Position { get; protected set; }
-    public int FleetID { get { var fleet = FleetManager.Get().FleetList.Find(f => f.Position == this.Position); return fleet != null ? fleet.ID : -1; } }
+    public int FleetID { get { var fleet = FleetManager.Get().GetFleet(Position); return fleet != null ? fleet.ID : -1; } }
     public TerrainType TerrainType { get; private set; }
     public ObjectiveType ObjectiveType { get; private set; }
 
@@ -36,12 +36,22 @@ public class Tile : IJSON
 
     public Tile(Position position, TerrainType terrain, ObjectiveType objective)
     {
-        TileParent = MapGenerator.InstatiateParentObject(position);
-        TileObject = MapGenerator.Get().InstatiateTileObject(TileParent);
-
         Position = position;
         TerrainType = terrain;
         ObjectiveType = objective;
+
+        InitiateValues();
+    }
+
+    public Tile()
+    {
+
+    }
+
+    private void InitiateValues()
+    {
+        TileParent = MapGenerator.InstatiateTile(Position);
+        TileObject = MapGenerator.Get().InstatiateTileObject(TileParent);
 
         SetCorrectTerrain();
         SetCorrectObjective();
@@ -87,9 +97,14 @@ public class Tile : IJSON
         return jsonObject;
     }
 
-    public void FromJSON(JSONObject o)
+    public void FromJSON(JSONObject jsonObject)
     {
-        throw new System.NotImplementedException();
+        Position = new Position(jsonObject[JSONs.Position]);
+        TerrainType = (TerrainType)(int)jsonObject[JSONs.TerrainType];
+        ObjectiveType = (ObjectiveType)(int)jsonObject[JSONs.ObjectiveType];
+
+        InitiateValues();
+        TileManager.Get().TileList.Add(this);
     }
 }
 
@@ -245,7 +260,6 @@ public class TileManager : MonoBehaviour, IJSON
 
     // Lists
     public List<Tile> TileList { get; private set; }
-    private List<Fleet> FleetList { get { return FleetManager.Get().FleetList; } }
     #endregion
 
     public void SelectTile(Tile tile)
@@ -256,7 +270,7 @@ public class TileManager : MonoBehaviour, IJSON
             RemoveCurrentSelectionAnimation();
         }
 
-        var fleet = FleetList.Find(f => f.Position == tile.Position);
+        var fleet = FleetManager.Get().GetFleet(tile.Position);
 
         if (tile == null || fleet == null || fleet.PlayerID != PlayerManager.Get().Player.ID)
         {
@@ -381,47 +395,48 @@ public class TileManager : MonoBehaviour, IJSON
     private void HighlightTile()
     {
         // If mouse is over new tile
-        if (CurrentHighlightedTile != null)
+        if (CurrentHighlightedTile == null)
         {
-            // Selected tile
-            if (CurrentHighlightedTile == CurrentSelectedTile)
+            return;
+        }
+
+        // Selected tile
+        if (CurrentHighlightedTile == CurrentSelectedTile)
+        {
+            SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverSelectionColor);
+            return;
+        }
+
+        // Other tile
+        // Enemies fleet (own selected)
+        if (CurrentSelectedTile != null && CurrentHighlightedTile.FleetID > -1)
+        {
+            if (InputManager.Get().CheckAttack(CurrentSelectedTile.FleetID, CurrentHighlightedTile.FleetID))
             {
-                SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverSelectionColor);
+                SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverEnemyFleetColor);
             }
-            // Other tile
             else
             {
-                // Enemies fleet (own selected)
-                if (CurrentSelectedTile != null && CurrentHighlightedTile.FleetID > -1)
-                {
-                    if (InputManager.Get().CheckAttack(CurrentSelectedTile.FleetID, CurrentHighlightedTile.FleetID))
-                    {
-                        SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverEnemyFleetColor);
-                    }
-                    else
-                    {
-                        SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverCantMoveColor);
-                    }
-                }
-                // Other fleet
-                else if (CurrentHighlightedTile.FleetID > -1)
-                {
-                    var fleet = FleetList.Find(f => f.ID == CurrentHighlightedTile.FleetID);
-                    if (fleet != null && fleet.PlayerID == PlayerManager.Get().Player.ID)
-                    {
-                        SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverFleetColor);
-                    }
-                    else
-                    {
-                        SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverEnemyFleetColor);
-                    }
-                }
-                // Default tile
-                else
-                {
-                    SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverColor);
-                }
+                SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverCantMoveColor);
             }
+        }
+        // Other fleet
+        else if (CurrentHighlightedTile.FleetID > -1)
+        {
+            var fleet = FleetManager.Get().GetFleet(CurrentHighlightedTile.FleetID);
+            if (fleet != null && fleet.PlayerID == PlayerManager.Get().Player.ID)
+            {
+                SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverFleetColor);
+            }
+            else
+            {
+                SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverEnemyFleetColor);
+            }
+        }
+        // Default tile
+        else
+        {
+            SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverColor);
         }
     }
 
@@ -454,10 +469,31 @@ public class TileManager : MonoBehaviour, IJSON
     }
     #endregion
 
+    #region Destroy tiles
+    private void DestroyAllTiles()
+    {
+        foreach (var tile in TileList)
+        {
+            Destroy(tile.TileParent.gameObject);
+        }
+
+        TileList.Clear();
+    }
+
     private void SetTileBorderColor(Tile tile, Color color)
     {
         if (tile == null) { return; }
         tile.TileObject.renderer.material.color = color;
+    } 
+    #endregion
+
+    public Tile GetTile(Position position)
+    {
+        return TileList.Find(t => t.Position == position);
+    }
+    public Tile GetTile(int fleetID)
+    {
+        return TileList.Find(t => t.FleetID == fleetID);
     }
 
     private void AddMouseEvents()
@@ -533,17 +569,14 @@ public class TileManager : MonoBehaviour, IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-        var tileObjects = JSONObject.arr;
-        foreach (var tile in TileList)
-        {
-            tileObjects.Add(tile.ToJSON());
-        }
-        jsonObject[JSONs.Tiles] = tileObjects;
+        jsonObject[JSONs.Tiles] = JSONObject.CreateList(TileList);
         return jsonObject;
     }
 
-    public void FromJSON(JSONObject o)
+    public void FromJSON(JSONObject jsonObject)
     {
-        throw new System.NotImplementedException();
+        DestroyAllTiles();
+
+        JSONObject.ReadList<Tile>(jsonObject[JSONs.Tiles]);
     }
 }

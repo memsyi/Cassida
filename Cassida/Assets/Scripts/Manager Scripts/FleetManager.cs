@@ -99,7 +99,6 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
     // Lists
     public List<Fleet> FleetList { get; private set; }
-    private List<Tile> TileList { get { return TileManager.Get().TileList; } }
 
     // Fleet ID
     private int _highestFleetID = 0;
@@ -138,7 +137,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var position = new Position(positionX, positionY);
 
-        var tile = TileList.Find(t => t.Position == position);
+        var tile = TileManager.Get().GetTile(position);
 
         if (tile == null || tile.FleetID > -1)
         {
@@ -171,7 +170,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
     public void AddFleet(Fleet fleet)
     {
-        if (FleetList.Exists(f => f.ID == fleet.ID || f.Position == fleet.Position) || !TileList.Exists(t => t.Position == fleet.Position))
+        if (FleetList.Exists(f => f.ID == fleet.ID || f.Position == fleet.Position) || TileManager.Get().GetTile(fleet.Position) != null)
         {
             return;
         }
@@ -214,7 +213,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             fleetID = HighestFleetID;
         }
 
-        var fleet = FleetList.Find(f => f.ID == fleetID);
+        var fleet = GetFleet(fleetID);
 
         if (fleet == null || fleet.UnitList.Exists(u => u.Position == position) || PlayerManager.Get().PlayerList.Find(p => p.ID == fleet.PlayerID).PhotonPlayer != info.sender)
         {
@@ -234,7 +233,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         // TODO genügend Geld?
 
-        var fleet = FleetList.Find(f => f.ID == fleetID);
+        var fleet = GetFleet(fleetID);
 
         if (fleet == null || fleet.UnitList.Exists(u => u.Position == position))
         {
@@ -286,6 +285,10 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     public Fleet GetFleet(int id)
     {
         return FleetList.Find(f => f.ID == id);
+    }
+    public Fleet GetFleet(Position position)
+    {
+        return FleetList.Find(f => f.Position == position);
     }
 
     private void OnGUI()

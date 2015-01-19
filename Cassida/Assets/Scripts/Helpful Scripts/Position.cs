@@ -8,14 +8,14 @@ public struct Position : IJSON
 
     public Position(int x, int y)
     {
-        this.X = x;
-        this.Y = y;
+        X = x;
+        Y = y;
     }
 
     public Position(JSONObject jsonsObject)
     {
-        this.X = 0;
-        this.Y = 0;
+        X = 0;
+        Y = 0;
         FromJSON(jsonsObject);
     }
 
