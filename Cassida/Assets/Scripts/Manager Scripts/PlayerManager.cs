@@ -109,13 +109,11 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
         {
             newPlayer = existingPlayer;
             newPlayer.PhotonPlayer = player;
-            print("existing player");
         }
         else
         {
             newPlayer = new Player(id, player, name, new Color(color.x, color.y, color.z));
             PlayerList.Add(newPlayer);
-            print("new player");
         }
 
         if (PhotonNetwork.isMasterClient)
