@@ -6,6 +6,7 @@ public struct JSONs
     public const string Army = "Army";
     public const string Map = "Map";
     public const string Players = "Players";
+    public const string Profiles = "Profiles";
 
     public const string Player = "Player";
     public const string CurrentPlayer = "CurrentPlayer";
@@ -13,6 +14,9 @@ public struct JSONs
     public const string ID = "ID";
     public const string Name = "Name";
     public const string Color = "Color";
+
+    public const string Profile = "Profile";
+    public const string PlayerName = "PlayerName";
 
     public const string Tiles = "Tiles";
     public const string TerrainType = "TerrainType";

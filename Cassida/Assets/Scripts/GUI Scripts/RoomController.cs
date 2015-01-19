@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class RoomInputController : MonoBehaviour 
+public class RoomController : MonoBehaviour 
 {
     public RoomFoo OwnRoom { get; private set; }
 
@@ -44,13 +44,18 @@ public class RoomInputController : MonoBehaviour
         MenuManager.Get().ChangeMenu(GameObject.FindGameObjectWithTag(Tags.MultiplayerRoomMenu).GetComponent<MenuController>());
     }
 
-    void Start()
+    private void Init()
     {
         Canvas = FindObjectOfType<Canvas>();
         SelectionImage.gameObject.SetActive(false);
     }
 
-    void Update()
+    private void Start()
+    {
+        Init();
+    }
+
+    private void Update()
     {
 
     }
