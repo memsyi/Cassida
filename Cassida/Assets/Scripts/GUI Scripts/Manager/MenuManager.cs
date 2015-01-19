@@ -28,10 +28,6 @@ public class MenuManager : MonoBehaviour
 
     public void ChangeMenu(MenuController menu)
     {
-        //if (CurrentMenu == menu)
-        //{
-        //    return;
-        //}
 
         if (CurrentMenu == null)
         {
@@ -83,5 +79,10 @@ public class MenuManager : MonoBehaviour
         }
 
         return _instance;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }

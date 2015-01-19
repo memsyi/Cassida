@@ -72,8 +72,8 @@ public class LobbyManager : MonoBehaviour
     public void ConnectToServer()
     {
         PhotonNetwork.offlineMode = false;
-        if (!developerModus) PhotonNetwork.ConnectUsingSettings("Cassida v0.0.2");
-        else PhotonNetwork.ConnectUsingSettings("Cassida v0.0.2c");
+        if (!developerModus) PhotonNetwork.ConnectUsingSettings("Cassida v0.0.3");
+        else PhotonNetwork.ConnectUsingSettings("Cassida v0.0.3c");
     }
 
     public void DisconnectFromServer()
@@ -175,8 +175,8 @@ public class LobbyManager : MonoBehaviour
 
         var roomController = room.GetComponent<RoomInputController>();
 
-        var newRoom = new RoomFoo(roomName, ProfileManager.Get().CurrentProfile.PlayerName, 0, 2, roomController);
-        RoomList.Add(newRoom);
+        var CurrentRoom = new RoomFoo(roomName, ProfileManager.Get().CurrentProfile.PlayerName, 0, 2, roomController);
+        RoomList.Add(CurrentRoom);
     }
 
 

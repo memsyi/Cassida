@@ -92,7 +92,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 11400004}
-        m_MethodName: Selected
+        m_MethodName: SelectThisProfile
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -142,8 +142,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097f79623376105438b5f04351519993, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  profileName: bbbb
-  profileID: 1
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
