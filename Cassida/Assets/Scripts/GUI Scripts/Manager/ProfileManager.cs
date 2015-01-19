@@ -3,52 +3,77 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public class Profile
+public class Profile : IJSON
 {
     public string ProfileName { get; protected set; }
-    public int ID { get; protected set; }
     public string PlayerName { get; private set; }
 
-    public ProfileInputController ProfileController { get; private set; }
+    public ProfileController ProfileController { get; private set; }
 
-    public Profile(string profileName, int id, string playerName, ProfileInputController profileController)
+    public Profile(string profileName, ProfileController profileController)
     {
         ProfileName = profileName;
-        ID = id;
-        PlayerName = playerName;
+        PlayerName = "";
 
         ProfileController = profileController;
     }
+
+    public Profile()
+    {
+
+    }
+
+    public JSONObject ToJSON()
+    {
+        var jsonObject = JSONObject.obj;
+        jsonObject[JSONs.Name] = new JSONObject(ProfileName);
+        jsonObject[JSONs.PlayerName] = new JSONObject(PlayerName);
+        return jsonObject;
+    }
+
+    public void FromJSON(JSONObject jsonObject)
+    {
+        ProfileName = (string)jsonObject[JSONs.Name];
+        PlayerName = (string)jsonObject[JSONs.PlayerName];
+
+        ProfileController = ProfileManager.Get().AddProfileObject(ProfileName);
+        ProfileManager.Get().ProfileList.Add(this);
+    }
 }
 
-public class ProfileManager : MonoBehaviour
+public class ProfileManager : MonoBehaviour, IJSON
 {
-    public Text errorMassage, profileStyle;
-    public Transform profilesPosition;
-    public Button deleteProfileButton;
-    //private int profilesCount, profileMaxID;
+    #region Variables
+    [SerializeField]
+    private Text errorMassage, profileStyle;
+    private Text ProfileStyle
+    {
+        get { return profileStyle; }
+    }
+    private Text ErrorMassage
+    {
+        get { return errorMassage; }
+    }
 
-    //public const string PLAYERNAME = "playername", CURRENTPROFILE = "currentprofile", PROFILESCOUNT = "profilecount", MAXID = "maxID";
+    [SerializeField]
+    private Transform profilesPosition;
+    private Transform ProfilesPosition
+    {
+        get { return profilesPosition; }
+    }
+
+    [SerializeField]
+    private Button deleteProfileButton;
+    private Button DeleteProfileButton
+    {
+        get { return deleteProfileButton; }
+    }
 
     public Profile CurrentProfile { get; private set; }
-    //private ProfileInputController CurrentSelection { get; set; }
 
     // Lists
-    private List<Profile> ProfileList { get; set; }
-
-    //private bool _accountCreated = false;
-
-    //public bool AccountCreated
-    //{
-    //    get
-    //    {
-    //        return _accountCreated;
-    //    }
-    //    set
-    //    {
-    //        _accountCreated = value;
-    //    }
-    //}
+    public List<Profile> ProfileList { get; private set; }
+    #endregion
 
     public void GetProfileName(Text text)
     {
@@ -57,84 +82,55 @@ public class ProfileManager : MonoBehaviour
 
     private void CreateNewProfile(string profileName)
     {
-        if (profileName.Length < 4)
+        if (profileName.Length < 3)
         {
             errorMassage.text = "Der Name muss mindestens 3 Zeichen lang sein";
             return;
         }
-        //print("current profiles: " + profilesCount); /////////////////////
+
+        if (GetProfile(profileName) != null)
+        {
+            errorMassage.text = "profile name already exists!";
+            return;
+        }
 
         AddNewProfile(profileName);
 
-        CurrentProfile = ProfileList.Find(p => p.ProfileName == profileName);
+        CurrentProfile = GetProfile(profileName);
 
         MenuManager.Get().ChangeMenu(GameObject.FindGameObjectWithTag(Tags.ProfileMenu).GetComponent<MenuController>());
 
-        // get a new ID
-        //int id = NewID();
-        //if (id < 0)
-        //{
-        //    print("we got empty accounts???");
-        //}
-        //else
-        //{
-        
-
-        
-        //profileController.SetOwnProfile(newProfile);
-
-        // set up profile stats
-
-        //PlayerPrefs.SetString(PLAYERNAME + id, profileName.GetComponent<ProfileInput>().profileName);
-        //profilesCount++;
-
-        //PlayerPrefs.SetInt(PROFILESCOUNT, profilesCount);
-
         errorMassage.text = "";
-        //AccountCreated = true;
-
-        //PlayerPrefs.SetString(CURRENTPROFILE, profileName.text);
-        //print("created a profile"); /////////////////////
     }
 
     private void AddNewProfile(string profileName)
+    {
+        var profileController = AddProfileObject(profileName);
+
+        var newProfile = new Profile(profileName, profileController);
+
+        ProfileList.Add(newProfile);
+        SelectProfile(newProfile.ProfileController);
+    }
+
+    public ProfileController AddProfileObject(string profileName)
     {
         Text profileObjectText = Instantiate(profileStyle, profilesPosition.position, profilesPosition.rotation) as Text;
         profileObjectText.transform.SetParent(profilesPosition);
         profileObjectText.transform.localScale = profilesPosition.localScale;
 
-        var profileController = profileObjectText.gameObject.GetComponent<ProfileInputController>();
+        var profileController = profileObjectText.gameObject.GetComponent<ProfileController>();
         profileObjectText.text = profileName;
 
-        var newProfile = new Profile("new profile", ProfileList.Count, "Otto", profileController);
-        
-        ProfileList.Add(newProfile);
-        ShowProfile(newProfile);
+        return profileController;
     }
 
-    //private int NewID()
-    //{
-    //    int newID = -1;
-    //    int count = PlayerPrefs.GetInt(PROFILESCOUNT) + 1;
-    //    for (int i = 0; i < count; i++)
-    //    {
-    //        if (PlayerPrefs.GetString(PLAYERNAME + i) == "")
-    //        {
-    //            if (i >= profileMaxID)
-    //            {
-    //                PlayerPrefs.SetInt(MAXID, i);
-    //                profileMaxID = i;
-    //                print("maxID: " + profileMaxID);
-    //            }
-    //            return newID = i;
-    //        }
-    //    }
-    //    return newID;
-    //}
-
-    public void SelectProfile(ProfileInputController profileController)
+    public void SelectProfile(ProfileController profileController)
     {
-        deleteProfileButton.gameObject.SetActive(true);
+        if (ProfileList.Count > 1)
+        {
+            deleteProfileButton.gameObject.SetActive(true);
+        }
 
         if (CurrentProfile != null)
         {
@@ -142,55 +138,10 @@ public class ProfileManager : MonoBehaviour
         }
 
         CurrentProfile = ProfileList.Find(p => p.ProfileController == profileController);
-        //print("selected" + profile.profileName + profile.profileID);
+        CurrentProfile.ProfileController.ActivateSelection();
+
+        SaveAllProfiles();
     }
-
-    private void ShowProfile(Profile profile)
-    {
-        AddNewProfile(profile.ProfileName);
-    }
-
-    private void ShowAllProfiles()
-    {
-        foreach (var profile in ProfileList)
-        {
-            ShowProfile(profile);
-        }
-
-        //if (PlayerPrefs.GetInt(PROFILESCOUNT) > 0)
-        //{
-        //    int countTo = PlayerPrefs.GetInt(MAXID);
-        //    print("countTo : " + countTo);
-        //    for (int i = 0; i <= countTo; i++)
-        //    {
-        //        if (PlayerPrefs.GetString(PLAYERNAME + i) != "")
-        //        {
-        //            // initiate the profile at the gui
-        //            Text profile = InstantiateProfileObjectText();
-
-        //            // set up profile stats
-        //            profileStyle.GetComponent<ProfileInput>().SetUpProfile(i, PlayerPrefs.GetString(PLAYERNAME + i));
-        //            profile.text = PlayerPrefs.GetString(PLAYERNAME + i);
-        //        }
-        //    }
-        //}
-    }
-
-    //{
-    //for (int i = -100; i < 100; i++)
-    //{
-    //    PlayerPrefs.SetString(PLAYERNAME + i, "");
-    //}
-    //PlayerPrefs.SetInt(PROFILESCOUNT, 0);
-    //PlayerPrefs.SetInt(MAXID, 0);
-    //}
-
-    //public void SetUpNewProfile()
-    //{
-    //    errorMassage.text = "";
-    //    //AccountCreated = false;
-    //    //newProfile.text = "";
-    //}
 
     public void DeletSelectedProfile()
     {
@@ -199,66 +150,70 @@ public class ProfileManager : MonoBehaviour
 
     private void DeletProfile(Profile profile)
     {
-        if (profile == null)
+        if (profile == null || ProfileList.Count < 2)
         {
             return;
         }
 
-        if (profile.ID == CurrentProfile.ID)
-        {
-            // TODO change profile to next
-            //CurrentProfile = 
-        }
-
         profile.ProfileController.DeleteProfileObject();
-        CurrentProfile = null;
         ProfileList.Remove(profile);
         deleteProfileButton.gameObject.SetActive(false);
-        // TODO save new profiles
+
+        if (profile.ProfileName == CurrentProfile.ProfileName)
+        {
+            if (ProfileList.Count <= 0)
+            {
+                CurrentProfile = null;
+                return;
+            }
+
+            CurrentProfile = ProfileList[0];
+            SelectProfile(CurrentProfile.ProfileController);
+        }
+
+        SaveAllProfiles();
     }
 
-    //public void DeleteProfileObject(Profile profile)
-    //{
-    //    if (profile == null)
-    //    {
-    //        return;
-    //    }
-    //    //SortProfiles(currentSelection.profileID);
-    //    //PlayerPrefs.SetString(PLAYERNAME + currentSelection.profileID, "");
-    //    //PlayerPrefs.SetInt(PROFILESCOUNT, PlayerPrefs.GetInt(PROFILESCOUNT) - 1);
-    //    //if (currentSelection.profileID >= profileMaxID)
-    //    //{
-    //    //    int newProfileMaxID = 0;
-    //    //    for (int i = 0; i < profileMaxID; i++)
-    //    //    {
-    //    //        if (PlayerPrefs.GetString(PLAYERNAME) != "")
-    //    //        {
-    //    //            newProfileMaxID = i;
-    //    //        }
-    //    //    }
-    //    //    profileMaxID = newProfileMaxID;
-    //    //    PlayerPrefs.SetInt(MAXID, profileMaxID);
-    //    //}
-        
-
-        
-    //}
+    private void SaveAllProfiles()
+    {
+        PlayerPrefs.SetString("Profiles", ToJSON().print());
+    }
 
     private void DeletAllProfiles()
     {
-        foreach (var profile in ProfileList)
+        for(int i = ProfileList.Count -1; i > 0; i--)
         {
-            DeletProfile(profile);
+            DeletProfile(ProfileList[i]);
         }
+
+        PlayerPrefs.DeleteKey("Profiles");
+    }
+
+    private Profile GetProfile(string profileName)
+    {
+        return ProfileList.Find(p => p.ProfileName == profileName);
     }
 
     private void Init()
     {
         ProfileList = new List<Profile>();
-        //profileMaxID = PlayerPrefs.GetInt(MAXID);
-        //profilesCount = PlayerPrefs.GetInt(PROFILESCOUNT);
+
+        if (PlayerPrefs.HasKey("Profiles"))
+        {
+            FromJSON(JSONParser.parse(PlayerPrefs.GetString("Profiles")));
+
+            if (CurrentProfile != null)
+            {
+                SelectProfile(CurrentProfile.ProfileController);
+            }
+
+            if (ProfileList.Count > 1)
+            {
+                return;
+            }
+        }
+        
         deleteProfileButton.gameObject.SetActive(false);
-        ShowAllProfiles();
     }
 
     private void Start()
@@ -295,5 +250,19 @@ public class ProfileManager : MonoBehaviour
         }
 
         return _instance;
+    }
+
+    public JSONObject ToJSON()
+    {
+        var jsonObject = JSONObject.obj;
+        jsonObject[JSONs.Profiles] = JSONObject.CreateList(ProfileList);
+        jsonObject[JSONs.Profile] = new JSONObject(CurrentProfile.ProfileName);
+        return jsonObject;
+    }
+
+    public void FromJSON(JSONObject jsonObject)
+    {
+        JSONObject.ReadList<Profile>(jsonObject[JSONs.Profiles]);
+        CurrentProfile = GetProfile((string)jsonObject[JSONs.Profile]);
     }
 }

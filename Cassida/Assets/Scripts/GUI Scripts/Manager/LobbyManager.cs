@@ -10,9 +10,9 @@ public class RoomFoo
     public int MaxPlayer { get; set; }
     public string InfoName { get { return MasterName + " " + CurrentPlayerCount + "/" + MaxPlayer; } }
 
-    public RoomInputController RoomController { get; private set; }
+    public RoomController RoomController { get; private set; }
 
-    public RoomFoo(string name, string masterName, int playerCount, int maxPlayer, RoomInputController roomController)
+    public RoomFoo(string name, string masterName, int playerCount, int maxPlayer, RoomController roomController)
     {
         Name = name;
         MasterName = masterName;
@@ -27,16 +27,13 @@ public class LobbyManager : MonoBehaviour
 {
     [SerializeField]
     private GameObject roomStyle;
-
     private GameObject RoomStyle
     {
         get { return roomStyle; }
-        set { roomStyle = value; }
     }
 
     [SerializeField]
     private float refreshTime = 2.0f;
-
     public float RefreshTime
     {
         get { return refreshTime; }
@@ -57,18 +54,6 @@ public class LobbyManager : MonoBehaviour
     private List<RoomInfo> RoomInfoList { get; set; }
     private List<RoomFoo> RoomList { get; set; }
 
-    //public bool RoomCreated
-    //{
-    //    get
-    //    {
-    //        return _roomCreated;
-    //    }
-    //    set
-    //    {
-    //        _roomCreated = value;
-    //    }
-    //}
-
     public void ConnectToServer()
     {
         PhotonNetwork.offlineMode = false;
@@ -81,7 +66,7 @@ public class LobbyManager : MonoBehaviour
         PhotonNetwork.Disconnect();
     }
 
-    public void JoinRoom(RoomInputController roomController)
+    public void JoinRoom(RoomController roomController)
     {
         SelectRoom(roomController);
         PhotonNetwork.JoinRoom(roomController.OwnRoom.MasterName);
@@ -173,7 +158,7 @@ public class LobbyManager : MonoBehaviour
         room.transform.SetParent(roomsPosition);
         room.transform.localScale = roomsPosition.localScale;
 
-        var roomController = room.GetComponent<RoomInputController>();
+        var roomController = room.GetComponent<RoomController>();
 
         var CurrentRoom = new RoomFoo(roomName, ProfileManager.Get().CurrentProfile.PlayerName, 0, 2, roomController);
         RoomList.Add(CurrentRoom);
@@ -210,7 +195,7 @@ public class LobbyManager : MonoBehaviour
         ShowAllNewExitingRooms();
     }
 
-    public void SelectRoom(RoomInputController roomController)
+    public void SelectRoom(RoomController roomController)
     {
         if (CurrentRoom != null)
         {

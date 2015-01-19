@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ProfileInputController : MonoBehaviour 
+public class ProfileController : MonoBehaviour 
 {
     //public Profile OwnProfile { get; private set; }
 
@@ -17,7 +17,7 @@ public class ProfileInputController : MonoBehaviour
         ActivateSelection();
     }
 
-    private void ActivateSelection()
+    public void ActivateSelection()
     {
         gameObject.transform.FindChild("Image").gameObject.SetActive(true);
     }
