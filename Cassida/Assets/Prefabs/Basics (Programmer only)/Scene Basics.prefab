@@ -192,7 +192,7 @@ GameObject:
   - 4: {fileID: 400018}
   m_Layer: 5
   m_Name: Menu
-  m_TagString: Untagged
+  m_TagString: Menu
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -417,7 +417,6 @@ GameObject:
   - 223: {fileID: 22300000}
   - 114: {fileID: 11400084}
   - 114: {fileID: 11400082}
-  - 114: {fileID: 11400086}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -900,7 +899,7 @@ GameObject:
   - 114: {fileID: 11400046}
   m_Layer: 5
   m_Name: Main Menu
-  m_TagString: Untagged
+  m_TagString: MainMenu
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2835,7 +2834,7 @@ MonoBehaviour:
   errorMassage: {fileID: 11400080}
   profileStyle: {fileID: 11400002, guid: 276ea4075da0d8b4786ee1ead72eb334, type: 2}
   profilesPosition: {fileID: 22400032}
-  deleteProfileButton: {fileID: 0}
+  deleteProfileButton: {fileID: 11400152}
 --- !u!114 &11400050
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3241,7 +3240,7 @@ MonoBehaviour:
   blockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 32
 --- !u!114 &11400084
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3263,17 +3262,6 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
---- !u!114 &11400086
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100046}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5da2db9047d19ed45850bcf94a4ca4bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &11400088
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3377,7 +3365,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -3639,7 +3627,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -4073,7 +4061,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -4250,7 +4238,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: CheckProfile
         m_Mode: 2
         m_Arguments:
@@ -4370,7 +4358,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -4588,7 +4576,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -4700,7 +4688,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -4832,7 +4820,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5049,7 +5037,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5182,7 +5170,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5363,7 +5351,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5673,7 +5661,7 @@ MonoBehaviour:
           m_StringArgument: NewMenu
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: CheckProfile
         m_Mode: 2
         m_Arguments:
@@ -5856,7 +5844,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -6184,7 +6172,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -6348,7 +6336,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400086}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:

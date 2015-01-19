@@ -99,8 +99,6 @@ public class Fleet : IJSON
     {
         if (!AllowRotation) { return; }
 
-        var rotation = rotationTarget - Rotation;
-
         FleetController.RotateFleet(rotationTarget);
 
         Rotation = rotationTarget % 6;

@@ -10,7 +10,7 @@ public struct PlayerProperties
 [RequireComponent(typeof(PhotonView))]
 public class GameController : Photon.MonoBehaviour, IJSON
 {
-    private void StartGame()
+    private void StartNewGame()
     {
         if (PhotonNetwork.isMasterClient)
         {
@@ -20,21 +20,31 @@ public class GameController : Photon.MonoBehaviour, IJSON
         }
     }
 
-    private void OnJoinedRoom()
-    {
-        StartGame();
-    }
-
-    #region Player connect
-    private void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
+    private void InitiatePlayer(PhotonPlayer photonPlayer, string name, Color color)
     {
         if (!PhotonNetwork.isMasterClient)
         {
             return;
         }
 
-        PlayerManager.Get().SetAllExistingPlayerInformationAtPlayer(newPlayer);
-        PlayerManager.Get().AddPlayerInformation(newPlayer, "new player", Color.blue);
+        PlayerManager.Get().SetAllExistingPlayerInformationAtPlayer(photonPlayer);
+        PlayerManager.Get().AddPlayerInformation(photonPlayer, name, color);
+    }
+
+    private void InitiateAllPlayersInRoom()
+    {
+
+    }
+
+    private void OnJoinedRoom()
+    {
+        StartNewGame();
+    }
+
+    #region Player connect
+    private void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
+    {
+        InitiatePlayer(newPlayer, "new Player", Color.blue);
     }
     #endregion
 
@@ -51,7 +61,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
             PlayerManager.Get().EndTurn();
         }
 
-        var player = PlayerManager.Get().PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
+        var player = PlayerManager.Get().GetPlayer(photonPlayer);
 
         photonView.RPC(RPCs.ClearAndDestroyAllOfDisconnectedPlayer, PhotonTargets.All, player.ID);
     }
@@ -64,7 +74,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        FleetManager.Get().DestroyAllFleetsOfPlayers(playerID);
+        FleetManager.Get().DestroyAllFleetsOfPlayer(playerID);
     }
     #endregion
 
@@ -92,7 +102,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
         if (GUI.Button(new Rect(400, 0, 100, 20), "Load"))
         {
             //PlayerPrefs.DeleteAll();
-            FleetManager.Get().DestroyAllFleetsOfPlayers(0);
+            FleetManager.Get().DestroyAllFleetsOfPlayer(0);
 
             FromJSON(JSONParser.parse(PlayerPrefs.GetString("Game")));
         }
@@ -149,6 +159,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
         var jsonObject = JSONObject.obj;
         jsonObject[JSONs.Army] = FleetManager.Get().ToJSON();
         jsonObject[JSONs.Map] = TileManager.Get().ToJSON();
+        jsonObject[JSONs.Players] = PlayerManager.Get().ToJSON();
         return jsonObject;
     }
 
@@ -156,5 +167,6 @@ public class GameController : Photon.MonoBehaviour, IJSON
     {
         FleetManager.Get().FromJSON(jsonObject[JSONs.Army]);
         TileManager.Get().FromJSON(jsonObject[JSONs.Map]);
+        PlayerManager.Get().FromJSON(jsonObject[JSONs.Players]);
     }
 }

@@ -119,7 +119,7 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         HighestBaseID = ID;
 
-        var player = PlayerManager.Get().PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
+        var player = PlayerManager.Get().GetPlayer(photonPlayer);
 
         BaseList.Add(new Base(ID, player, position, new BaseValues()));
     }

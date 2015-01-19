@@ -127,7 +127,9 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     [RPC]
     private void AskForNewFleet(int positionX, int positionY, int fleetType, PhotonMessageInfo info)
     {
-        if (!PhotonNetwork.isMasterClient || info.sender != PlayerManager.Get().CurrentPlayer.PhotonPlayer)
+        var playerID = PlayerManager.Get().GetPlayer(info.sender).ID;
+
+        if (!PhotonNetwork.isMasterClient || playerID != PlayerManager.Get().CurrentPlayer.ID)
         {
             return;
         }
@@ -150,7 +152,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        photonView.RPC(RPCs.AddNewFleet, PhotonTargets.All, HighestFleetID, info.sender, positionX, positionY, fleetType);
+        photonView.RPC(RPCs.AddNewFleet, PhotonTargets.All, HighestFleetID, playerID, positionX, positionY, fleetType);
     }
 
     [RPC]
@@ -262,7 +264,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         FleetList.Remove(fleet);
     }
 
-    public void DestroyAllFleetsOfPlayers(int playerID)
+    public void DestroyAllFleetsOfPlayer(int playerID)
     {
         for (int i = FleetList.Count - 1; i >= 0; i--)
         {
@@ -270,6 +272,13 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             {
                 DestroyFleet(FleetList[i]);
             }
+        }
+    }
+    public void DestroyAllFleets()
+    {
+        foreach (var player in PlayerManager.Get().PlayerList)
+        {
+            DestroyAllFleetsOfPlayer(player.ID);
         }
     }
     #endregion
@@ -338,6 +347,8 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
     public void FromJSON(JSONObject jsonObject)
     {
+        DestroyAllFleets();
+
         JSONObject.ReadList<Fleet>(jsonObject[JSONs.Fleets]);
     }
 

@@ -10,7 +10,6 @@ public class Player : IJSON
     public Color Color { get; private set; }
 
     public Player(int id, PhotonPlayer photonPlayer, string name, Color color)
-        : this()
     {
         ID = id;
         PhotonPlayer = photonPlayer;
@@ -40,14 +39,16 @@ public class Player : IJSON
 
     public void FromJSON(JSONObject jsonObject)
     {
-        var id = (int)jsonObject[JSONs.ID];
-        var name = (string)jsonObject[JSONs.Name];
-        var color = new Color((float)jsonObject[JSONs.Color]["r"], (float)jsonObject[JSONs.Color]["g"], (float)jsonObject[JSONs.Color]["b"]);
+        ID = (int)jsonObject[JSONs.ID];
+        Name = (string)jsonObject[JSONs.Name];
+        Color = new Color((float)jsonObject[JSONs.Color]["r"], (float)jsonObject[JSONs.Color]["g"], (float)jsonObject[JSONs.Color]["b"]);
+
+        PlayerManager.Get().PlayerList.Add(this);
     }
 }
 
 [RequireComponent(typeof(PhotonView))]
-public class PlayerManager : Photon.MonoBehaviour
+public class PlayerManager : Photon.MonoBehaviour, IJSON
 {
     #region Variables
     // Player
@@ -177,7 +178,7 @@ public class PlayerManager : Photon.MonoBehaviour
             InputManager.Get().RemoveMouseEvents();
         }
 
-        CurrentPlayer = PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
+        CurrentPlayer = GetPlayer(photonPlayer);
 
         if (PhotonNetwork.player != photonPlayer)
         {
@@ -215,9 +216,15 @@ public class PlayerManager : Photon.MonoBehaviour
     }
     #endregion
 
+    //private void RemovePlayer
+
     public Player GetPlayer(int playerID)
     {
         return PlayerList.Find(p => p.ID == playerID);
+    }
+    public Player GetPlayer(PhotonPlayer photonPlayer)
+    {
+        return PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
     }
 
     private void Init()
@@ -261,5 +268,17 @@ public class PlayerManager : Photon.MonoBehaviour
         }
 
         return _instance;
+    }
+
+    public JSONObject ToJSON()
+    {
+        var jsonObject = JSONObject.obj;
+        jsonObject[JSONs.Players] = JSONObject.CreateList(PlayerList);
+        return jsonObject;
+    }
+
+    public void FromJSON(JSONObject jsonObject)
+    {
+        JSONObject.ReadList<Player>(jsonObject[JSONs.Players]);
     }
 }

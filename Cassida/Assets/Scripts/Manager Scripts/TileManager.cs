@@ -428,18 +428,20 @@ public class TileManager : MonoBehaviour, IJSON
     public void ResetHighlightedTile()
     {
         // If mouse is not over tile any more
-        if (CurrentHighlightedTile != null)
+        if (CurrentHighlightedTile == null)
         {
-            // Selected tile
-            if (CurrentHighlightedTile == CurrentSelectedTile)
-            {
-                SetTileBorderColor(CurrentHighlightedTile, TileColor.SelectionColor);
-            }
-            // Default tile
-            else
-            {
-                SetTileBorderColor(CurrentHighlightedTile, TileColor.DefaultColor);
-            }
+            return;
+        }
+
+        // Selected tile
+        if (CurrentHighlightedTile == CurrentSelectedTile)
+        {
+            SetTileBorderColor(CurrentHighlightedTile, TileColor.SelectionColor);
+        }
+        // Default tile
+        else
+        {
+            SetTileBorderColor(CurrentHighlightedTile, TileColor.DefaultColor);
         }
 
         CurrentHighlightedTile = null;
@@ -454,7 +456,7 @@ public class TileManager : MonoBehaviour, IJSON
 
     private void SetTileBorderColor(Tile tile, Color color)
     {
-        if (tile == null) { return; } 
+        if (tile == null) { return; }
         tile.TileObject.renderer.material.color = color;
     }
 
