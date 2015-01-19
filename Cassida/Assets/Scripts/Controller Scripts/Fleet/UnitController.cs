@@ -67,10 +67,11 @@ public class Unit : IJSON
     private void InitiateValues()
     {
         var fleet = FleetManager.Get().GetFleet(FleetID);
+        var player = PlayerManager.Get().GetPlayer(fleet.PlayerID);
         UnitParent = UnitController.InstatiateParentObject(FleetID, Position);
         UnitController = UnitParent.gameObject.AddComponent<UnitController>(); // TODO change controller to specific unit controller
 
-        UnitController.InstantiateUnit(UnitValues.UnitType, UnitValues.Strength, fleet.Player.Color);
+        UnitController.InstantiateUnit(UnitValues.UnitType, UnitValues.Strength, player.Color);
     }
 
     public bool CheckWhetherUnitIsAlive()

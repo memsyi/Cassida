@@ -128,7 +128,7 @@ public class InputManager : Photon.MonoBehaviour
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null || !fleet.AllowMovement || fleet.Player.ID != PlayerManager.Get().CurrentPlayer.ID)
+        if (fleet == null || !fleet.AllowMovement || fleet.PlayerID != PlayerManager.Get().CurrentPlayer.ID)
         {
             return false;
         }
@@ -223,7 +223,7 @@ public class InputManager : Photon.MonoBehaviour
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null || !fleet.AllowRotation || fleet.Player.ID != PlayerManager.Get().CurrentPlayer.ID)
+        if (fleet == null || !fleet.AllowRotation || fleet.PlayerID != PlayerManager.Get().CurrentPlayer.ID)
         {
             return false;
         }
@@ -384,7 +384,7 @@ public class InputManager : Photon.MonoBehaviour
         var ownFleet = FleetList.Find(f => f.ID == ownFleetID);
         var enemyFleet = FleetList.Find(f => f.ID == enemyFleetID);
 
-        if (ownFleet == null || enemyFleet == null || ownFleet.Player.ID != PlayerManager.Get().CurrentPlayer.ID || enemyFleet.Player.ID == PlayerManager.Get().CurrentPlayer.ID)
+        if (ownFleet == null || enemyFleet == null || ownFleet.PlayerID != PlayerManager.Get().CurrentPlayer.ID || enemyFleet.PlayerID == PlayerManager.Get().CurrentPlayer.ID)
         {
             return false;
         }

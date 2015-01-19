@@ -41,12 +41,12 @@ public class FleetValues : IJSON
 public class Fleet : IJSON
 {
     public int ID { get; private set; }
-    public Player Player { get; private set; } // TODO change to playerID
+    public int PlayerID { get; private set; }
     public Position Position { get; private set; }
     private int rotation;
     public int Rotation { get { return rotation; } private set { rotation = value; if (rotation < 0) rotation += 6; if (rotation >= 6) rotation -= 6; } }
     public FleetValues FleetValues { get; private set; }
-    public List<Unit> UnitList { get; private set; } // TODO set private
+    public List<Unit> UnitList { get; private set; }
 
     public Transform FleetParent { get; protected set; }
     public FleetController FleetController { get; protected set; }
@@ -55,10 +55,10 @@ public class Fleet : IJSON
     public bool AllowMovement { get { return MovementPointsLeft > 0; } }
     public bool AllowRotation { get; private set; }
 
-    public Fleet(int id, Player player, Position position, FleetValues fleetValues)
+    public Fleet(int id, int player, Position position, FleetValues fleetValues)
     {
         ID = id;
-        Player = player;
+        PlayerID = player;
         Position = position;
         Rotation = 0;
         FleetValues = fleetValues;
@@ -76,12 +76,13 @@ public class Fleet : IJSON
 
     private void InitiateValues()
     {
+        var player = PlayerManager.Get().GetPlayer(PlayerID);
         // Parent object and controller must be first!
-        FleetParent = FleetController.InstatiateParentObject(Position, Player.Name);
+        FleetParent = FleetController.InstatiateParentObject(Position, player.Name);
         FleetController = FleetParent.gameObject.AddComponent<FleetController>();
         UnitList = new List<Unit>();
 
-        FleetController.InstantiateFleet(FleetValues.FleetType, Player.Color);
+        FleetController.InstantiateFleet(FleetValues.FleetType, player.Color);
     }
 
     public void MoveFleet(Position target)
@@ -213,7 +214,7 @@ public class Fleet : IJSON
     {
         var jsonObject = JSONObject.obj;
         jsonObject[JSONs.ID] = new JSONObject(ID);
-        jsonObject[JSONs.PlayerID] = new JSONObject(Player.ID);
+        jsonObject[JSONs.PlayerID] = new JSONObject(PlayerID);
         jsonObject[JSONs.Position] = Position.ToJSON();
         jsonObject[JSONs.Rotation] = new JSONObject(Rotation);
         jsonObject[JSONs.FleetValues] = FleetValues.ToJSON();
@@ -227,7 +228,7 @@ public class Fleet : IJSON
     public void FromJSON(JSONObject jsonObject)
     {
         ID = (int)jsonObject[JSONs.ID];
-        Player = PlayerManager.Get().GetPlayer((int)jsonObject[JSONs.PlayerID]);
+        PlayerID = (int)jsonObject[JSONs.PlayerID];
         Position = new Position(jsonObject[JSONs.Position]);
         Rotation = (int)jsonObject[JSONs.Rotation];
         FleetValues = new FleetValues();

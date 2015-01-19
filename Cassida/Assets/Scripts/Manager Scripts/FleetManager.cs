@@ -51,7 +51,7 @@ public struct UnitSettings
     {
         get { return _meeleUnitOneObject; }
         private set { _meeleUnitOneObject = value; }
-    } 
+    }
     #endregion
 
     #region Range
@@ -71,7 +71,7 @@ public struct UnitSettings
     {
         get { return _rangeUnitOneObject; }
         private set { _rangeUnitOneObject = value; }
-    } 
+    }
     #endregion
 }
 
@@ -154,7 +154,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     }
 
     [RPC]
-    private void AddNewFleet(int id, PhotonPlayer photonPlayer, int positionX, int positionY, int fleetType, PhotonMessageInfo info)
+    private void AddNewFleet(int id, int playerID, int positionX, int positionY, int fleetType, PhotonMessageInfo info)
     {
         if (!info.sender.isMasterClient)
         {
@@ -162,9 +162,9 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         }
 
         var position = new Position(positionX, positionY);
-        var player = PlayerManager.Get().PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
+        var player = PlayerManager.Get().GetPlayer(playerID);
 
-        AddFleet(new Fleet(id, player, position, new FleetValues((FleetType)fleetType)));
+        AddFleet(new Fleet(id, player.ID, position, new FleetValues((FleetType)fleetType)));
     }
 
     public void AddFleet(Fleet fleet)
@@ -188,11 +188,11 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         foreach (var fleet in FleetList)
         {
-            photonView.RPC(RPCs.AddNewFleet, photonPlayer, fleet.ID, fleet.Player.PhotonPlayer, fleet.Position.X, fleet.Position.Y, (int)fleet.FleetValues.FleetType);
+            photonView.RPC(RPCs.AddNewFleet, photonPlayer, fleet.ID, fleet.PlayerID, fleet.Position.X, fleet.Position.Y, (int)fleet.FleetValues.FleetType);
 
-            foreach(var unit in fleet.UnitList)
+            foreach (var unit in fleet.UnitList)
             {
-                    photonView.RPC(RPCs.AddNewUnit, photonPlayer, fleet.ID, unit.Position, (int)unit.UnitValues.UnitType, unit.UnitValues.Strength);
+                photonView.RPC(RPCs.AddNewUnit, photonPlayer, fleet.ID, unit.Position, (int)unit.UnitValues.UnitType, unit.UnitValues.Strength);
             }
         }
     }
@@ -214,7 +214,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var fleet = FleetList.Find(f => f.ID == fleetID);
 
-        if (fleet == null || fleet.UnitList.Exists(u => u.Position == position) || fleet.Player.PhotonPlayer != info.sender)
+        if (fleet == null || fleet.UnitList.Exists(u => u.Position == position) || PlayerManager.Get().PlayerList.Find(p => p.ID == fleet.PlayerID).PhotonPlayer != info.sender)
         {
             return;
         }
@@ -266,7 +266,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     {
         for (int i = FleetList.Count - 1; i >= 0; i--)
         {
-            if (FleetList[i].Player.ID == playerID)
+            if (FleetList[i].PlayerID == playerID)
             {
                 DestroyFleet(FleetList[i]);
             }

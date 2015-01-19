@@ -133,11 +133,6 @@ public class PlayerManager : Photon.MonoBehaviour
         photonView.RPC(RPCs.SetCurrentPlayer, PhotonTargets.All, CurrentPlayer.PhotonPlayer);
     }
 
-    public Player GetPlayer(int id)
-    {
-        return PlayerList.Find(p => p.ID == id);
-    }
-
     #region End turn
     public void EndTurn()
     {
@@ -219,6 +214,11 @@ public class PlayerManager : Photon.MonoBehaviour
         return nextPlayer;
     }
     #endregion
+
+    public Player GetPlayer(int playerID)
+    {
+        return PlayerList.Find(p => p.ID == playerID);
+    }
 
     private void Init()
     {

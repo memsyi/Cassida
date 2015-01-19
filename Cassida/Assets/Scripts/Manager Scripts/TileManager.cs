@@ -258,7 +258,7 @@ public class TileManager : MonoBehaviour, IJSON
 
         var fleet = FleetList.Find(f => f.Position == tile.Position);
 
-        if (tile == null || fleet == null || fleet.Player.ID != PlayerManager.Get().Player.ID)
+        if (tile == null || fleet == null || fleet.PlayerID != PlayerManager.Get().Player.ID)
         {
             CurrentSelectedTile = null;
             return;
@@ -407,7 +407,7 @@ public class TileManager : MonoBehaviour, IJSON
                 else if (CurrentHighlightedTile.FleetID > -1)
                 {
                     var fleet = FleetList.Find(f => f.ID == CurrentHighlightedTile.FleetID);
-                    if (fleet != null && fleet.Player.ID == PlayerManager.Get().Player.ID)
+                    if (fleet != null && fleet.PlayerID == PlayerManager.Get().Player.ID)
                     {
                         SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverFleetColor);
                     }
