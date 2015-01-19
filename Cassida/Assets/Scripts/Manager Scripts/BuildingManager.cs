@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BuildingManager : MonoBehaviour
+public class BuildingManager : MonoBehaviour, IJSON
 {
 
     // Use this for initialization
@@ -14,5 +14,15 @@ public class BuildingManager : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public JSONObject ToJSON()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void FromJSON(JSONObject o)
+    {
+        throw new System.NotImplementedException();
     }
 }

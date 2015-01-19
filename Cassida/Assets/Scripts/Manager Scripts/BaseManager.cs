@@ -80,10 +80,10 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         // TODO genügend Geld?
 
-        var tileList = TileManager.Get().TileList.FindAll(t => t.ObjectiveType == ObjectiveType.Base 
-            && !BaseList.Exists(b => 
+        var tileList = TileManager.Get().TileList.FindAll(t => t.ObjectiveType == ObjectiveType.Base
+            && !BaseList.Exists(b =>
                 b.Position == t.Position
-                && b.Player.PhotonPlayer == photonPlayer));
+                && PlayerManager.Get().GetPlayer(b.PlayerID).PhotonPlayer == photonPlayer));
 
         if (tileList == null)
         {
@@ -121,7 +121,7 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         var player = PlayerManager.Get().GetPlayer(photonPlayer);
 
-        BaseList.Add(new Base(ID, player, position, new BaseValues()));
+        BaseList.Add(new Base(ID, player.ID, position, new BaseValues()));
     }
 
     public void InstantiateAllExistingBasesAtPlayer(PhotonPlayer photonPlayer)
@@ -133,10 +133,41 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         foreach (var baseo in BaseList)
         {
-            photonView.RPC(RPCs.AddNewBase, photonPlayer, baseo.ID, baseo.Player.PhotonPlayer, baseo.Position.X, baseo.Position.Y);
+            photonView.RPC(RPCs.AddNewBase, photonPlayer, baseo.ID, PlayerManager.Get().GetPlayer(baseo.PlayerID).PhotonPlayer, baseo.Position.X, baseo.Position.Y);
         }
     }
     #endregion
+
+    #region Destroy or reset fleets
+    public void DestroyBase(Base baseo)
+    {
+        Destroy(baseo.BaseParent.gameObject);
+
+        TileManager.Get().ResetHighlightedTile();
+
+        BaseList.Remove(baseo);
+    }
+
+    public void DestroyBaseOfPlayer(int playerID)
+    {
+        var baseo = GetBase(playerID);
+
+        DestroyBase(baseo);
+    }
+    public void DestroyAllBases()
+    {
+        foreach (var baseo in BaseList)
+        {
+            DestroyBase(baseo);
+        }
+        BaseList.Clear();
+    }
+    #endregion
+
+    public Base GetBase(int playerID)
+    {
+        return BaseList.Find(b => b.PlayerID == playerID);
+    }
 
     private void Init()
     {
@@ -182,17 +213,14 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-        var baseObjects = JSONObject.arr;
-        foreach (var baseo in BaseList)
-        {
-            baseObjects.Add(baseo.ToJSON());
-        }
-        jsonObject[JSONs.Fleets] = baseObjects;
+        jsonObject[JSONs.Bases] = JSONObject.CreateList(BaseList);
         return jsonObject;
     }
 
-    public void FromJSON(JSONObject o)
+    public void FromJSON(JSONObject jsonObject)
     {
-        throw new System.NotImplementedException();
+        DestroyAllBases();
+
+        JSONObject.ReadList<Base>(jsonObject[JSONs.Bases]);
     }
 }

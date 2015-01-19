@@ -5,6 +5,7 @@ public struct JSONs
 {
     public const string Army = "Army";
     public const string Map = "Map";
+    public const string Bases = "Bases";
     public const string Players = "Players";
     public const string Profiles = "Profiles";
 
@@ -37,5 +38,10 @@ public struct JSONs
     public const string UnitType = "UnitType";
     public const string Strength = "Strength";
     public const string FleetID = "FleetID";
-    public const string AllowAttack = "AllowAttack";    
+    public const string AllowAttack = "AllowAttack";
+
+    //public const string Base = "Base";
+    public const string BaseValues = "BaseValues";
+
+    public const string Buildings = "Buildings";
 }

@@ -74,7 +74,7 @@ public class Fleet : IJSON
     private void InitiateValues()
     {
         var player = PlayerManager.Get().GetPlayer(PlayerID);
-        FleetParent = FleetController.InstatiateParentObject(Position, player.Name);
+        FleetParent = FleetController.InstatiateParentObject(Position, Rotation, player.Name);
         FleetController = FleetParent.gameObject.AddComponent<FleetController>();
         UnitList = new List<Unit>();
 
@@ -215,7 +215,6 @@ public class Fleet : IJSON
         jsonObject[JSONs.Units] = JSONObject.CreateList(UnitList);
         jsonObject[JSONs.AllowRotation] = new JSONObject(AllowRotation);
         jsonObject[JSONs.MovementPointsLeft] = new JSONObject(MovementPointsLeft);
-
         return jsonObject;
     }
 
@@ -232,7 +231,6 @@ public class Fleet : IJSON
 
         InitiateValues();
         FleetManager.Get().AddFleet(this);
-        FleetController.RotateFleet(Rotation);
 
         UnitList = JSONObject.ReadList<Unit>(jsonObject[JSONs.Units]);
     }
@@ -245,10 +243,12 @@ public class FleetController : MonoBehaviour
     private Color color;
     private Color Color { get { return color; } set { SetColorOfFleet(value); color = value; } }
 
-    public static Transform InstatiateParentObject(Position position, string playerName)
+    public static Transform InstatiateParentObject(Position position, int rotation, string playerName)
     {
         var fleetParent = new GameObject("Fleet of: " + playerName).transform;
-        fleetParent.position = TileManager.Get().TileList.Find(t => t.Position == position).TileParent.position;
+        fleetParent.position = TileManager.Get().GetTile(position).TileParent.position;
+        fleetParent.rotation = Quaternion.AngleAxis(rotation * 60f, Vector3.up);
+
         fleetParent.SetParent(GameObject.Find(Tags.Fleets).transform);
         return fleetParent;
     }
@@ -299,82 +299,52 @@ public class FleetController : MonoBehaviour
     #endregion
 
     #region Movement and Rotation
-    private Vector3 _movementTarget;
-
-    private Vector3 MovementTarget
-    {
-        get { return _movementTarget; }
-        set
-        {
-            _movementTarget = value;
-            Move = true;
-        }
-    }
-
-    private Quaternion _rotationTarget;
-
-    private Quaternion RotationTarget
-    {
-        get { return _rotationTarget; }
-        set
-        {
-            _rotationTarget.eulerAngles = value.eulerAngles;
-            Turn = true;
-        }
-    }
+    private Vector3 MovementTarget { get; set; }
+    private Quaternion RotationTarget { get; set; }
 
     private bool Move { get; set; }
-    private bool Turn { get; set; }
+    private bool Rotate { get; set; }
 
     public void MoveFleet(Position target)
     {
-        MovementTarget = TileManager.Get().TileList.Find(t => t.Position == target).TileParent.position;
-        //StartCoroutine("MoveToTarget", TileManager.Get().TileList.Find(t => t.Position == target).TileParent.position);
-    }
-
-    public void RotateFleet(int rotationDirection)
-    {
-        RotationTarget = Quaternion.AngleAxis(rotationDirection * 60f, Vector3.up);
-    }
-
-    //IEnumerator MoveToTarget(Vector3 target)
-    private void MoveToTarget()
-    {
-        
-        //while (true)
-        //{
-            if (!Move)
-            {
-                return;
-            }
-
-            transform.position = Vector3.Lerp(transform.position, MovementTarget, Time.deltaTime * 3);
-
-            if (Vector3.Distance(transform.position, MovementTarget) < 0.01f)
-            {
-                transform.position = MovementTarget;
-                Move = false;
-                //break;
-            }
-        //}
-
-        //yield return null;
-    }
-
-    private void RotateToTarget()
-    {
-        if (!Turn)
+        MovementTarget = TileManager.Get().GetTile(target).TileParent.position;
+        if (!Move)
         {
-            return;
+            Move = true;
+            StartCoroutine(MoveToTarget());
         }
+    }
 
-        transform.rotation = Quaternion.Slerp(transform.rotation, RotationTarget, Time.deltaTime * 3);
-
-        if (Quaternion.Angle(transform.rotation, RotationTarget) < 0.01f)
+    public void RotateFleet(int rotationTarget)
+    {
+        RotationTarget = Quaternion.AngleAxis(rotationTarget * 60f, Vector3.up);
+        if (!Rotate)
         {
-            transform.rotation = RotationTarget;
-            Turn = false;
+            Rotate = true;
+            StartCoroutine(RotateToTarget());
         }
+    }
+
+    private IEnumerator MoveToTarget()
+    {
+        while (Vector3.Distance(transform.position, MovementTarget) > 0.001f)
+        {
+            transform.position = Vector3.Lerp(transform.position, MovementTarget, Time.deltaTime);
+            yield return null;
+        }
+        transform.position = MovementTarget;
+        Move = false;
+    }
+
+    private IEnumerator RotateToTarget()
+    {
+        while (Quaternion.Angle(transform.rotation, RotationTarget) > 0.001f)
+        {
+            transform.rotation = Quaternion.Slerp(transform.rotation, RotationTarget, Time.deltaTime * 3);
+            yield return null;
+        }
+        transform.rotation = RotationTarget;
+        Rotate = false;
     }
     #endregion
 
@@ -400,7 +370,6 @@ public class FleetController : MonoBehaviour
 
     private void Update()
     {
-        MoveToTarget();
-        RotateToTarget();
+
     }
 }
