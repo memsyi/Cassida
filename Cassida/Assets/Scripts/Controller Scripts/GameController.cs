@@ -18,8 +18,6 @@ public class GameController : Photon.MonoBehaviour, IJSON
             PlayerManager.Get().AddPlayerInformation(PhotonNetwork.player, "master", Color.red);
             MapManager.Get().AddBasesToMap();
         }
-
-        //print(FleetManager.Get().ToJSON().print());
     }
 
     private void OnJoinedRoom()
@@ -145,30 +143,6 @@ public class GameController : Photon.MonoBehaviour, IJSON
 
         return _instance;
     }
-
-    //private JSONObject ToJSON()
-    //{
-    //    var x= JSONObject.obj;
-
-    //    //x["size"]=new JSONObject(1);
-
-    //    //if(x)
-
-    //    //x["FleetMgr"] = FleetManager.Save();
-
-    //    return x;
-
-    //    //List<string> strs;
-    //    //var l=JSONObject.arr;l.Add(strs 
-
-    //    //x["Player"]["Levels"][2]["XP"] = 2
-    //    //(int)x["Player/Levels/2/XP"]
-    //}
-
-    //private void FromJSON(JSONObject x)
-    //{
-    //    //size = (float)x["size"];
-    //}
 
     public JSONObject ToJSON()
     {
