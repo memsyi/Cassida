@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class RoomFoo
 {
-    public string Name { get; private set; }
+    public string RoomName { get; private set; }
     public string MasterName { get; private set; }
     public int CurrentPlayerCount { get; private set; }
     public int MaxPlayer { get; set; }
@@ -12,9 +12,9 @@ public class RoomFoo
 
     public RoomController RoomController { get; private set; }
 
-    public RoomFoo(string name, string masterName, int playerCount, int maxPlayer, RoomController roomController)
+    public RoomFoo(string roomName, string masterName, int playerCount, int maxPlayer, RoomController roomController)
     {
-        Name = name;
+        RoomName = roomName;
         MasterName = masterName;
         CurrentPlayerCount = playerCount;
         MaxPlayer = maxPlayer;
@@ -207,7 +207,7 @@ public class LobbyManager : MonoBehaviour
 
     private void ShowRoom(RoomFoo room)
     {
-        InstantiateRoomObject(room.Name);
+        InstantiateRoomObject(room.RoomName);
         //.OwnRoom = new RoomFoo(roomController.OwnRoom.Name, PlayerManager.Get().Player.Name, roomController.OwnRoom.CurrentPlayerCount, roomController.OwnRoom.MaxPlayer);
     }
 
@@ -215,7 +215,7 @@ public class LobbyManager : MonoBehaviour
     {
         foreach (var roomInfo in RoomInfoList)
         {
-            if(RoomList.Exists(r => r.Name == roomInfo.name))
+            if(RoomList.Exists(r => r.RoomName == roomInfo.name))
             {
                 return;
             }
@@ -252,7 +252,7 @@ public class LobbyManager : MonoBehaviour
     {
         foreach (var roomInfo in RoomInfoList)
         {
-            var room = RoomList.Find(r => r.Name == roomInfo.name);
+            var room = RoomList.Find(r => r.RoomName == roomInfo.name);
             if (room != null)
             {
                 return;
