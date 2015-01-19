@@ -10,13 +10,14 @@ public struct PlayerProperties
 [RequireComponent(typeof(PhotonView))]
 public class GameController : Photon.MonoBehaviour, IJSON
 {
-    private void StartNewGame()
+    public void StartNewGame()
     {
         if (PhotonNetwork.isMasterClient)
         {
             WorldManager.Get().InitializeWorld();
             PlayerManager.Get().AddPlayerInformation(PhotonNetwork.player, "master", Color.red);
             MapManager.Get().AddBasesToMap();
+            CameraController.Get().enabled = true;
         }
     }
 
@@ -38,7 +39,7 @@ public class GameController : Photon.MonoBehaviour, IJSON
 
     private void OnJoinedRoom()
     {
-        StartNewGame();
+        //StartNewGame();
     }
 
     #region Player connect

@@ -219,6 +219,7 @@ public class ProfileManager : MonoBehaviour, IJSON
     private void Start()
     {
         Init();
+        //AddNewProfile("Maxim");
     }
 
     private void Awake()

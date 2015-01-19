@@ -3,7 +3,7 @@ using System.Collections;
 
 public class MenuManager : MonoBehaviour
 {
-    private MenuController CurrentMenu {get; set;}
+    private MenuController CurrentMenu { get; set; }
 
     public void ShowMenu(MenuController menu)
     {
@@ -63,6 +63,12 @@ public class MenuManager : MonoBehaviour
         }
 
         return _instance;
+    }
+
+    public void CloseMenu()
+    {
+        CurrentMenu.IsOpen = false;
+        CurrentMenu = null;
     }
 
     public void QuitGame()

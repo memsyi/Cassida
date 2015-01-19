@@ -767,6 +767,8 @@ public class CameraController : MonoBehaviour
     {
         DefaultPosition = transform.position;
         DefaultRotation = transform.rotation;
+
+        enabled = false;
     }
 
     private void Start()

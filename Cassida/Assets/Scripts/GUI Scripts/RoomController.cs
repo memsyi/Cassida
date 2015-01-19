@@ -13,7 +13,7 @@ public class RoomController : MonoBehaviour
     public void SetOwnProfile(RoomFoo room)
     {
         OwnRoom = room;
-        RoomName.text = room.Name;
+        RoomName.text = room.RoomName;
     }
 
     public void SelectThisRoom()
