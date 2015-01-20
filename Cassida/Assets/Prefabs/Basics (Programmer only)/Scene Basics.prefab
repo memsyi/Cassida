@@ -244,7 +244,7 @@ GameObject:
   - 124: {fileID: 12400002}
   m_Layer: 5
   m_Name: Menu Camera
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2256,7 +2256,7 @@ Behaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100026}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!95 &9500000
 Animator:
   serializedVersion: 3
@@ -2740,13 +2740,16 @@ MonoBehaviour:
       height: 100
     _borderStrength: 5
   _cameraSettings:
-    _movementSpeed: .200000003
-    _rotationSpeed: .5
-    _zoomSpeed: 1
+    _movementSpeed: .5
+    _rotationSpeed: 1.5
+    _zoomSpeed: 2
     _buttonSpeed: 1
-    _mouseButtonSpeed: 1
+    _mouseButtonSpeed: 1.5
     _minimumZoom: 20
     _maximumZoom: .75
+    _minimumZoomRotation: -.75
+    _maximumZoomRotation: 50
+    _zoomRotationSpeed: 12
     _zoomDownAngle: 40
     _heightMultiplier: 1
 --- !u!114 &11400002

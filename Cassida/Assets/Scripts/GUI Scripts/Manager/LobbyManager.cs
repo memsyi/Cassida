@@ -105,6 +105,11 @@ public class LobbyManager : MonoBehaviour
             DisconnectFromServer();
         }
 
+        if (PhotonNetwork.isMasterClient && GUILayout.Button("Start Game"))
+        {
+            GameController.Get().StartNewGame();
+        }
+
         if (!developerModus)
         {
             return;

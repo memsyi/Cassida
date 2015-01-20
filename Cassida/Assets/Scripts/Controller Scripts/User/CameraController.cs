@@ -197,6 +197,9 @@ public class SettingsCameraSettings
         _mouseButtonSpeed = 1f,
         _minimumZoom = 20f,
         _maximumZoom = 0.75f,
+        _minimumZoomRotation = 10f,
+        _maximumZoomRotation = 50f,
+        _zoomRotationSpeed = 5f,
         _zoomDownAngle = 40f,
         _heightMultiplier = 1f;
 
@@ -215,6 +218,21 @@ public class SettingsCameraSettings
     {
         get { return _maximumZoom; }
         set { _maximumZoom = value; }
+    }
+    public float MinimumZoomRotation
+    {
+        get { return _minimumZoomRotation; }
+        set { _minimumZoomRotation = value; }
+    }
+    public float MaximumZoomRotation
+    {
+        get { return _maximumZoomRotation; }
+        set { _maximumZoomRotation = value; }
+    }
+    public float ZoomRotationSpeed
+    {
+        get { return _zoomRotationSpeed; }
+        set { _zoomRotationSpeed = value; }
     }
     public float MouseButtonSpeed
     {
@@ -752,6 +770,8 @@ public class CameraController : MonoBehaviour
             transform.position += Vector3.down * CameraSettings.ZoomSpeed * HeightMultiplier * zoom;
         }
 
+        SetCorrectCameraZoom();
+
         if (transform.position.y < CameraSettings.MaximumZoom)
         {
             transform.position = new Vector3(transform.position.x, CameraSettings.MaximumZoom, transform.position.z);
@@ -761,6 +781,18 @@ public class CameraController : MonoBehaviour
             transform.position = new Vector3(transform.position.x, CameraSettings.MinimumZoom, transform.position.z);
         }
     }
+
+    private void SetCorrectCameraZoom()
+    {
+        //print(Quaternion.AngleAxis(Mathf.PingPong(25, 40), Vector3.left));
+        float correctRotation = Mathf.Min(transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation, CameraSettings.MaximumZoomRotation);
+        //transform.rotation = Quaternion.AngleAxis(correctRotation, Vector3.right);
+        transform.rotation = Quaternion.Euler(
+            correctRotation,
+            transform.rotation.eulerAngles.y,
+            0);
+    }
+
     #endregion
 
     private void Init()
