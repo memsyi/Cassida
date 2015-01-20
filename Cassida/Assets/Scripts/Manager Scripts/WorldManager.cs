@@ -7,9 +7,9 @@ public class WorldManager : MonoBehaviour
 
     #endregion
 
-    public void InitializeWorld()
+    public void InitializeWorld(EdgeLength bottomEdgeLength, MapForms mapForm)
     {
-        MapManager.Get().InitializeMap();
+        MapManager.Get().InitializeMap(bottomEdgeLength, mapForm);
     }
 
     private void Init()

@@ -10,7 +10,10 @@ public struct RPCs
     public const string AddNewUnit = "AddNewUnit";
 
     public const string SetPlayerInformation = "SetPlayerInformation";
-    public const string SetExistingPlayerInformation = "SetExistingPlayerInformation";
+    public const string SetPlayerColor = "SetPlayerColor";
+
+    public const string AskMasterToJoinGame = "AskMasterToJoinGame";
+    public const string AskMasterToChangeColor = "AskMasterToChangeColor"; 
 
     public const string AskForEndTurn = "AskForEndTurn";
     public const string SetCurrentPlayer = "SetCurrentPlayer";

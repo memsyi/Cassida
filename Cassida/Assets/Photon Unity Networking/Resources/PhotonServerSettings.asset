@@ -49,4 +49,6 @@ MonoBehaviour:
   - AddNewBase
   - AskMasterToJoinGame
   - SetExistingPlayerInformation
+  - AskMasterToChangeColor
+  - SetPlayerColor
   DisableAutoOpenWizard: 0

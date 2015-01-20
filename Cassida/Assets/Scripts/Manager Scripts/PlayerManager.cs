@@ -46,7 +46,7 @@ public class Player : IJSON
     private PhotonPlayer photonPlayer = null;
     public PhotonPlayer PhotonPlayer { get { return photonPlayer; } set { if (photonPlayer == null) photonPlayer = value; } }
     public string Name { get; private set; }
-    public Color Color { get; private set; }
+    public Color Color { get; set; }
 
     public Player(int id, PhotonPlayer photonPlayer, string name, Color color)
     {
@@ -63,12 +63,6 @@ public class Player : IJSON
     public Player()
     {
 
-    }
-
-    public void ChangeValues(string name, Color color)
-    {
-        Name = name;
-        Color = color;
     }
 
     public JSONObject ToJSON()
@@ -121,6 +115,7 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
+        CheckOfflineMode();
         photonView.RPC(RPCs.SetPlayerInformation, PhotonTargets.All, PlayerList.Count, photonPlayer, name, new Vector3(color.r, color.g, color.b));
     }
 
@@ -133,6 +128,7 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
 
         foreach (var player in PlayerList)
         {
+            CheckOfflineMode();
             photonView.RPC(RPCs.SetPlayerInformation, photonPlayer, player.ID, player.PhotonPlayer, player.Name, new Vector3(player.Color.r, player.Color.g, player.Color.b));
         }
     }
@@ -148,14 +144,20 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
         }
     }
 
-    public void ChangeExistinPlayerInformation(int id, PhotonPlayer photonPlayer, string name, Color color)
+    public void ChangePlayerColor(PhotonPlayer photonPlayer, Color color)
     {
-        if (!PhotonNetwork.isMasterClient || PlayerList.Exists(p => p.ID == id))
+        if (!PhotonNetwork.isMasterClient || PlayerList.Exists(p => p.PhotonPlayer == photonPlayer))
         {
             return;
         }
 
-        photonView.RPC(RPCs.SetExistingPlayerInformation, PhotonTargets.All, id, PlayerList.Count, photonPlayer, name, new Vector3(color.r, color.g, color.b));
+        CheckOfflineMode();
+        photonView.RPC(RPCs.SetPlayerColor, PhotonTargets.All, photonPlayer, new Vector3(color.r, color.g, color.b));
+    }
+
+    private void CheckOfflineMode()
+    {
+        GameManager.Get().CheckOfflineMode();
     }
 
     [RPC]
@@ -189,16 +191,9 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
 
             SetCurrentPlayer(CurrentPlayer.PhotonPlayer);
 
-            if (!photonPlayer.isMasterClient)
+            if (TileManager.Get().TileList.Count > 0 && !photonPlayer.isMasterClient)
             {
-                // Instantiate map at player
-                MapGenerator.Get().InstatiateAllExistingTilesAtPlayer(photonPlayer);
-
-                // Instatiate fleets at player
-                FleetManager.Get().InstantiateAllExistingFleetsAtPlayer(photonPlayer);
-
-                // Instantiate bases at player
-                BaseManager.Get().InstantiateAllExistingBasesAtPlayer(photonPlayer);
+                GameManager.Get().SetUpGameToPlayer(photonPlayer);
             }
         }
 
@@ -211,16 +206,15 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
     }
 
     [RPC]
-    private void SetExistingPlayerInformation(int id, PhotonPlayer photonPlayer, string name, Vector3 color, PhotonMessageInfo info)
+    private void SetPlayerColor(PhotonPlayer photonPlayer, Vector3 color, PhotonMessageInfo info)
     {
-        var playerToChange = PlayerList.Find(p => p.ID == id);
+        var playerToChange = PlayerList.Find(p => p.PhotonPlayer == photonPlayer);
         if (!info.sender.isMasterClient || playerToChange == null)
         {
             return;
         }
 
-        playerToChange.PhotonPlayer = photonPlayer;
-        playerToChange.ChangeValues(name, new Color(color.x, color.y, color.z));
+        playerToChange.Color = new Color(color.x, color.y, color.z);
     }
 
     private void SetCurrentPlayer(PhotonPlayer player)

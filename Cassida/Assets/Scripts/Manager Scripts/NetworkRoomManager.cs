@@ -4,17 +4,15 @@ using System.Collections.Generic;
 public class MultiplayerRoom
 {
     public string RoomName { get; private set; }
-    public string MasterName { get; private set; }
-    public int CurrentPlayerCount { get; private set; }
+    public int CurrentPlayerCount { get; set; }
     public int MaxPlayer { get; set; }
-    public string InfoName { get { return MasterName + " " + CurrentPlayerCount + "/" + MaxPlayer; } }
+    public string InfoName { get { return CurrentPlayerCount + "/" + MaxPlayer; } }
 
     public RoomController RoomController { get; private set; }
 
-    public MultiplayerRoom(string roomName, string masterName, int playerCount, int maxPlayer, RoomController roomController)
+    public MultiplayerRoom(string roomName, int playerCount, int maxPlayer, RoomController roomController)
     {
         RoomName = roomName;
-        MasterName = masterName;
         CurrentPlayerCount = playerCount;
         MaxPlayer = maxPlayer;
 
@@ -22,12 +20,12 @@ public class MultiplayerRoom
     }
 }
 
-public class NetworkRoomManager : MonoBehaviour
+public class NetworkRoomManager : Photon.MonoBehaviour
 {
 
     private bool LoadedGame { get; set; }
 
-    public void StartGame()
+    public void StartGame(int bottomEdgeLength, int mapForm)
     {
         if (!PhotonNetwork.isMasterClient)
         {
@@ -43,7 +41,28 @@ public class NetworkRoomManager : MonoBehaviour
             return;
         }
 
-        GameManager.Get().StartNewGame();
+        GameManager.Get().StartNewGame((EdgeLength)bottomEdgeLength, (MapForms)mapForm);
+    }
+
+    public void TryToChangeColor(int possibleColor)
+    {
+        photonView.RPC(RPCs.AskMasterToChangeColor, PhotonTargets.MasterClient, possibleColor);
+        ChangeColor(possibleColor);
+    }
+
+    public void ChangePlayerCount(int playerCount)
+    {
+        if(!PhotonNetwork.isMasterClient || PlayerManager.Get().PlayerList.Count > playerCount)
+        {
+            return;
+        }
+
+        PhotonNetwork.room.maxPlayers = playerCount;
+    }
+
+    private void ChangeColor(int possibleColor)
+    {
+        PlayerManager.Get().Player.Color = PlayerColor.GetColor((PossiblePlayerColors)possibleColor);
     }
 
     private void OnJoinedRoom()
@@ -59,11 +78,12 @@ public class NetworkRoomManager : MonoBehaviour
 
         if (PhotonNetwork.isMasterClient)
         {
+            print(ProfileManager.Get().CurrentProfile);
             AddPlayerInformation(PhotonNetwork.player, ProfileManager.Get().CurrentProfile.PlayerName);
         }
         else
         {
-            AskMasterToJoinGame(PhotonNetwork.player, ProfileManager.Get().CurrentProfile.PlayerName);
+            photonView.RPC(RPCs.AskMasterToJoinGame, PhotonTargets.MasterClient, PhotonNetwork.player, ProfileManager.Get().CurrentProfile.PlayerName);
         }
     }
 
@@ -75,24 +95,43 @@ public class NetworkRoomManager : MonoBehaviour
     //        return;
     //    }
 
-        
+
     //}
 
     [RPC]
-    private void AskMasterToJoinGame(PhotonPlayer photonPlayer, string name)
+    private void AskMasterToJoinGame(string name, PhotonMessageInfo info)
     {
-        if (!PhotonNetwork.isMasterClient)
+        if (!PhotonNetwork.isMasterClient || PlayerManager.Get().GetPlayer(info.sender) != null)
         {
             return;
         }
 
-        PlayerManager.Get().SetAllExistingPlayerInformationAtPlayer(photonPlayer);
-        AddPlayerInformation(photonPlayer, name);
+        PlayerManager.Get().SetAllExistingPlayerInformationAtPlayer(info.sender);
+        AddPlayerInformation(info.sender, name);
+    }
+
+    [RPC]
+    private void AskMasterToChangeColor(int possibleColor, PhotonMessageInfo info)
+    {
+        if (!PhotonNetwork.isMasterClient || PlayerManager.Get().GetPlayer(info.sender) == null)
+        {
+            return;
+        }
+
+        var color = PlayerColor.GetColor((PossiblePlayerColors)possibleColor);
+
+        if (PlayerManager.Get().PlayerList.Exists(p => p.Color == color))
+        {
+            PlayerManager.Get().ChangePlayerColor(info.sender, PlayerManager.Get().GetPlayer(info.sender).Color);
+            return;
+        }
+
+        PlayerManager.Get().ChangePlayerColor(info.sender, color);
     }
 
     private void AddPlayerInformation(PhotonPlayer photonPlayer, string name)
     {
-        var color = FindRandomFreeColor(); 
+        var color = FindRandomFreeColor();
         PlayerManager.Get().AddPlayerInformation(photonPlayer, name, color);
     }
 
@@ -111,7 +150,7 @@ public class NetworkRoomManager : MonoBehaviour
 
     private void Init()
     {
-        
+
     }
 
     private void Start()

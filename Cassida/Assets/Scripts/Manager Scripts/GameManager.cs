@@ -14,12 +14,12 @@ public class Game : IJSON
 
     public Game(int bar)
     {
-        
+
     }
 
     public Game()
     {
-        
+
     }
 
     public JSONObject ToJSON()
@@ -31,7 +31,7 @@ public class Game : IJSON
 
     public void FromJSON(JSONObject jsonObject)
     {
-        
+
     }
 }
 
@@ -43,17 +43,25 @@ public class GameManager : Photon.MonoBehaviour, IJSON
     private Game Game { get; set; }
     #endregion
 
-    public void StartNewGame()
+    public void StartNewGame(EdgeLength bottomEdgeLength, MapForms mapForm)
     {
-        if (PhotonNetwork.isMasterClient)
+        CheckOfflineMode();
+
+        if (!PhotonNetwork.isMasterClient)
         {
-            WorldManager.Get().InitializeWorld();
-            MapManager.Get().AddBasesToMap();
+            return;
         }
+
+        WorldManager.Get().InitializeWorld(bottomEdgeLength, mapForm);
+        SetUpGameToAllPlayer();
     }
 
     public void LoadGame(int SavePointID)
     {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
         // TODO läd noch nicht den richtigen savepoint
         FromJSON(JSONParser.parse(PlayerPrefs.GetString("Game")));
     }
@@ -67,6 +75,15 @@ public class GameManager : Photon.MonoBehaviour, IJSON
 
         PlayerManager.Get().SetAllExistingPlayerInformationAtPlayer(photonPlayer);
         PlayerManager.Get().AddPlayerInformation(photonPlayer, name, color);
+    }
+
+    public void CheckOfflineMode()
+    {
+        if (!PhotonNetwork.connected)
+        {
+            PhotonNetwork.offlineMode = true;
+            PhotonNetwork.CreateRoom("singlePlayerRoom");
+        }
     }
 
     #region Player connect
@@ -108,6 +125,26 @@ public class GameManager : Photon.MonoBehaviour, IJSON
     }
     #endregion
 
+    public void SetUpGameToPlayer(PhotonPlayer photonPlayer)
+    {
+        // Instantiate map at player
+        MapGenerator.Get().InstatiateAllExistingTilesAtPlayer(photonPlayer);
+
+        // Instatiate fleets at player
+        FleetManager.Get().InstantiateAllExistingFleetsAtPlayer(photonPlayer);
+
+        // Instantiate bases at player
+        BaseManager.Get().InstantiateAllExistingBasesAtPlayer(photonPlayer);
+    }
+
+    public void SetUpGameToAllPlayer()
+    {
+        foreach (var player in PlayerManager.Get().PlayerList)
+        {
+            SetUpGameToPlayer(player.PhotonPlayer);
+        }
+    }
+
     private void OnLeftRoom()
     {
         Application.LoadLevel(Application.loadedLevelName);
@@ -115,6 +152,10 @@ public class GameManager : Photon.MonoBehaviour, IJSON
 
     private void OnGUI()
     {
+        if (GUI.Button(new Rect(100, 0, 100, 20), "Start game"))
+        {
+            StartNewGame(EdgeLength.Seven, MapForms.Hexagon);
+        }
         if (PhotonNetwork.player == PlayerManager.Get().CurrentPlayer.PhotonPlayer)
         {
             if (GUI.Button(new Rect(100, 0, 100, 20), "EndTurn"))

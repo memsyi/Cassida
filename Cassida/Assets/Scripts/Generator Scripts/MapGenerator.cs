@@ -9,11 +9,11 @@ public enum MapForms { Hexagon, CuttedDiamond, Diamond }
 public class MapGenerator : Photon.MonoBehaviour
 {
     #region Variables
-    [SerializeField]
-    private EdgeLength _bottomEdgeLength = EdgeLength.Fife;
+    //[SerializeField]
+    //private EdgeLength _bottomEdgeLength = EdgeLength.Fife;
 
-    [SerializeField]
-    private MapForms _mapForm = MapForms.Hexagon;
+    //[SerializeField]
+    //private MapForms _mapForm = MapForms.Hexagon;
 
     [SerializeField] // TODO struct !! [Serialize..]
     private Transform
@@ -33,17 +33,17 @@ public class MapGenerator : Photon.MonoBehaviour
     }
     #endregion
 
-    private MapForms MapForm
-    {
-        get { return _mapForm; }
-        set { _mapForm = value; }
-    }
+    //private MapForms MapForm
+    //{
+    //    get { return _mapForm; }
+    //    set { _mapForm = value; }
+    //}
 
-    private int BottomEdgeLength
-    {
-        get { return (int)_bottomEdgeLength; }
-        set { _bottomEdgeLength = (EdgeLength)value; }
-    }
+    //private int BottomEdgeLength
+    //{
+    //    get { return (int)_bottomEdgeLength; }
+    //    set { _bottomEdgeLength = (EdgeLength)value; }
+    //}
 
     // Lists
     List<Tile> TileList { get { return TileManager.Get().TileList; } }
@@ -57,30 +57,30 @@ public class MapGenerator : Photon.MonoBehaviour
         return tileParent;
     }
 
-    public void GenerateMap()
+    public void GenerateMap(int bottomEdgeLength, MapForms mapForm)
     {
         if (!PhotonNetwork.isMasterClient)
         {
             return;
         }
 
-        if (MapForm == MapForms.CuttedDiamond)
+        if (mapForm == MapForms.CuttedDiamond)
         {
-            BottomEdgeLength = BottomEdgeLength - BottomEdgeLength / 2 + 1;
+            bottomEdgeLength = bottomEdgeLength - bottomEdgeLength / 2 + 1;
         }
-        else if (MapForm == MapForms.Diamond)
+        else if (mapForm == MapForms.Diamond)
         {
-            BottomEdgeLength = BottomEdgeLength / 2 + 1;
+            bottomEdgeLength = bottomEdgeLength / 2 + 1;
         }
 
-        for (int x = -BottomEdgeLength + 1; x < BottomEdgeLength; x++)
+        for (int x = -bottomEdgeLength + 1; x < bottomEdgeLength; x++)
         {
-            for (int y = -BottomEdgeLength + 1; y < BottomEdgeLength; y++)
+            for (int y = -bottomEdgeLength + 1; y < bottomEdgeLength; y++)
             {
                 // Set tile in dependence on the map form
-                if ((MapForm == MapForms.Hexagon && Mathf.Abs(x + y) < BottomEdgeLength)
-                 || (MapForm == MapForms.CuttedDiamond && Mathf.Abs(x + y) <= BottomEdgeLength * 2 - 4)
-                 || MapForm == MapForms.Diamond)
+                if ((mapForm == MapForms.Hexagon && Mathf.Abs(x + y) < bottomEdgeLength)
+                 || (mapForm == MapForms.CuttedDiamond && Mathf.Abs(x + y) <= bottomEdgeLength * 2 - 4)
+                 || mapForm == MapForms.Diamond)
                 {
                     var position = new Position(x, y);
                     photonView.RPC(RPCs.AddTile, PhotonTargets.All, x, y, (int)CalculateTerrainType(position), (int)CalculateObjectiveType(position));

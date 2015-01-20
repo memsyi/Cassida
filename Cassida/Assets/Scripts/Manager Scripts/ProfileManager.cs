@@ -1,6 +1,5 @@
 ﻿﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
 
 public class Profile : IJSON
@@ -137,7 +136,7 @@ public class ProfileManager : MonoBehaviour, IJSON
             CurrentProfile.ProfileController.DeactivateSelection();
         }
 
-        CurrentProfile = ProfileList.Find(p => p.ProfileController == profileController);
+        CurrentProfile = GetProfile(profileController);
         CurrentProfile.ProfileController.ActivateSelection();
 
         SaveAllProfiles();
@@ -181,7 +180,7 @@ public class ProfileManager : MonoBehaviour, IJSON
 
     private void DeletAllProfiles()
     {
-        for(int i = ProfileList.Count -1; i > 0; i--)
+        for (int i = ProfileList.Count - 1; i > 0; i--)
         {
             DeletProfile(ProfileList[i]);
         }
@@ -192,6 +191,10 @@ public class ProfileManager : MonoBehaviour, IJSON
     private Profile GetProfile(string profileName)
     {
         return ProfileList.Find(p => p.ProfileName == profileName);
+    }
+    private Profile GetProfile(ProfileController profileController)
+    {
+        return ProfileList.Find(p => p.ProfileController == profileController);
     }
 
     private void Init()
@@ -212,14 +215,13 @@ public class ProfileManager : MonoBehaviour, IJSON
                 return;
             }
         }
-        
+
         deleteProfileButton.gameObject.SetActive(false);
     }
 
     private void Start()
     {
         Init();
-        //AddNewProfile("Maxim");
     }
 
     private void Awake()

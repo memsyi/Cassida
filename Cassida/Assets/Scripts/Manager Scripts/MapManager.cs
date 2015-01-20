@@ -11,22 +11,23 @@ public class MapManager : MonoBehaviour
     private List<Tile> TileList { get { return TileManager.Get().TileList; } }
     #endregion
 
-    public void InitializeMap()
+    public void InitializeMap(EdgeLength bottomEdgeLength, MapForms mapForm)
     {
-        GenerateMap();
+        GenerateMap(bottomEdgeLength, mapForm);
+        AddBasesToMap();
     }
 
-    private void GenerateMap()
+    private void GenerateMap(EdgeLength bottomEdgeLength, MapForms mapForm)
     {
         if (!PhotonNetwork.isMasterClient)
         {
             return;
         }
 
-        MapGenerator.Get().GenerateMap();
+        MapGenerator.Get().GenerateMap((int)bottomEdgeLength, mapForm);
     }
 
-    public void AddBasesToMap()
+    private void AddBasesToMap()
     {
         if (!PhotonNetwork.isMasterClient)
         {

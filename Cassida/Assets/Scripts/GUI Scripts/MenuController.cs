@@ -20,18 +20,21 @@ public class MenuController : MonoBehaviour
         }
     }
 
-    public void Awake()
+    private void Start()
+    {
+        _canvasGroup.blocksRaycasts = _canvasGroup.interactable = false;
+    }
+
+    private void Awake()
     {
         _animator = GetComponent<Animator>();
         _canvasGroup = GetComponent<CanvasGroup>();
 
         var rect = GetComponent<RectTransform>();
         rect.offsetMax = rect.offsetMin = new Vector2(0, 0);
-
-        _canvasGroup.blocksRaycasts = _canvasGroup.interactable = false;
     }
 
-    public void Update()
+    private void Update()
     {
         if (!IsOpen)
         {

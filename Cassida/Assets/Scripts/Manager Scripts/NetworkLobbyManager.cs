@@ -35,8 +35,6 @@ public class NetworkLobbyManager : MonoBehaviour
 
     public void ConnectToServer()
     {
-        PhotonNetwork.offlineMode = false;
-
         //if (!DeveloperModus)
         //{
             PhotonNetwork.ConnectUsingSettings("Cassida v0.0.3");
@@ -76,7 +74,6 @@ public class NetworkLobbyManager : MonoBehaviour
     private void OnDisconnectedFromPhoton()
     {
         print("disconnect");
-        PhotonNetwork.offlineMode = true;
         MenuManager.Get().ShowMenu(GameObject.FindGameObjectWithTag(Tags.MainMenu).GetComponent<MenuController>());
     }
 
@@ -96,12 +93,12 @@ public class NetworkLobbyManager : MonoBehaviour
 
     //private void OnGUI()
     //{
-        //if (PhotonNetwork.offlineMode && GUILayout.Button("Go online"))
+        //if (!PhotonNetwork.connected && GUILayout.Button("Go online"))
         //{
         //    //DeveloperModus = true;
         //    ConnectToServer();
         //}
-        //else if (!PhotonNetwork.offlineMode && GUILayout.Button("Go offline"))
+        //else if (PhotonNetwork.connected && GUILayout.Button("Go offline"))
         //{
         //    //DeveloperModus = false;
         //    DisconnectFromServer();
@@ -112,7 +109,7 @@ public class NetworkLobbyManager : MonoBehaviour
         //    return;
         //}
 
-        //if (!PhotonNetwork.offlineMode)
+        //if (PhotonNetwork.connected)
         //{
         //    GUILayout.Label(PhotonNetwork.connectionState.ToString());
         //    GUILayout.Label(PhotonNetwork.connectionStateDetailed.ToString());
@@ -164,14 +161,14 @@ public class NetworkLobbyManager : MonoBehaviour
 
     private void InstantiateRoomObject(string roomName)
     {
-        GameObject room = Instantiate(roomStyle, roomsPosition.position, roomsPosition.rotation) as GameObject;
-        room.transform.SetParent(roomsPosition);
-        room.transform.localScale = roomsPosition.localScale;
+        GameObject roomObject = Instantiate(roomStyle, roomsPosition.position, roomsPosition.rotation) as GameObject;
+        roomObject.transform.SetParent(roomsPosition);
+        roomObject.transform.localScale = roomsPosition.localScale;
 
-        var roomController = room.GetComponent<RoomController>();
+        var roomController = roomObject.GetComponent<RoomController>();
 
-        CurrentRoom = new MultiplayerRoom(roomName, ProfileManager.Get().CurrentProfile.PlayerName, 0, 2, roomController);
-        RoomList.Add(CurrentRoom);
+        var room = new MultiplayerRoom(roomName, 1, 2, roomController);
+        RoomList.Add(room);
     }
 
     private void RefreshRooms()
@@ -189,6 +186,7 @@ public class NetworkLobbyManager : MonoBehaviour
         }
 
         ShowAllNewExitingRooms();
+        CorrectDataOfExistingRooms();
     }
 
     public void SelectRoom(RoomController roomController)
@@ -203,6 +201,17 @@ public class NetworkLobbyManager : MonoBehaviour
     private void ShowRoom(string roomName)
     {
         InstantiateRoomObject(roomName);
+    }
+
+    private void CorrectDataOfExistingRooms()
+    {
+        for(int i = RoomList.Count -1; i >0; i--)
+        {
+            var room = RoomList[i];
+            var roomInfo = RoomInfoList.Find(r => r.name == room.RoomName);
+            room.CurrentPlayerCount = roomInfo.playerCount;
+            room.MaxPlayer = roomInfo.maxPlayers;
+        }
     }
 
     private void ShowAllNewExitingRooms()
@@ -241,7 +250,6 @@ public class NetworkLobbyManager : MonoBehaviour
         {
             return;
         }
-        PhotonNetwork.offlineMode = true;
     }
 
     private void Start()
