@@ -606,14 +606,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62a0f9c068e8daf4b837791594eaf1fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tileSettings:
-    _defaultColor: {r: .5, g: .5, b: .5, a: .137254909}
-    _mouseOverColor: {r: 0, g: 1, b: 1, a: .137254909}
-    _mouseOverFleetColor: {r: 0, g: 0, b: 1, a: .137254909}
-    _selectionColor: {r: 1, g: 1, b: 1, a: .196078435}
-    _mouseOverSelectionColor: {r: 1, g: 0, b: 0, a: .137254909}
-    _mouseOverEnemyFleetColor: {r: 1, g: 0, b: 1, a: .137254909}
-    _mouseOverCantMoveColor: {r: 1, g: 0, b: 0, a: .137254909}
+  _tileColor:
+    _defaultColor: {r: .470588207, g: .802839577, b: 1, a: .137254909}
+    _mouseOverColor: {r: 0, g: 1, b: 1, a: 1}
+    _mouseOverFleetColor: {r: 0, g: 0, b: 1, a: 1}
+    _selectionColor: {r: 1, g: 1, b: 1, a: 1}
+    _mouseOverSelectionColor: {r: 1, g: 0, b: 0, a: 1}
+    _mouseOverEnemyFleetColor: {r: 1, g: 0, b: 1, a: 1}
+    _mouseOverCantMoveColor: {r: 1, g: 0, b: 0, a: 1}
+  _tileAnimation:
+    _allowAnimation: 1
+    _smothAnimation: 1
+    _animationSpeed: 1
+    _animationRange: 1
+    _animationFadeOut: 1
+    _animatedObjectCount: 4
 --- !u!114 &11400032
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -625,6 +632,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0ba1f400a171e5468bb2ae6438375a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _moveableTileObject: {fileID: 400000, guid: 3ff84fa9b225f0440bfc136ded0e0a32, type: 2}
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1

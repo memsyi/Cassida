@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 [System.Serializable]
-public class SettingsTileSettings
+public class SettingsTileColor
 {
     [SerializeField]
     private Color
@@ -53,21 +53,92 @@ public class SettingsTileSettings
     #endregion
 }
 
+[System.Serializable]
+public class SettingsTileAnimation
+{
+    [SerializeField]
+    private bool
+        _allowAnimation = true,
+        _smothAnimation = false;
+
+    [SerializeField]
+    private float
+        _animationSpeed = 1.0f,
+        _animationRange = 1.0f,
+        _animationFadeOut = 1.0f;
+
+    [SerializeField]
+    private int _animatedObjectCount = 2;
+
+    public float AnimationFadeOut
+    {
+        get { return _animationFadeOut; }
+        set { _animationFadeOut = value; }
+    }
+
+    public float AnimationRange
+    {
+        get { return _animationRange; }
+        set { _animationRange = value; }
+    }
+
+    public float AnimationSpeed
+    {
+        get { return _animationSpeed; }
+        set { _animationSpeed = value; }
+    }
+
+    public int AnimatedObjectCount
+    {
+        get { return _animatedObjectCount; }
+        set { _animatedObjectCount = value; }
+    }
+
+    public bool AllowAnimation
+    {
+        get { return _allowAnimation; }
+        set { _allowAnimation = value; }
+    }
+
+    public bool SmothAnimation
+    {
+        get { return _smothAnimation; }
+        set { _smothAnimation = value; }
+    }
+
+    public bool BackwardAnimation { get; set; }
+    public List<Transform> SelectionObjects { get; set; }
+
+    public SettingsTileAnimation()
+    {
+        SelectionObjects = new List<Transform>();
+    }
+}
+
 public class TileManager : MonoBehaviour
 {
     [SerializeField]
-    SettingsTileSettings _tileSettings;
+    SettingsTileColor _tileColor;
+
+    [SerializeField]
+    SettingsTileAnimation _tileAnimation;
 
     #region Variables
-    public SettingsTileSettings TileSettings
+    public SettingsTileColor TileColor
     {
-        get { return _tileSettings; }
-        set { _tileSettings = value; }
+        get { return _tileColor; }
+        set { _tileColor = value; }
+    }
+    public SettingsTileAnimation TileAnimation
+    {
+        get { return _tileAnimation; }
+        set { _tileAnimation = value; }
     }
 
     // Scripts
     private MouseController MouseController { get; set; }
     private MapManager MapManager { get; set; }
+    private MapGenerator MapGenerator { get; set; }
 
     // Lists
     public List<Tile> TileList { get; private set; }
@@ -97,19 +168,137 @@ public class TileManager : MonoBehaviour
     {
         if (CurrentSelectedTile != null)
         {
-            SetTileBorderColor(CurrentSelectedTile, TileSettings.DefaultColor);
+            SetTileBorderColor(CurrentSelectedTile, TileColor.DefaultColor);
+
+            RemoveCurrentSelectionAnimation();
         }
 
         if (tile.Fleet != null && tile.Fleet.Player == PhotonNetwork.player)
         {
             CurrentSelectedTile = tile;
-            SetTileBorderColor(CurrentSelectedTile, TileSettings.MouseOverSelectionColor);
+            SetTileBorderColor(CurrentSelectedTile, TileColor.MouseOverSelectionColor);
+
+            if (TileAnimation.AllowAnimation)
+            {
+                InitiateSelectionAnimation(tile);
+            }
         }
         else
         {
             CurrentSelectedTile = null;
         }
     }
+
+    public void ResetAllTiles()
+    {
+        ResetSelectedTile();
+        ResetHighlightedTile();
+        RemoveCurrentSelectionAnimation();
+    }
+
+    #region Selected tile animation
+    private void InitiateSelectionAnimation(Tile tile)
+    {
+        foreach (var selectionObject in TileAnimation.SelectionObjects)
+        {
+            selectionObject.position = tile.TileParent.position;
+            selectionObject.renderer.material.color = TileColor.MouseOverColor;
+            selectionObject.gameObject.SetActive(true);
+        }
+
+        //if (tile.Fleet.MovePoints > 0)
+        //{
+
+        //    // show moveable tiles around the selected fleet if the fleet got movement Points
+        //    TileList.Equals(tile);
+        //    var list = TileList.FindAll(t => Vector3.Distance(t.TileParent.position, tile.TileParent.position) <= 2f);
+        //Debug.Log(list.Count);
+    }
+
+    private void RemoveCurrentSelectionAnimation()
+    {
+        foreach (var selectionObject in TileAnimation.SelectionObjects)
+        {
+            selectionObject.gameObject.SetActive(false);
+        }
+    }
+
+    private void AnimateSelection()
+    {
+        if (TileAnimation.SelectionObjects.Count == 0 || TileAnimation.AnimationRange == 0)
+        {
+            return;
+        }
+
+        var currentAnimatedObjectPosition = TileAnimation.SelectionObjects[0].position.y;
+
+        currentAnimatedObjectPosition += Time.deltaTime * TileAnimation.AnimationSpeed * 0.1f * (!TileAnimation.BackwardAnimation ? 1 : -1);
+
+        if (currentAnimatedObjectPosition > TileAnimation.AnimationRange / 10
+            || currentAnimatedObjectPosition < 0)
+        {
+            if (TileAnimation.SmothAnimation)
+            {
+                TileAnimation.BackwardAnimation = !TileAnimation.BackwardAnimation;
+            }
+            else
+            {
+                foreach (var selectionObject in TileAnimation.SelectionObjects)
+                {
+                    selectionObject.position = CurrentSelectedTile.TileParent.position;
+                    selectionObject.transform.renderer.material.color = TileColor.MouseOverColor;
+                }
+            }
+
+            return;
+        }
+        //else if (TileAnimation.BackwardAnimation & currentAnimatedObjectPosition < 0)
+        //{
+        //    TileAnimation.BackwardAnimation = false;
+
+        //    foreach (var selectionObject in TileAnimation.SelectionObjects)
+        //    {
+        //        selectionObject.position.Set(selectionObject.position.x, 0, selectionObject.position.z);
+        //        selectionObject.renderer.material.color = TileColor.MouseOverColor;
+        //    }
+        //}
+
+        for (int i = 0; i < TileAnimation.SelectionObjects.Count; i++)
+        {
+            var selectionObject = TileAnimation.SelectionObjects[i];
+
+            selectionObject.position = new Vector3(selectionObject.position.x, currentAnimatedObjectPosition * (i % 2 == 0 ? 1 : -1), selectionObject.position.z);
+        }
+
+        //SelectionOne.transform.position = new Vector3(SelectionOne.transform.position.x, curentAnimationPosition.y, SelectionOne.transform.position.z);
+        //SelectionTwo.transform.position = new Vector3(SelectionOne.transform.position.x, -curentAnimationPosition.y, SelectionOne.transform.position.z);
+
+        if (TileAnimation.BackwardAnimation)
+        {
+            foreach (var selectionObject in TileAnimation.SelectionObjects)
+            {
+                //selectionObject.renderer.material.color = Color.Lerp(selectionObject.renderer.material.color, TileColor.MouseOverColor, Time.deltaTime);
+                //selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 + TileAnimation.AnimationFadeOut / 25);
+                selectionObject.transform.renderer.material.color *= TileColor.MouseOverColor * 1 / currentAnimatedObjectPosition / TileAnimation.AnimationRange;
+            }
+
+            //SelectionOne.transform.renderer.material.color *= new Color(1, 1, 1, 1 + animationFadeOut / 25);
+            //SelectionTwo.transform.renderer.material.color *= new Color(1, 1, 1, 1 + animationFadeOut / 25);
+        }
+        else
+        {
+            foreach (var selectionObject in TileAnimation.SelectionObjects)
+            {
+                //selectionObject.renderer.material.color = Color.Lerp(selectionObject.renderer.material.color, Color.clear, Time.deltaTime);
+                selectionObject.transform.renderer.material.color *= new Color(1, 1, 1, 1 - currentAnimatedObjectPosition / TileAnimation.AnimationRange);
+                //selectionObject.transform.renderer.material.color *= Color.clear * currentAnimatedObjectPosition / TileAnimation.AnimationRange;
+            }
+
+            //SelectionOne.transform.renderer.material.color *= new Color(1, 1, 1, 1 - animationFadeOut / 25);
+            //SelectionTwo.transform.renderer.material.color *= new Color(1, 1, 1, 1 - animationFadeOut / 25);
+        }
+    }
+    #endregion
 
     #region Highlight tiles
     private void HighLightNearestTile()
@@ -134,7 +323,7 @@ public class TileManager : MonoBehaviour
             // Selected tile
             if (CurrentHighlightedTile == CurrentSelectedTile)
             {
-                SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverSelectionColor);
+                SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverSelectionColor);
             }
             // Other tile
             else
@@ -144,11 +333,11 @@ public class TileManager : MonoBehaviour
                 {
                     if (CheckAttackEnemyFleet())
                     {
-                        SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverEnemyFleetColor);
+                        SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverEnemyFleetColor);
                     }
                     else
                     {
-                        SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverCantMoveColor);
+                        SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverCantMoveColor);
                     }
                 }
                 // Other fleet
@@ -156,17 +345,17 @@ public class TileManager : MonoBehaviour
                 {
                     if (CurrentHighlightedTile.Fleet.Player == PhotonNetwork.player)
                     {
-                        SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverFleetColor);
+                        SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverFleetColor);
                     }
                     else
                     {
-                        SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverEnemyFleetColor);
+                        SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverEnemyFleetColor);
                     }
                 }
                 // Default tile
                 else
                 {
-                    SetTileBorderColor(CurrentHighlightedTile, TileSettings.MouseOverColor);
+                    SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverColor);
                 }
             }
         }
@@ -180,16 +369,22 @@ public class TileManager : MonoBehaviour
             // Selected tile
             if (CurrentHighlightedTile == CurrentSelectedTile)
             {
-                SetTileBorderColor(CurrentHighlightedTile, TileSettings.SelectionColor);
+                SetTileBorderColor(CurrentHighlightedTile, TileColor.SelectionColor);
             }
             // Default tile
             else
             {
-                SetTileBorderColor(CurrentHighlightedTile, TileSettings.DefaultColor);
+                SetTileBorderColor(CurrentHighlightedTile, TileColor.DefaultColor);
             }
         }
 
         CurrentHighlightedTile = null;
+    }
+
+    private void ResetSelectedTile()
+    {
+        SetTileBorderColor(CurrentSelectedTile, TileColor.DefaultColor);
+        CurrentSelectedTile = null;
     }
     #endregion
 
@@ -258,6 +453,11 @@ public class TileManager : MonoBehaviour
 
     private void SetTileBorderColor(Tile tile, Color color)
     {
+        if (tile == null)
+        {
+            return;
+        }
+
         tile.TileParent.renderer.material.color = color;
     }
 
@@ -272,8 +472,9 @@ public class TileManager : MonoBehaviour
     {
         MouseController = GameObject.FindGameObjectWithTag(Tags.GameController).GetComponent<MouseController>();
         MapManager = GameObject.FindGameObjectWithTag(Tags.Manager).GetComponent<MapManager>();
+        MapGenerator = GameObject.FindGameObjectWithTag(Tags.Map).GetComponent<MapGenerator>();
 
-        if (!MouseController || !MapManager)
+        if (!MouseController || !MapManager || !MapGenerator)
         {
             Debug.LogError("MissedComponents!");
         }
@@ -282,6 +483,12 @@ public class TileManager : MonoBehaviour
     private void Start()
     {
         TileList = new List<Tile>();
+
+        for (int i = 0; i < TileAnimation.AnimatedObjectCount; i++)
+        {
+            TileAnimation.SelectionObjects.Add(Instantiate(MapGenerator.TileParent) as Transform);
+            TileAnimation.SelectionObjects[i].gameObject.SetActive(false);
+        }
     }
 
     private void Awake()
@@ -293,5 +500,10 @@ public class TileManager : MonoBehaviour
     {
         // Check highlighting
         HighLightNearestTile();
+
+        if (CurrentSelectedTile != null)
+        {
+            AnimateSelection();
+        }
     }
 }

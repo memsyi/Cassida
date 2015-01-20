@@ -242,7 +242,15 @@ public class FleetManager : Photon.MonoBehaviour
     } 
     #endregion
 
-    #region Destroy fleets
+    #region Destroy or reset fleets
+    public void ResetMovementOfAllFleets()
+    {
+        foreach (var fleet in FleetList)
+        {
+            fleet.ResetMovementPoints();
+        }
+    }
+
     public void DestroyFleet(Fleet fleet)
     {
         var tileOfFleet = TileList.Find(t => t.Fleet == fleet);
@@ -279,6 +287,7 @@ public class FleetManager : Photon.MonoBehaviour
         {
             InstantiateNewFleet(new Vector2(Random.Range(-2, 2), Random.Range(-3, 3)), FleetType.Slow, testUnits);
         }
+        InstantiateNewFleet(new Vector2(Random.Range(-2, 2), Random.Range(-3, 3)), FleetType.Fast, testUnits);
     }
 
     private void Init()

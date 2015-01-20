@@ -9,7 +9,6 @@
     public const string GameController = "GameController";
     public const string CameraController = "CameraController";
     public const string Manager = "Manager";
-    public const string Generators = "Generators";
     public const string Map = "Map";
     public const string Fleets = "Fleets";
 }

@@ -5,6 +5,15 @@ using System.Collections.Generic;
 public class InputManager : Photon.MonoBehaviour
 {
     #region Varibales
+    [SerializeField]
+    private Transform _moveableTileObject;
+
+    public Transform MoveableTileObject
+    {
+        get { return _moveableTileObject; }
+        private set { _moveableTileObject = value; }
+    }
+
     // Scripts		
     private MouseController MouseController { get; set; }
     private FleetManager FleetManager { get; set; }
@@ -12,6 +21,8 @@ public class InputManager : Photon.MonoBehaviour
     private TileManager TileManager { get; set; }
 
     // Lists
+    private List<Tile> MoveableTileList { get; set; }
+    private List<Transform> MoveableTileObjectList { get; set; }
     private List<Fleet> FleetList { get { return FleetManager.FleetList; } }
     private List<Tile> TileList { get { return TileManager.TileList; } }
 
@@ -32,12 +43,57 @@ public class InputManager : Photon.MonoBehaviour
         if (CurrentSelectedTile == clickedTile)
         {
             RotateFleet(CurrentSelectedTile.Fleet.ID);
+            return;
         }
 
         TileManager.SelectTile(MapManager.NearestTileToMousePosition);
+
+        CheckShowMovementArea();
     }
 
     #region Movement and Rotation
+    private void CheckShowMovementArea()
+    {
+        ResetMovementArea();
+
+        if (CurrentSelectedTile == null)
+        {
+            return;
+        }
+
+        if (CurrentSelectedTile.Fleet.MovementPointsLeft > 0)
+        {
+            ShowMovementArea();
+        }
+    }
+
+    private void ShowMovementArea()
+    {
+        if (CurrentSelectedTile.Fleet.MovementPointsLeft == 0)
+        {
+            return;
+        }
+
+        MoveableTileList = TileList.FindAll(t => Vector3.Distance(CurrentSelectedTile.TileParent.position, t.TileParent.position) <= 2f);
+
+        foreach (var tile in MoveableTileList)
+        {
+            MoveableTileObjectList.Add(Instantiate(MoveableTileObject, tile.TileParent.position, tile.TileParent.rotation) as Transform);
+        }
+    }
+
+    public void ResetMovementArea()
+    {
+        MoveableTileList.Clear();
+
+        foreach (var tileObject in MoveableTileObjectList)
+        {
+            Destroy(tileObject.gameObject);
+        }
+
+        MoveableTileObjectList.Clear();
+    }
+
     private void CheckFleetMovement()
     {
         var targetTile = MapManager.NearestTileToMousePosition;
@@ -63,9 +119,14 @@ public class InputManager : Photon.MonoBehaviour
         }
 
         // Move fleet
-        MoveFleet(CurrentSelectedTile.Fleet.ID, targetTile.Position);
+        if (MoveableTileList.Exists(t => t == targetTile))
+        {
+            MoveFleet(CurrentSelectedTile.Fleet.ID, targetTile.Position);
 
-        TileManager.SelectTile(targetTile);
+            TileManager.SelectTile(targetTile);
+
+            CheckShowMovementArea();
+        }
     }
 
     private void RotateFleet(int fleetID, bool rotateRight = true)
@@ -96,6 +157,8 @@ public class InputManager : Photon.MonoBehaviour
 
     private void MoveFleet(int fleetID, Vector2 targetTilePosition)
     {
+        ResetMovementArea();
+
         photonView.RPC("NetworkMoveFleet", PhotonTargets.AllBuffered, fleetID, targetTilePosition);
     }
 
@@ -142,7 +205,7 @@ public class InputManager : Photon.MonoBehaviour
         {
             for (int i = 0; i < enemyFleet.Units.Length; i++)
             {
-                AttackUnitOfFleet(enemyFleetTile.Fleet.ID, i, ownUnitStrength);
+                AttackUnitOfFleet(enemyFleet.ID, i, ownUnitStrength);
             }
         }
         else
@@ -194,6 +257,9 @@ public class InputManager : Photon.MonoBehaviour
 
     private void Start()
     {
+        MoveableTileList = new List<Tile>();
+        MoveableTileObjectList = new List<Transform>();
+
         AddMouseEvents();
     }
 
