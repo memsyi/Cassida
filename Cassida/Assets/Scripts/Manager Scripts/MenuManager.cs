@@ -1,5 +1,4 @@
-﻿@@ -0,0 +1,82 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using System.Collections;
 
 public class MenuManager : MonoBehaviour

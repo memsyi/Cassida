@@ -6,15 +6,6 @@ public class MenuController : MonoBehaviour
     private Animator _animator;
     private CanvasGroup _canvasGroup;
 
-    [SerializeField]
-    private string _menuName;
-
-    public string MenuName
-    {
-        get { return _menuName; }
-        set { _menuName = value; }
-    }
-
     public bool IsOpen
     {
         get { return _animator.GetBool("IsOpen"); }

@@ -4,13 +4,13 @@ using System.Collections;
 
 public class RoomController : MonoBehaviour 
 {
-    public RoomFoo OwnRoom { get; private set; }
+    public MultiplayerRoom OwnRoom { get; private set; }
 
     private Canvas Canvas { get; set; }
     public Text RoomName { get; private set; }
     public Image SelectionImage;
 
-    public void SetOwnProfile(RoomFoo room)
+    public void SetOwnProfile(MultiplayerRoom room)
     {
         OwnRoom = room;
         RoomName.text = room.RoomName;

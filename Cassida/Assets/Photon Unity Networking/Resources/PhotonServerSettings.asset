@@ -47,4 +47,6 @@ MonoBehaviour:
   - ClearAndDestroyAllOfDisconnectedPlayer
   - AddTile
   - AddNewBase
+  - AskMasterToJoinGame
+  - SetExistingPlayerInformation
   DisableAutoOpenWizard: 0

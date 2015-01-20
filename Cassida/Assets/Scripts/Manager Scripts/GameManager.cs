@@ -1,5 +1,4 @@
-﻿@@ -0,0 +1,201 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using System.Collections.Generic;
 
 public struct PlayerProperties

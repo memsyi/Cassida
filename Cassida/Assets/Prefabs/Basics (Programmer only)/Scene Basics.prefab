@@ -88,6 +88,7 @@ GameObject:
   - 114: {fileID: 11400036}
   - 114: {fileID: 11400040}
   - 114: {fileID: 11400038}
+  - 114: {fileID: 11400384}
   - 114: {fileID: 11400356}
   - 114: {fileID: 11400354}
   - 114: {fileID: 11400352}
@@ -244,7 +245,7 @@ GameObject:
   - 124: {fileID: 12400002}
   m_Layer: 5
   m_Name: Menu Camera
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2256,7 +2257,7 @@ Behaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100026}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!95 &9500000
 Animator:
   serializedVersion: 3
@@ -3188,7 +3189,7 @@ MonoBehaviour:
   m_EndEdit:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400354}
+      - m_Target: {fileID: 0}
         m_MethodName: GetProfileName
         m_Mode: 2
         m_Arguments:
@@ -3221,7 +3222,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10721934895fb4a4dac21f3a9ab835b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _menuName: 
 --- !u!114 &11400048
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3392,7 +3392,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: QuitGame
         m_Mode: 1
         m_Arguments:
@@ -3791,7 +3791,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -4053,7 +4053,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -4146,7 +4146,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10721934895fb4a4dac21f3a9ab835b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _menuName: 
 --- !u!114 &11400126
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4285,7 +4284,7 @@ MonoBehaviour:
           m_StringArgument: NewMenu
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: CloseMenu
         m_Mode: 1
         m_Arguments:
@@ -4514,7 +4513,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400354}
+      - m_Target: {fileID: 0}
         m_MethodName: DeletSelectedProfile
         m_Mode: 1
         m_Arguments:
@@ -4750,7 +4749,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -4864,7 +4863,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10721934895fb4a4dac21f3a9ab835b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _menuName: 
 --- !u!114 &11400182
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4968,7 +4966,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5080,7 +5078,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5212,7 +5210,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5429,7 +5427,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5562,7 +5560,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5743,7 +5741,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5755,7 +5753,7 @@ MonoBehaviour:
           m_StringArgument: NewMenu
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 11400356}
+      - m_Target: {fileID: 0}
         m_MethodName: DisconnectFromServer
         m_Mode: 1
         m_Arguments:
@@ -6045,7 +6043,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400354}
+      - m_Target: {fileID: 0}
         m_MethodName: GetProfileName
         m_Mode: 2
         m_Arguments:
@@ -6117,7 +6115,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10721934895fb4a4dac21f3a9ab835b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _menuName: 
 --- !u!114 &11400284
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -6129,7 +6126,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10721934895fb4a4dac21f3a9ab835b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _menuName: 
 --- !u!114 &11400286
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -6228,7 +6224,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -6294,7 +6290,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10721934895fb4a4dac21f3a9ab835b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _menuName: 
 --- !u!114 &11400300
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -6436,7 +6431,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10721934895fb4a4dac21f3a9ab835b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _menuName: 
 --- !u!114 &11400312
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -6556,7 +6550,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -6568,7 +6562,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 11400356}
+      - m_Target: {fileID: 0}
         m_MethodName: ConnectToServer
         m_Mode: 1
         m_Arguments:
@@ -6732,7 +6726,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -6826,7 +6820,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400356}
+      - m_Target: {fileID: 0}
         m_MethodName: CreateRoom
         m_Mode: 5
         m_Arguments:
@@ -6838,7 +6832,7 @@ MonoBehaviour:
           m_StringArgument: NewMenu
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -7045,7 +7039,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 100008}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5da2db9047d19ed45850bcf94a4ca4bf, type: 3}
+  m_Script: {fileID: 11500000, guid: 634108978675d9a48b9312da4f62f7e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &11400354
@@ -7056,13 +7050,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 100008}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d3d1461bb5678d341945dc196730ea0b, type: 3}
+  m_Script: {fileID: 11500000, guid: d8a94e81822d24b4ea4d95138696ef5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  errorMassage: {fileID: 11400080}
-  profileStyle: {fileID: 11400002, guid: 276ea4075da0d8b4786ee1ead72eb334, type: 2}
-  profilesPosition: {fileID: 22400032}
-  deleteProfileButton: {fileID: 11400152}
 --- !u!114 &11400356
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7071,11 +7061,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 100008}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 995a1cad93e9f0c44a0eb557ab8d47e8, type: 3}
+  m_Script: {fileID: 11500000, guid: 8c85149185947904390192ccd93dd681, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   roomStyle: {fileID: 100002, guid: 64bf96792a0370e4591e6acdc9ebba65, type: 2}
-  refreshTime: 2
+  refreshTime: 0
   roomsPosition: {fileID: 22400004}
 --- !u!114 &11400358
 MonoBehaviour:
@@ -7209,7 +7199,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10721934895fb4a4dac21f3a9ab835b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _menuName: 
 --- !u!114 &11400370
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7355,7 +7344,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400352}
+      - m_Target: {fileID: 0}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -7367,7 +7356,7 @@ MonoBehaviour:
           m_StringArgument: NewMenu
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 11400356}
+      - m_Target: {fileID: 0}
         m_MethodName: LeaveRoom
         m_Mode: 1
         m_Arguments:
@@ -7402,6 +7391,17 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &11400384
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d756778d8f3c59f43a575d7006064871, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1
