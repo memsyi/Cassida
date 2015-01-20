@@ -22,8 +22,8 @@
     public const string MainMenu = "MainMenu";
     public const string SettingsMenu = "SettingsMenu";
     public const string CreditsMenu = "CreditsMenu";
-    public const string LobbyMenu = "LobbyMenu";
-    public const string SingelPlayerMenu = "SingelPlayerMenu";
+    public const string SingleplayerLobbyMenu = "SingleplayerLobbyMenu";
+    public const string SinglePlayerRoomMenu = "SinglePlayerRoomMenu";
     public const string MultiplayerLobbyMenu = "MultiplayerLobbyMenu";
     public const string MultiplayerRoomMenu = "MultiplayerRoomMenu";
     public const string ProfileMenu = "ProfileMenu";

@@ -18,19 +18,19 @@ public class RoomController : MonoBehaviour
 
     public void SelectThisRoom()
     {
-        LobbyManager.Get().SelectRoom(this);
+        NetworkLobbyManager.Get().SelectRoom(this);
 
         ActivateSelection();
     }
 
     private void ActivateSelection()
     {
-        SelectionImage.gameObject.SetActive(true);
+        gameObject.transform.FindChild("Text").gameObject.SetActive(true);
     }
 
     public void DeactivateSelection()
     {
-        SelectionImage.gameObject.SetActive(false);
+        gameObject.transform.FindChild("Text").gameObject.SetActive(false);
     }
 
     public void DeleteRoomObject()
@@ -40,8 +40,7 @@ public class RoomController : MonoBehaviour
 
     public void JoinRoom()
     {
-        LobbyManager.Get().JoinRoom(this);
-        MenuManager.Get().ChangeMenu(GameObject.FindGameObjectWithTag(Tags.MultiplayerRoomMenu).GetComponent<MenuController>());
+        NetworkLobbyManager.Get().JoinRoom(this);
     }
 
     private void Init()

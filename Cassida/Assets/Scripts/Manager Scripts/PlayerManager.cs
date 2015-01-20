@@ -1,6 +1,45 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+public enum PossiblePlayerColors
+{
+    Red,
+    Blue,
+    Green,
+    Yellow,
+    Magenta
+}
+
+public class PlayerColor
+{
+    public static Color GetColor(PossiblePlayerColors possibleColor)
+    {
+        var color = Color.black;
+        switch (possibleColor)
+        {
+            case PossiblePlayerColors.Red:
+                color = Color.red;
+                break;
+            case PossiblePlayerColors.Blue:
+                color = Color.blue;
+                break;
+            case PossiblePlayerColors.Green:
+                color = Color.green;
+                break;
+            case PossiblePlayerColors.Yellow:
+                color = Color.yellow;
+                break;
+            case PossiblePlayerColors.Magenta:
+                color = Color.magenta;
+                break;
+            default:
+                color = Color.white;
+                break;
+        }
+        return color;
+    }
+}
+
 public class Player : IJSON
 {
     public int ID { get; private set; }
@@ -14,12 +53,22 @@ public class Player : IJSON
         ID = id;
         PhotonPlayer = photonPlayer;
         Name = name;
-        Color = color;
+
+        if (color == null)
+            Color = Color.white;
+        else
+            Color = color;
     }
 
     public Player()
     {
 
+    }
+
+    public void ChangeValues(string name, Color color)
+    {
+        Name = name;
+        Color = color;
     }
 
     public JSONObject ToJSON()
@@ -65,14 +114,14 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
     public List<Player> PlayerList { get; private set; }
     #endregion
 
-    public void AddPlayerInformation(PhotonPlayer player, string name, Color color)
+    public void AddPlayerInformation(PhotonPlayer photonPlayer, string name, Color color)
     {
-        if (!PhotonNetwork.isMasterClient || PlayerList.Exists(p => p.PhotonPlayer == player))
+        if (!PhotonNetwork.isMasterClient || PlayerList.Exists(p => p.PhotonPlayer == photonPlayer))
         {
             return;
         }
 
-        photonView.RPC(RPCs.SetPlayerInformation, PhotonTargets.All, PlayerList.Count, player, name, new Vector3(color.r, color.g, color.b));
+        photonView.RPC(RPCs.SetPlayerInformation, PhotonTargets.All, PlayerList.Count, photonPlayer, name, new Vector3(color.r, color.g, color.b));
     }
 
     public void SetAllExistingPlayerInformationAtPlayer(PhotonPlayer photonPlayer)
@@ -99,10 +148,20 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
         }
     }
 
-    [RPC]
-    private void SetPlayerInformation(int id, PhotonPlayer player, string name, Vector3 color, PhotonMessageInfo info)
+    public void ChangeExistinPlayerInformation(int id, PhotonPlayer photonPlayer, string name, Color color)
     {
-        if (!info.sender.isMasterClient || PlayerList.Exists(p => p.PhotonPlayer == player))
+        if (!PhotonNetwork.isMasterClient || PlayerList.Exists(p => p.ID == id))
+        {
+            return;
+        }
+
+        photonView.RPC(RPCs.SetExistingPlayerInformation, PhotonTargets.All, id, PlayerList.Count, photonPlayer, name, new Vector3(color.r, color.g, color.b));
+    }
+
+    [RPC]
+    private void SetPlayerInformation(int id, PhotonPlayer photonPlayer, string name, Vector3 color, PhotonMessageInfo info)
+    {
+        if (!info.sender.isMasterClient || PlayerList.Exists(p => p.PhotonPlayer == photonPlayer))
         {
             return;
         }
@@ -113,11 +172,11 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
         if (existingPlayer != null)
         {
             newPlayer = existingPlayer;
-            newPlayer.PhotonPlayer = player;
+            newPlayer.PhotonPlayer = photonPlayer;
         }
         else
         {
-            newPlayer = new Player(id, player, name, new Color(color.x, color.y, color.z));
+            newPlayer = new Player(id, photonPlayer, name, new Color(color.x, color.y, color.z));
             PlayerList.Add(newPlayer);
         }
 
@@ -130,25 +189,38 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
 
             SetCurrentPlayer(CurrentPlayer.PhotonPlayer);
 
-            if (!player.isMasterClient)
+            if (!photonPlayer.isMasterClient)
             {
                 // Instantiate map at player
-                MapGenerator.Get().InstatiateAllExistingTilesAtPlayer(player);
+                MapGenerator.Get().InstatiateAllExistingTilesAtPlayer(photonPlayer);
 
                 // Instatiate fleets at player
-                FleetManager.Get().InstantiateAllExistingFleetsAtPlayer(player);
+                FleetManager.Get().InstantiateAllExistingFleetsAtPlayer(photonPlayer);
 
                 // Instantiate bases at player
-                BaseManager.Get().InstantiateAllExistingBasesAtPlayer(player);
+                BaseManager.Get().InstantiateAllExistingBasesAtPlayer(photonPlayer);
             }
         }
 
-        if (PhotonNetwork.player != player || Player.PhotonPlayer != null)
+        if (PhotonNetwork.player != photonPlayer || Player.PhotonPlayer != null)
         {
             return;
         }
 
         Player = newPlayer;
+    }
+
+    [RPC]
+    private void SetExistingPlayerInformation(int id, PhotonPlayer photonPlayer, string name, Vector3 color, PhotonMessageInfo info)
+    {
+        var playerToChange = PlayerList.Find(p => p.ID == id);
+        if (!info.sender.isMasterClient || playerToChange == null)
+        {
+            return;
+        }
+
+        playerToChange.PhotonPlayer = photonPlayer;
+        playerToChange.ChangeValues(name, new Color(color.x, color.y, color.z));
     }
 
     private void SetCurrentPlayer(PhotonPlayer player)
@@ -253,7 +325,7 @@ public class PlayerManager : Photon.MonoBehaviour, IJSON
         {
             player.PhotonPlayer = null;
         }
-    } 
+    }
     #endregion
 
     public Player GetPlayer(int playerID)

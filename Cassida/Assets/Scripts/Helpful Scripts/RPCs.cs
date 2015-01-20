@@ -10,6 +10,7 @@ public struct RPCs
     public const string AddNewUnit = "AddNewUnit";
 
     public const string SetPlayerInformation = "SetPlayerInformation";
+    public const string SetExistingPlayerInformation = "SetExistingPlayerInformation";
 
     public const string AskForEndTurn = "AskForEndTurn";
     public const string SetCurrentPlayer = "SetCurrentPlayer";

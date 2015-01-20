@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class MenuController : MonoBehaviour 
+public class MenuController : MonoBehaviour
 {
     private Animator _animator;
     private CanvasGroup _canvasGroup;
 
     [SerializeField]
     private string _menuName;
-    
+
     public string MenuName
     {
         get { return _menuName; }
@@ -18,7 +18,15 @@ public class MenuController : MonoBehaviour
     public bool IsOpen
     {
         get { return _animator.GetBool("IsOpen"); }
-        set { _animator.SetBool("IsOpen", value); }
+        set
+        {
+            _animator.SetBool("IsOpen", value);
+
+            if (!value)
+            {
+                _canvasGroup.blocksRaycasts = _canvasGroup.interactable = false;
+            }
+        }
     }
 
     public void Awake()
@@ -28,17 +36,16 @@ public class MenuController : MonoBehaviour
 
         var rect = GetComponent<RectTransform>();
         rect.offsetMax = rect.offsetMin = new Vector2(0, 0);
+
+        _canvasGroup.blocksRaycasts = _canvasGroup.interactable = false;
     }
 
     public void Update()
     {
-        if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Open"))
+        if (!IsOpen)
         {
-            _canvasGroup.blocksRaycasts = _canvasGroup.interactable = false;
+            return;
         }
-        else
-        {
-            _canvasGroup.blocksRaycasts = _canvasGroup.interactable = true;
-        }
-    }	
+        _canvasGroup.blocksRaycasts = _canvasGroup.interactable = true;
+    }
 }

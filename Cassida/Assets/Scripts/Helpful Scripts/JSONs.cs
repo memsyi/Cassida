@@ -5,8 +5,12 @@ public struct JSONs
 {
     public const string Army = "Army";
     public const string Map = "Map";
+    public const string Bases = "Bases";
+    public const string Game = "Game";
     public const string Players = "Players";
     public const string Profiles = "Profiles";
+
+    public const string SaveTime = "SaveTime";
 
     public const string Player = "Player";
     public const string CurrentPlayer = "CurrentPlayer";
