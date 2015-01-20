@@ -15,7 +15,7 @@ public class BaseValues : IJSON
         return jsonObject;
     }
 
-    public void FromJSON(JSONObject jsonObject)
+    public void FromJSON(JSONObject o)
     {
         throw new System.NotImplementedException();
     }
@@ -24,39 +24,29 @@ public class BaseValues : IJSON
 public class Base : IJSON
 {
     public int ID { get; private set; }
-    public int PlayerID { get; private set; }
+    public Player Player { get; private set; }
     public Position Position { get; private set; }
     public BaseValues BaseValues { get; private set; }
-    private List<Building> BuildingList { get; set; }
+    private Building[] Buildings { get; set; }
 
     public Transform BaseParent { get; protected set; }
     public BaseController BaseController { get; protected set; }
 
     public bool AllowAddBuilding { get; private set; }
 
-    public Base(int id, int playerID, Position position, BaseValues baseValues)
+    public Base(int id, Player player, Position position, BaseValues baseValues)
     {
+        // Parent object and controller must be first!
+        BaseParent = BaseController.InstatiateParentObject(position, player.Name);
+        BaseController = BaseParent.gameObject.AddComponent<BaseController>();
+        Buildings = new Building[10];
+
         ID = id;
-        PlayerID = playerID;
+        Player = player;
         Position = position;
         BaseValues = baseValues;
 
         AllowAddBuilding = true;
-
-        InitiateValues();
-    }
-
-    public Base()
-    {
-
-    }
-
-    private void InitiateValues()
-    {
-        var player = PlayerManager.Get().GetPlayer(PlayerID);
-        BaseParent = BaseController.InstatiateParentObject(Position, player.Name);
-        BaseController = BaseParent.gameObject.AddComponent<BaseController>();
-        BuildingList = new List<Building>();
 
         BaseController.InstantiateBase(player.Name, player.Color);
     }
@@ -64,26 +54,13 @@ public class Base : IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-        jsonObject[JSONs.ID] = new JSONObject(ID);
-        jsonObject[JSONs.PlayerID] = new JSONObject(PlayerID);
-        jsonObject[JSONs.Position] = Position.ToJSON();
-        jsonObject[JSONs.BaseValues] = BaseValues.ToJSON();
-        jsonObject[JSONs.Buildings] = JSONObject.CreateList(BuildingList);
+
         return jsonObject;
     }
 
-    public void FromJSON(JSONObject jsonObject)
+    public void FromJSON(JSONObject o)
     {
-        ID = (int)jsonObject[JSONs.ID];
-        PlayerID = (int)jsonObject[JSONs.PlayerID];
-        Position = new Position(jsonObject[JSONs.Position]);
-        BaseValues = new BaseValues();
-        BaseValues.FromJSON(jsonObject[JSONs.BaseValues]);
-
-        InitiateValues();
-        //BaseManager.Get().AddBase(this);
-
-        BuildingList = JSONObject.ReadList<Building>(jsonObject[JSONs.Buildings]);
+        throw new System.NotImplementedException();
     }
 }
 
