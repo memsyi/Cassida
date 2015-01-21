@@ -28,9 +28,21 @@ public class MenuManager : MonoBehaviour
         CurrentMenu.IsOpen = true;
     }
 
+    public void CloseMenu()
+    {
+        CurrentMenu.IsOpen = false;
+        CurrentMenu = null;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
     private void Init()
     {
         ChangeMenu(GameObject.FindGameObjectWithTag(Tags.MainMenu).GetComponent<MenuController>());
+        CameraController.Get().enabled = false;
     }
 
     private void Start()
@@ -67,16 +79,5 @@ public class MenuManager : MonoBehaviour
         }
 
         return _instance;
-    }
-
-    public void CloseMenu()
-    {
-        CurrentMenu.IsOpen = false;
-        CurrentMenu = null;
-    }
-
-    public void QuitGame()
-    {
-        Application.Quit();
     }
 }

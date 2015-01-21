@@ -197,7 +197,7 @@ public class ProfileManager : MonoBehaviour, IJSON
         return ProfileList.Find(p => p.ProfileController == profileController);
     }
 
-    private void Init()
+    private void LoadProfiles()
     {
         ProfileList = new List<Profile>();
 
@@ -210,13 +210,16 @@ public class ProfileManager : MonoBehaviour, IJSON
                 SelectProfile(CurrentProfile.ProfileController);
             }
 
-            if (ProfileList.Count > 1)
+            if (ProfileList.Count <= 1)
             {
-                return;
+                deleteProfileButton.gameObject.SetActive(false);
             }
         }
+    }
 
-        deleteProfileButton.gameObject.SetActive(false);
+    private void Init()
+    {
+
     }
 
     private void Start()
@@ -236,6 +239,8 @@ public class ProfileManager : MonoBehaviour, IJSON
             Debug.LogError("Second instance!");
             return;
         }
+
+        LoadProfiles();
     }
 
     private void Update()

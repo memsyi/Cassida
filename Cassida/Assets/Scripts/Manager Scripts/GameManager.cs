@@ -11,10 +11,13 @@ public class Game : IJSON
 {
     public int PlayerCount { get { return PlayerManager.Get().PlayerList.Count; } }
     public float SaveTime { get { return (float)System.DateTime.Now.ToOADate(); } }
+    public EdgeLength MapSize { get; set; }
+    public MapForms MapForm { get; set; }
 
-    public Game(int bar)
+    public Game(EdgeLength mapSize, MapForms mapForm)
     {
-
+        MapSize = mapSize;
+        MapForm = mapForm;
     }
 
     public Game()
@@ -40,11 +43,12 @@ public class Game : IJSON
 public class GameManager : Photon.MonoBehaviour, IJSON
 {
     #region Variables
-    private Game Game { get; set; }
+    public Game Game { get; set; }
     #endregion
 
-    public void StartNewGame(EdgeLength bottomEdgeLength, MapForms mapForm)
+    public void StartNewGame()
     {
+        SetUpGameView();
         CheckOfflineMode();
 
         if (!PhotonNetwork.isMasterClient)
@@ -52,18 +56,24 @@ public class GameManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        WorldManager.Get().InitializeWorld(bottomEdgeLength, mapForm);
+        WorldManager.Get().InitializeWorld(Game.MapSize, Game.MapForm);
+
         SetUpGameToAllPlayer();
     }
 
     public void LoadGame(int SavePointID)
     {
+        SetUpGameView();
+        CheckOfflineMode();
+
         if (!PhotonNetwork.isMasterClient)
         {
             return;
         }
         // TODO läd noch nicht den richtigen savepoint
         FromJSON(JSONParser.parse(PlayerPrefs.GetString("Game")));
+
+        SetUpGameToAllPlayer();
     }
 
     private void InitiatePlayer(PhotonPlayer photonPlayer, string name, Color color)
@@ -145,6 +155,12 @@ public class GameManager : Photon.MonoBehaviour, IJSON
         }
     }
 
+    private void SetUpGameView()
+    {
+        GameObject.FindGameObjectWithTag(Tags.Menu).SetActive(false);
+        CameraController.Get().enabled = true;
+    }
+
     private void OnLeftRoom()
     {
         Application.LoadLevel(Application.loadedLevelName);
@@ -154,7 +170,7 @@ public class GameManager : Photon.MonoBehaviour, IJSON
     {
         if (GUI.Button(new Rect(100, 0, 100, 20), "Start game"))
         {
-            StartNewGame(EdgeLength.Seven, MapForms.Hexagon);
+            StartNewGame();
         }
         if (PhotonNetwork.player == PlayerManager.Get().CurrentPlayer.PhotonPlayer)
         {
@@ -182,7 +198,7 @@ public class GameManager : Photon.MonoBehaviour, IJSON
 
     private void Init()
     {
-
+        Game = new Game(EdgeLength.Seven, MapForms.Hexagon);
     }
 
     private void Start()

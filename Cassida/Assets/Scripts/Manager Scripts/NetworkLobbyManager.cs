@@ -74,12 +74,20 @@ public class NetworkLobbyManager : MonoBehaviour
     private void OnDisconnectedFromPhoton()
     {
         print("disconnect");
-        MenuManager.Get().ShowMenu(GameObject.FindGameObjectWithTag(Tags.MainMenu).GetComponent<MenuController>());
+        var mainMenu = GameObject.FindGameObjectWithTag(Tags.MainMenu);
+        if (mainMenu != null)
+        {
+            MenuManager.Get().ShowMenu(mainMenu.GetComponent<MenuController>());
+        }
     }
 
     private void OnJoinedLobby()
     {
-        MenuManager.Get().ShowMenu(GameObject.FindGameObjectWithTag(Tags.MultiplayerLobbyMenu).GetComponent<MenuController>());
+        var lobbyMenu = GameObject.FindGameObjectWithTag(Tags.MultiplayerLobbyMenu);
+        if (lobbyMenu != null)
+        {
+            MenuManager.Get().ShowMenu(lobbyMenu.GetComponent<MenuController>());
+        }
         //if (!DeveloperModus)
         //{
         //    //ShowAllNewExitingRooms();

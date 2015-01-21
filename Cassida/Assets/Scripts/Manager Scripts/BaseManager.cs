@@ -130,10 +130,10 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
         {
             return;
         }
-
-        foreach (var baseo in BaseList)
+        
+        for(int i = BaseList.Count -1; i > 0; i--)
         {
-            photonView.RPC(RPCs.AddNewBase, photonPlayer, baseo.ID, baseo.Player.PhotonPlayer, baseo.Position.X, baseo.Position.Y);
+            photonView.RPC(RPCs.AddNewBase, photonPlayer, BaseList[i].ID, BaseList[i].Player.PhotonPlayer, BaseList[i].Position.X, BaseList[i].Position.Y);
         }
     }
     #endregion

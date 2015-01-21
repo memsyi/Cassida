@@ -25,15 +25,12 @@ public class NetworkRoomManager : Photon.MonoBehaviour
 
     private bool LoadedGame { get; set; }
 
-    public void StartGame(int bottomEdgeLength, int mapForm)
+    public void StartGame()
     {
         if (!PhotonNetwork.isMasterClient)
         {
             return;
         }
-
-        GameObject.FindGameObjectWithTag(Tags.Menu).SetActive(false);
-        CameraController.Get().enabled = true;
 
         if (LoadedGame)
         {
@@ -41,18 +38,12 @@ public class NetworkRoomManager : Photon.MonoBehaviour
             return;
         }
 
-        GameManager.Get().StartNewGame((EdgeLength)bottomEdgeLength, (MapForms)mapForm);
-    }
-
-    public void TryToChangeColor(int possibleColor)
-    {
-        photonView.RPC(RPCs.AskMasterToChangeColor, PhotonTargets.MasterClient, possibleColor);
-        ChangeColor(possibleColor);
+        GameManager.Get().StartNewGame();
     }
 
     public void ChangePlayerCount(int playerCount)
     {
-        if(!PhotonNetwork.isMasterClient || PlayerManager.Get().PlayerList.Count > playerCount)
+        if (!PhotonNetwork.isMasterClient || PlayerManager.Get().PlayerList.Count > playerCount)
         {
             return;
         }
@@ -60,6 +51,22 @@ public class NetworkRoomManager : Photon.MonoBehaviour
         PhotonNetwork.room.maxPlayers = playerCount;
     }
 
+    public void ChangeMapSize(int bottomEdgeLength)
+    {
+        GameManager.Get().Game.MapSize = (EdgeLength)bottomEdgeLength;
+    }
+
+    public void ChangeMapForm(int mapForm)
+    {
+        GameManager.Get().Game.MapForm = (MapForms)mapForm;
+    }
+
+    public void TryToChangeColor(int possibleColor)
+    {
+        photonView.RPC(RPCs.AskMasterToChangeColor, PhotonTargets.MasterClient, possibleColor);
+        ChangeColor(possibleColor);
+    }
+    
     private void ChangeColor(int possibleColor)
     {
         PlayerManager.Get().Player.Color = PlayerColor.GetColor((PossiblePlayerColors)possibleColor);
@@ -67,8 +74,10 @@ public class NetworkRoomManager : Photon.MonoBehaviour
 
     private void OnJoinedRoom()
     {
-        print("join room");
-        MenuManager.Get().ShowMenu(GameObject.FindGameObjectWithTag(Tags.MultiplayerRoomMenu).GetComponent<MenuController>());
+        if (!PhotonNetwork.offlineMode)
+        {
+            MenuManager.Get().ShowMenu(GameObject.FindGameObjectWithTag(Tags.MultiplayerRoomMenu).GetComponent<MenuController>());
+        }
 
         if (LoadedGame)
         {
@@ -83,7 +92,7 @@ public class NetworkRoomManager : Photon.MonoBehaviour
         }
         else
         {
-            photonView.RPC(RPCs.AskMasterToJoinGame, PhotonTargets.MasterClient, PhotonNetwork.player, ProfileManager.Get().CurrentProfile.PlayerName);
+            photonView.RPC(RPCs.AskMasterToJoinGame, PhotonTargets.MasterClient, ProfileManager.Get().CurrentProfile.PlayerName);
         }
     }
 
