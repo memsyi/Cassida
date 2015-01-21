@@ -22,8 +22,7 @@ public class MultiplayerRoom
 
 public class NetworkRoomManager : Photon.MonoBehaviour
 {
-
-    private bool LoadedGame { get; set; }
+    private int SavePointIndex { get; set; }
 
     public void StartGame()
     {
@@ -32,13 +31,7 @@ public class NetworkRoomManager : Photon.MonoBehaviour
             return;
         }
 
-        if (LoadedGame)
-        {
-            GameManager.Get().LoadGame(0); // TODO load correct
-            return;
-        }
-
-        GameManager.Get().StartNewGame();
+        photonView.RPC(RPCs.StartGame, PhotonTargets.All, SavePointIndex);
     }
 
     public void ChangePlayerCount(int playerCount)
@@ -53,11 +46,21 @@ public class NetworkRoomManager : Photon.MonoBehaviour
 
     public void ChangeMapSize(int bottomEdgeLength)
     {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
         GameManager.Get().Game.MapSize = (EdgeLength)bottomEdgeLength;
     }
 
     public void ChangeMapForm(int mapForm)
     {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
         GameManager.Get().Game.MapForm = (MapForms)mapForm;
     }
 
@@ -65,6 +68,23 @@ public class NetworkRoomManager : Photon.MonoBehaviour
     {
         photonView.RPC(RPCs.AskMasterToChangeColor, PhotonTargets.MasterClient, possibleColor);
         ChangeColor(possibleColor);
+    }
+
+    [RPC]
+    private void StartGame(int savePointID, PhotonMessageInfo info)
+    {
+        if (!info.sender.isMasterClient)
+        {
+            return;
+        }
+
+        if (savePointID >= 0)
+        {
+            GameManager.Get().LoadGame(savePointID); // TODO load correct
+            return;
+        }
+
+        GameManager.Get().StartNewGame();
     }
     
     private void ChangeColor(int possibleColor)
@@ -79,15 +99,13 @@ public class NetworkRoomManager : Photon.MonoBehaviour
             MenuManager.Get().ShowMenu(GameObject.FindGameObjectWithTag(Tags.MultiplayerRoomMenu).GetComponent<MenuController>());
         }
 
-        if (LoadedGame)
-        {
-            // TODO change to correct save point
-            PlayerManager.Get().FromJSON(JSONParser.parse(PlayerPrefs.GetString("Game"))[JSONs.Players]);
-        }
-
         if (PhotonNetwork.isMasterClient)
         {
-            print(ProfileManager.Get().CurrentProfile);
+            if (SavePointIndex >= 0)
+            {
+                // TODO change to correct save point
+                PlayerManager.Get().FromJSON(JSONParser.parse(PlayerPrefs.GetString("Game"))[JSONs.Players]);
+            }
             AddPlayerInformation(PhotonNetwork.player, ProfileManager.Get().CurrentProfile.PlayerName);
         }
         else
@@ -159,7 +177,7 @@ public class NetworkRoomManager : Photon.MonoBehaviour
 
     private void Init()
     {
-
+        SavePointIndex = -1;
     }
 
     private void Start()

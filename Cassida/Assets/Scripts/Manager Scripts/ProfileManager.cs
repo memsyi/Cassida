@@ -149,7 +149,7 @@ public class ProfileManager : MonoBehaviour, IJSON
 
     private void DeletProfile(Profile profile)
     {
-        if (profile == null || ProfileList.Count < 2)
+        if (profile == null || ProfileList.Count <= 1)
         {
             return;
         }
@@ -175,7 +175,7 @@ public class ProfileManager : MonoBehaviour, IJSON
 
     private void SaveAllProfiles()
     {
-        PlayerPrefs.SetString(Playerprefs.AutoSavePoint, ToJSON().print());
+        PlayerPrefs.SetString(Playerprefs.Profiles, ToJSON().print());
     }
 
     private void DeletAllProfiles()
@@ -185,7 +185,7 @@ public class ProfileManager : MonoBehaviour, IJSON
             DeletProfile(ProfileList[i]);
         }
 
-        PlayerPrefs.DeleteKey(Playerprefs.AutoSavePoint);
+        PlayerPrefs.DeleteKey(Playerprefs.Profiles);
     }
 
     private Profile GetProfile(string profileName)
@@ -201,9 +201,9 @@ public class ProfileManager : MonoBehaviour, IJSON
     {
         ProfileList = new List<Profile>();
 
-        if (PlayerPrefs.HasKey(Playerprefs.AutoSavePoint))
+        if (PlayerPrefs.HasKey(Playerprefs.Profiles))
         {
-            FromJSON(JSONParser.parse(PlayerPrefs.GetString(Playerprefs.AutoSavePoint)));
+            FromJSON(JSONParser.parse(PlayerPrefs.GetString(Playerprefs.Profiles)));
 
             if (CurrentProfile != null)
             {

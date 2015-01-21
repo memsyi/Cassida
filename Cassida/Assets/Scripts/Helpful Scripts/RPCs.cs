@@ -12,6 +12,7 @@ public struct RPCs
     public const string SetPlayerInformation = "SetPlayerInformation";
     public const string SetPlayerColor = "SetPlayerColor";
 
+    public const string StartGame = "StartGame";
     public const string AskMasterToJoinGame = "AskMasterToJoinGame";
     public const string AskMasterToChangeColor = "AskMasterToChangeColor"; 
 

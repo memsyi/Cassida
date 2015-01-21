@@ -51,4 +51,5 @@ MonoBehaviour:
   - SetExistingPlayerInformation
   - AskMasterToChangeColor
   - SetPlayerColor
+  - StartGame
   DisableAutoOpenWizard: 0
