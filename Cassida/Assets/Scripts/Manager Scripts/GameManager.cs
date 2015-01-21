@@ -157,7 +157,11 @@ public class GameManager : Photon.MonoBehaviour, IJSON
 
     private void SetUpGameView()
     {
-        GameObject.FindGameObjectWithTag(Tags.Menu).SetActive(false);
+        var menu = GameObject.FindGameObjectWithTag(Tags.Menu);
+        if (menu != null)
+        {
+            menu.SetActive(false);
+        }
         CameraController.Get().enabled = true;
     }
 

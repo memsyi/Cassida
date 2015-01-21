@@ -4073,7 +4073,7 @@ MonoBehaviour:
     _allowOwnKeys: 0
     _allowMovement: 1
     _allowRotation: 1
-    _allowUpDownRotation: 1
+    _allowUpDownRotation: 0
     _allowZoomRotation: 1
   _cameraKeys:
     _ownForwardKey: w
@@ -4095,11 +4095,11 @@ MonoBehaviour:
       height: 100
     _borderStrength: 5
   _cameraSettings:
-    _movementSpeed: .200000003
-    _rotationSpeed: .5
-    _zoomSpeed: 1
-    _buttonSpeed: 1
-    _mouseButtonSpeed: 1
+    _movementSpeed: .5
+    _rotationSpeed: 1.29999995
+    _zoomSpeed: 3
+    _buttonSpeed: 1.29999995
+    _mouseButtonSpeed: 5
     _minimumZoom: 20
     _maximumZoom: .75
     _minimumZoomRotation: -.75
@@ -7029,6 +7029,30 @@ Prefab:
     - target: {fileID: 11400134, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraControlls._allowUpDownRotation
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._movementSpeed
+      value: .5
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._rotationSpeed
+      value: 1.29999995
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._zoomSpeed
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._mouseButtonSpeed
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._buttonSpeed
+      value: 1.29999995
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
