@@ -26,7 +26,8 @@ public class SettingsCameraControlls
         _allowOwnKeys = false,
         _allowMovement = true,
         _allowRotation = true,
-        _allowUpDownRotation = true;
+        _allowUpDownRotation = true,
+        _allowZoomRotation = true;
 
     #region Controlls
     public BorderCrossingActions BorderCrossingAction
@@ -84,6 +85,11 @@ public class SettingsCameraControlls
     {
         get { return _allowUpDownRotation; }
         set { _allowUpDownRotation = value; }
+    }
+    public bool AllowZoomRation
+    {
+        get { return _allowZoomRotation; }
+        set { _allowZoomRotation = value; }
     }
     #endregion
 }
@@ -190,17 +196,17 @@ public class SettingsCameraSettings
 {
     [SerializeField]
     private float
-        _movementSpeed = 0.2f,
-        _rotationSpeed = 0.5f,
-        _zoomSpeed = 1f,
+        _movementSpeed = 0.5f,
+        _rotationSpeed = 1.5f,
+        _zoomSpeed = 2f,
         _buttonSpeed = 1f,
-        _mouseButtonSpeed = 1f,
+        _mouseButtonSpeed = 1.5f,
         _minimumZoom = 20f,
         _maximumZoom = 0.75f,
-        _minimumZoomRotation = 10f,
-        _maximumZoomRotation = 50f,
-        _zoomRotationSpeed = 5f,
-        _zoomDownAngle = 40f,
+        _minimumZoomRotation = -0.75f,
+        //_maximumZoomRotation = 50f,
+        _zoomRotationSpeed = 12f,
+        _zoomDownAngle = 50f,
         _heightMultiplier = 1f;
 
     #region Settings
@@ -224,11 +230,11 @@ public class SettingsCameraSettings
         get { return _minimumZoomRotation; }
         set { _minimumZoomRotation = value; }
     }
-    public float MaximumZoomRotation
-    {
-        get { return _maximumZoomRotation; }
-        set { _maximumZoomRotation = value; }
-    }
+    //public float MaximumZoomRotation
+    //{
+    //    get { return _maximumZoomRotation; }
+    //    set { _maximumZoomRotation = value; }
+    //}
     public float ZoomRotationSpeed
     {
         get { return _zoomRotationSpeed; }
@@ -770,7 +776,6 @@ public class CameraController : MonoBehaviour
             transform.position += Vector3.down * CameraSettings.ZoomSpeed * HeightMultiplier * zoom;
         }
 
-        SetCorrectCameraZoom();
 
         if (transform.position.y < CameraSettings.MaximumZoom)
         {
@@ -780,12 +785,14 @@ public class CameraController : MonoBehaviour
         {
             transform.position = new Vector3(transform.position.x, CameraSettings.MinimumZoom, transform.position.z);
         }
+
+        if (CameraControlls.AllowZoomRation) SetCorrectCameraZoom();
     }
 
     private void SetCorrectCameraZoom()
     {
         //print(Quaternion.AngleAxis(Mathf.PingPong(25, 40), Vector3.left));
-        float correctRotation = Mathf.Min(transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation, CameraSettings.MaximumZoomRotation);
+        float correctRotation = Mathf.Min(transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation, CameraSettings.ZoomDownAngle);
         //transform.rotation = Quaternion.AngleAxis(correctRotation, Vector3.right);
         transform.rotation = Quaternion.Euler(
             correctRotation,

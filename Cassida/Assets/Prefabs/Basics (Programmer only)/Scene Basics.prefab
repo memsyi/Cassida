@@ -2720,6 +2720,7 @@ MonoBehaviour:
     _allowMovement: 1
     _allowRotation: 1
     _allowUpDownRotation: 1
+    _allowZoomRotation: 1
   _cameraKeys:
     _ownForwardKey: w
     _ownLeftKey: a
@@ -2748,7 +2749,6 @@ MonoBehaviour:
     _minimumZoom: 20
     _maximumZoom: .75
     _minimumZoomRotation: -.75
-    _maximumZoomRotation: 50
     _zoomRotationSpeed: 12
     _zoomDownAngle: 40
     _heightMultiplier: 1
