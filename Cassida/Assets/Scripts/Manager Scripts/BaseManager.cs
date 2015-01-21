@@ -47,6 +47,14 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
     // Lists
     public List<Base> BaseList { get; private set; }
+
+    // Base ID
+    private int _highestBaseID = 0;
+    private int HighestBaseID
+    {
+        get { return _highestBaseID; }
+        set { if (PhotonNetwork.isMasterClient) _highestBaseID = value; }
+    }
     #endregion
 
     public void InstantiateBasesForAllPlayer()
@@ -72,10 +80,14 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         // TODO genügend Geld?
 
+        print("Check base");
+
         var tileList = TileManager.Get().TileList.FindAll(t => t.ObjectiveType == ObjectiveType.Base
             && !BaseList.Exists(b =>
                 b.Position == t.Position
                 || PlayerManager.Get().GetPlayer(b.PlayerID).PhotonPlayer == photonPlayer));
+
+        print(tileList.Count);
 
         if (tileList == null)
         {
@@ -89,16 +101,20 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        if (BaseList.Exists(f => f.PlayerID == PlayerManager.Get().GetPlayer(photonPlayer).ID))
+        var player = PlayerManager.Get().GetPlayer(photonPlayer);
+
+        HighestBaseID++;
+
+        if (BaseList.Exists(f => f.ID == HighestBaseID))
         {
             return;
         }
 
-        photonView.RPC(RPCs.AddNewBase, PhotonTargets.All, photonPlayer, tile.Position.X, tile.Position.Y);
+        photonView.RPC(RPCs.AddNewBase, PhotonTargets.All, HighestBaseID, player.ID, tile.Position.X, tile.Position.Y);
     }
 
     [RPC]
-    private void AddNewBase(int playerID, int positionX, int positionY, PhotonMessageInfo info)
+    private void AddNewBase(int id, int playerID, int positionX, int positionY, PhotonMessageInfo info)
     {
         if (!info.sender.isMasterClient)
         {
@@ -107,7 +123,9 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         var position = new Position(positionX, positionY);
 
-        BaseList.Add(new Base(playerID, position, new BaseValues()));
+        HighestBaseID = id;
+
+        BaseList.Add(new Base(id, playerID, position, new BaseValues()));
     }
 
     public void InstantiateAllExistingBasesAtPlayer(PhotonPlayer photonPlayer)
@@ -119,7 +137,8 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         for (int i = BaseList.Count - 1; i > 0; i--)
         {
-            photonView.RPC(RPCs.AddNewBase, photonPlayer, BaseList[i].PlayerID, BaseList[i].Position.X, BaseList[i].Position.Y);
+            var baseo = BaseList[i];
+            photonView.RPC(RPCs.AddNewBase, photonPlayer, baseo.ID, baseo.PlayerID, baseo.Position.X, baseo.Position.Y);
         }
     }
     #endregion
@@ -157,6 +176,10 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
     public Base GetBase(int playerID)
     {
         return BaseList.Find(b => b.PlayerID == playerID);
+    }
+    public Base GetBase(Position position)
+    {
+        return BaseList.Find(b => b.Position == position);
     }
 
     private void Init()

@@ -106,6 +106,7 @@ public class NetworkRoomManager : Photon.MonoBehaviour
                 // TODO change to correct save point
                 PlayerManager.Get().FromJSON(JSONParser.parse(PlayerPrefs.GetString("Game"))[JSONs.Players]);
             }
+
             AddPlayerInformation(PhotonNetwork.player, ProfileManager.Get().CurrentProfile.PlayerName);
         }
         else
@@ -135,6 +136,8 @@ public class NetworkRoomManager : Photon.MonoBehaviour
 
         PlayerManager.Get().SetAllExistingPlayerInformationAtPlayer(info.sender);
         AddPlayerInformation(info.sender, name);
+
+        print("add player");
     }
 
     [RPC]

@@ -25,6 +25,7 @@ public class Tile : IJSON
 {
     public Position Position { get; protected set; }
     public int FleetID { get { var fleet = FleetManager.Get().GetFleet(Position); return fleet != null ? fleet.ID : -1; } }
+    public int BaseID { get { var baseo = BaseManager.Get().GetBase(Position); return baseo != null ? baseo.ID : -1; } }
     public TerrainType TerrainType { get; private set; }
     public ObjectiveType ObjectiveType { get; private set; }
 
@@ -34,7 +35,7 @@ public class Tile : IJSON
     public TerrainController TerrainController { get; private set; }
     public ObjectiveController ObjectiveController { get; private set; }
 
-    public Tile(Position position, TerrainType terrain, ObjectiveType objective)
+    public Tile(Position position, ObjectiveType objective, TerrainType terrain)
     {
         Position = position;
         TerrainType = terrain;
@@ -266,16 +267,29 @@ public class TileManager : MonoBehaviour, IJSON
     {
         if (CurrentSelectedTile != null)
         {
-            SetTileBorderColor(CurrentSelectedTile, TileColor.DefaultColor);
-            RemoveCurrentSelectionAnimation();
+            ResetSelectedTile();
         }
 
-        var fleet = FleetManager.Get().GetFleet(tile.Position);
-
-        if (tile == null || fleet == null || fleet.PlayerID != PlayerManager.Get().Player.ID)
+        if (tile == null)
         {
             CurrentSelectedTile = null;
             return;
+        }
+
+        var fleet = FleetManager.Get().GetFleet(tile.Position);
+        var baseo = BaseManager.Get().GetBase(tile.Position);
+
+        var playerID = PlayerManager.Get().Player.ID;
+
+        if ((fleet == null || fleet.PlayerID != playerID)
+            && (baseo == null || baseo.PlayerID != playerID))
+        {
+            return;
+        }
+
+        if (baseo != null)
+        {
+            // TODO select base
         }
 
         CurrentSelectedTile = tile;
@@ -287,7 +301,7 @@ public class TileManager : MonoBehaviour, IJSON
         }
     }
 
-    public void ResetAllTiles() // TODO event
+    public void ResetAllTiles()
     {
         ResetSelectedTile();
         ResetHighlightedTile();
@@ -409,9 +423,9 @@ public class TileManager : MonoBehaviour, IJSON
 
         // Other tile
         // Enemies fleet (own selected)
-        if (CurrentSelectedTile != null && CurrentHighlightedTile.FleetID > -1)
+        if (CurrentSelectedTile != null && (CurrentHighlightedTile.FleetID > -1 || CurrentHighlightedTile.BaseID > -1))
         {
-            if (InputManager.Get().CheckAttack(CurrentSelectedTile.FleetID, CurrentHighlightedTile.FleetID))
+            if (InputManager.Get().CheckAttack(CurrentSelectedTile.FleetID, CurrentHighlightedTile.Position))
             {
                 SetTileBorderColor(CurrentHighlightedTile, TileColor.MouseOverEnemyFleetColor);
             }
@@ -421,7 +435,7 @@ public class TileManager : MonoBehaviour, IJSON
             }
         }
         // Other fleet
-        else if (CurrentHighlightedTile.FleetID > -1)
+        else if (CurrentHighlightedTile.FleetID > -1 || CurrentHighlightedTile.BaseID > -1)
         {
             var fleet = FleetManager.Get().GetFleet(CurrentHighlightedTile.FleetID);
             if (fleet != null && fleet.PlayerID == PlayerManager.Get().Player.ID)
@@ -464,7 +478,12 @@ public class TileManager : MonoBehaviour, IJSON
 
     private void ResetSelectedTile()
     {
+        if (CurrentSelectedTile == null)
+        {
+            return;
+        }
         SetTileBorderColor(CurrentSelectedTile, TileColor.DefaultColor);
+        RemoveCurrentSelectionAnimation();
         CurrentSelectedTile = null;
     }
     #endregion
@@ -484,7 +503,7 @@ public class TileManager : MonoBehaviour, IJSON
     {
         if (tile == null) { return; }
         tile.TileObject.renderer.material.color = color;
-    } 
+    }
     #endregion
 
     public Tile GetTile(Position position)
@@ -516,6 +535,7 @@ public class TileManager : MonoBehaviour, IJSON
         for (int i = 0; i < TileAnimation.AnimatedObjectCount; i++)
         {
             var tileAnimationObject = Instantiate(MapGenerator.Get().TileObject) as Transform;
+            tileAnimationObject.parent = GameObject.FindGameObjectWithTag(Tags.Map).transform;
 
             TileAnimation.SelectionObjects.Add(tileAnimationObject);
             TileAnimation.SelectionObjects[i].gameObject.SetActive(false);

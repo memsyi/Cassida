@@ -7054,6 +7054,10 @@ Prefab:
       propertyPath: _cameraSettings._buttonSpeed
       value: 1.29999995
       objectReference: {fileID: 0}
+    - target: {fileID: 11400032, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _attackableTileObject
+      value: 
+      objectReference: {fileID: 400000, guid: 387969e5cc6b9834fa21a0e8e51658ba, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
   m_RootGameObject: {fileID: 1924779991}
@@ -7684,6 +7688,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _moveableTileObject: {fileID: 400000, guid: 3ff84fa9b225f0440bfc136ded0e0a32, type: 2}
+  _attackableTileObject: {fileID: 400000, guid: 387969e5cc6b9834fa21a0e8e51658ba,
+    type: 2}
 --- !u!114 &1583209388
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9287,7 +9293,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 400008, guid: 3d83c95fee1be9d488400265fa281e5b, type: 2}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3d83c95fee1be9d488400265fa281e5b, type: 2}

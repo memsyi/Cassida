@@ -83,7 +83,9 @@ public class MapGenerator : Photon.MonoBehaviour
                  || mapForm == MapForms.Diamond)
                 {
                     var position = new Position(x, y);
-                    photonView.RPC(RPCs.AddTile, PhotonTargets.All, x, y, (int)CalculateTerrainType(position), (int)CalculateObjectiveType(position));
+                    var objectiveType = CalculateObjectiveType(position);
+                    var terrainType = objectiveType == ObjectiveType.Empty ? (int)CalculateTerrainType(position) : (int)TerrainType.Empty;
+                    photonView.RPC(RPCs.AddTile, PhotonTargets.All, x, y, (int)objectiveType, (int)terrainType);
                 }
             }
         }
@@ -98,12 +100,12 @@ public class MapGenerator : Photon.MonoBehaviour
 
         foreach (var tile in TileList)
         {
-            photonView.RPC(RPCs.AddTile, player, tile.Position.X, tile.Position.Y, (int)tile.TerrainType, (int)tile.ObjectiveType);
+            photonView.RPC(RPCs.AddTile, player, tile.Position.X, tile.Position.Y, (int)tile.ObjectiveType, (int)tile.TerrainType);
         }
     }
 
     [RPC]
-    private void AddTile(int positionX, int positionY, int terrainType, int objectiveType, PhotonMessageInfo info)
+    private void AddTile(int positionX, int positionY, int objectiveType, int terrainType, PhotonMessageInfo info)
     {
         var position = new Position(positionX, positionY);
 
@@ -112,7 +114,7 @@ public class MapGenerator : Photon.MonoBehaviour
             return;
         }
 
-        TileList.Add(new Tile(position, (TerrainType)terrainType, (ObjectiveType)objectiveType));
+        TileList.Add(new Tile(position, (ObjectiveType)objectiveType, (TerrainType)terrainType));
     }
 
     public Transform InstatiateTileObject(Transform tileParent)
@@ -138,7 +140,7 @@ public class MapGenerator : Photon.MonoBehaviour
 
     private ObjectiveType CalculateObjectiveType(Position position)
     {
-        if(position == new Position(3, 0)) return ObjectiveType.Base;
+        if (position == new Position(3, 0) || position == new Position(-3, 0)) return ObjectiveType.Base;
         return ObjectiveType.Empty; // TODO calculate tiles where bases can be place
     }
 

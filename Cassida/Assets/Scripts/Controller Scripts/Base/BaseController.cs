@@ -23,6 +23,7 @@ public class BaseValues : IJSON
 
 public class Base : IJSON
 {
+    public int ID { get; private set; }
     public int PlayerID { get; private set; }
     public Position Position { get; private set; }
     public BaseValues BaseValues { get; private set; }
@@ -33,8 +34,9 @@ public class Base : IJSON
 
     public bool AllowAddBuilding { get; private set; }
 
-    public Base(int playerID, Position position, BaseValues baseValues)
+    public Base(int id, int playerID, Position position, BaseValues baseValues)
     {
+        ID = id;
         PlayerID = playerID;
         Position = position;
         BaseValues = baseValues;
@@ -62,6 +64,7 @@ public class Base : IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
+        jsonObject[JSONs.ID] = new JSONObject(ID);
         jsonObject[JSONs.PlayerID] = new JSONObject(PlayerID);
         jsonObject[JSONs.Position] = Position.ToJSON();
         jsonObject[JSONs.BaseValues] = BaseValues.ToJSON();
@@ -72,6 +75,7 @@ public class Base : IJSON
 
     public void FromJSON(JSONObject jsonObject)
     {
+        ID = (int)jsonObject[JSONs.ID];
         PlayerID = (int)jsonObject[JSONs.PlayerID];
         Position = new Position(jsonObject[JSONs.Position]);
         BaseValues = new BaseValues();
@@ -124,6 +128,7 @@ public class BaseController : MonoBehaviour
             colorObject.renderer.material.color = color;
         }
     }
+
     #endregion
 
     private void Init()

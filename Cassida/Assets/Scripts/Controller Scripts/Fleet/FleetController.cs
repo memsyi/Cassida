@@ -325,12 +325,11 @@ public class FleetController : MonoBehaviour
         }
     }
 
-    //IEnumerator MoveToTarget(Vector3 target)
     private IEnumerator MoveToTarget()
     {
         while (Vector3.Distance(transform.position, MovementTarget) > 0.001f)
         {
-            transform.position = Vector3.Lerp(transform.position, MovementTarget, Time.deltaTime);
+            transform.position = Vector3.Lerp(transform.position, MovementTarget, Time.deltaTime * 3);
             yield return null;
         }
         transform.position = MovementTarget;

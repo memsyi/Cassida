@@ -52,4 +52,6 @@ MonoBehaviour:
   - AskMasterToChangeColor
   - SetPlayerColor
   - StartGame
+  - AskForAttack
+  - AttackEnemy
   DisableAutoOpenWizard: 0

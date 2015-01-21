@@ -48,6 +48,8 @@ public class GameManager : Photon.MonoBehaviour, IJSON
 
     public void StartNewGame()
     {
+        print(PlayerManager.Get().PlayerList.Count);
+
         SetUpGameView();
         CheckOfflineMode();
 
@@ -132,6 +134,7 @@ public class GameManager : Photon.MonoBehaviour, IJSON
         }
 
         FleetManager.Get().DestroyAllFleetsOfPlayer(playerID);
+        InputManager.Get().CheckShowActionArea();
     }
     #endregion
 
@@ -178,7 +181,7 @@ public class GameManager : Photon.MonoBehaviour, IJSON
         }
         if (PhotonNetwork.player == PlayerManager.Get().CurrentPlayer.PhotonPlayer)
         {
-            if (GUI.Button(new Rect(100, 0, 100, 20), "EndTurn"))
+            if (GUI.Button(new Rect(0, 0, 100, 20), "EndTurn"))
             {
                 PlayerManager.Get().EndTurn();
             }
