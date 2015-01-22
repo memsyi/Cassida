@@ -18,56 +18,14 @@ AnimationClip:
         value: {x: 0, y: 1, z: 0, w: -4.37113883e-08}
         inSlope: {x: 0, y: 0, z: 0, w: 0}
         outSlope: {x: 0, y: 0, z: 0, w: 0}
-        tangentMode: 15
+        tangentMode: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
-    path: Panel
+    path: Left Site Panel
   m_CompressedRotationCurves: []
   m_PositionCurves: []
   m_ScaleCurves: []
-  m_FloatCurves:
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - time: 0
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 10
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-    attribute: m_Alpha
-    path: 
-    classID: 225
-    script: {fileID: 0}
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - time: 0
-        value: 0
-        inSlope: 439.656006
-        outSlope: 439.656006
-        tangentMode: 10
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-    attribute: m_LocalPosition.z
-    path: Panel
-    classID: 224
-    script: {fileID: 0}
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - time: 0
-        value: .71484375
-        inSlope: 24.4275513
-        outSlope: 24.4275513
-        tangentMode: 10
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-    attribute: m_AnchoredPosition.x
-    path: Panel
-    classID: 224
-    script: {fileID: 0}
+  m_FloatCurves: []
   m_PPtrCurves: []
   m_SampleRate: 60
   m_WrapMode: 0
@@ -76,28 +34,10 @@ AnimationClip:
     m_Extent: {x: 0, y: 0, z: 0}
   m_ClipBindingConstant:
     genericBindings:
-    - path: 1668086795
-      attribute: 2033536083
-      script: {fileID: 0}
-      classID: 224
-      customType: 0
-      isPPtrCurve: 0
-    - path: 1668086795
-      attribute: 1460864421
-      script: {fileID: 0}
-      classID: 224
-      customType: 0
-      isPPtrCurve: 0
-    - path: 1668086795
+    - path: 2935027801
       attribute: 2
       script: {fileID: 0}
       classID: 4
-      customType: 0
-      isPPtrCurve: 0
-    - path: 0
-      attribute: 1574349066
-      script: {fileID: 0}
-      classID: 225
       customType: 0
       isPPtrCurve: 0
     pptrCurveMapping: []
@@ -126,53 +66,11 @@ AnimationClip:
         value: 0
         inSlope: 0
         outSlope: 0
-        tangentMode: 10
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-    attribute: m_Alpha
-    path: 
-    classID: 225
-    script: {fileID: 0}
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - time: 0
-        value: 0
-        inSlope: 439.656006
-        outSlope: 439.656006
-        tangentMode: 10
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-    attribute: m_LocalPosition.z
-    path: Panel
-    classID: 224
-    script: {fileID: 0}
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - time: 0
-        value: .71484375
-        inSlope: 24.4275513
-        outSlope: 24.4275513
-        tangentMode: 10
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-    attribute: m_AnchoredPosition.x
-    path: Panel
-    classID: 224
-    script: {fileID: 0}
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - time: 0
-        value: 0
-        inSlope: 0
-        outSlope: 0
         tangentMode: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
     attribute: m_LocalRotation.x
-    path: Panel
+    path: Left Site Panel
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -186,7 +84,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
     attribute: m_LocalRotation.y
-    path: Panel
+    path: Left Site Panel
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -200,7 +98,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
     attribute: m_LocalRotation.z
-    path: Panel
+    path: Left Site Panel
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -214,7 +112,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
     attribute: m_LocalRotation.w
-    path: Panel
+    path: Left Site Panel
     classID: 224
     script: {fileID: 0}
   m_EulerEditorCurves:
@@ -229,7 +127,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
     attribute: localEulerAnglesBaked.x
-    path: Panel
+    path: Left Site Panel
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -243,7 +141,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
     attribute: localEulerAnglesBaked.y
-    path: Panel
+    path: Left Site Panel
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -257,7 +155,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
     attribute: localEulerAnglesBaked.z
-    path: Panel
+    path: Left Site Panel
     classID: 224
     script: {fileID: 0}
   m_Events: []

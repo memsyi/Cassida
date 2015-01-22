@@ -1,6 +1,7 @@
 ﻿﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+//using UnityEngine.EventSystems;
 
 public class Profile : IJSON
 {
@@ -68,11 +69,27 @@ public class ProfileManager : MonoBehaviour, IJSON
         get { return deleteProfileButton; }
     }
 
+    [SerializeField]
+    private InputField profileInputField;
+    private InputField ProfileInputField
+    {
+        get { return profileInputField; }
+    }
+
     public Profile CurrentProfile { get; private set; }
 
     // Lists
     public List<Profile> ProfileList { get; private set; }
     #endregion
+
+    public void StartNewProfile()
+    {
+        ProfileInputField.text = "";
+        //ProfileInputField.Select();
+        //if (ProfileInputField.isFocused) print("omg wtf");
+        //EventSystemManager.currentSystem.SetSelectedGameObject(ProfileInputField, null);
+        //FindObjectOfType<EventSystem>().SetSelectedGameObject(ProfileInputField);
+    }
 
     public void GetProfileName(Text text)
     {

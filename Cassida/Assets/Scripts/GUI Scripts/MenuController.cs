@@ -17,6 +17,11 @@ public class MenuController : MonoBehaviour
             {
                 _canvasGroup.blocksRaycasts = _canvasGroup.interactable = false;
             }
+            else if(this.tag == "CreateNewProfileMenu")
+            {
+                print("i am : " + this.tag);
+                ProfileManager.Get().StartNewProfile();
+            }
         }
     }
 

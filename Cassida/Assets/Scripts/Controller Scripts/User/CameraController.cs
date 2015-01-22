@@ -27,7 +27,8 @@ public class SettingsCameraControlls
         _allowMovement = true,
         _allowRotation = true,
         _allowUpDownRotation = true,
-        _allowZoomRotation = true;
+        _allowZoomRotation = true,
+        _cameraBaseView = false;
 
     #region Controlls
     public BorderCrossingActions BorderCrossingAction
@@ -90,6 +91,11 @@ public class SettingsCameraControlls
     {
         get { return _allowZoomRotation; }
         set { _allowZoomRotation = value; }
+    }
+    public bool CameraBaseView
+    {
+        get { return _cameraBaseView; }
+        set { _cameraBaseView = value; }
     }
     #endregion
 }
@@ -204,16 +210,22 @@ public class SettingsCameraSettings
         _minimumZoom = 20f,
         _maximumZoom = 0.75f,
         _minimumZoomRotation = -0.75f,
-        //_maximumZoomRotation = 50f,
         _zoomRotationSpeed = 12f,
         _zoomDownAngle = 50f,
-        _heightMultiplier = 1f;
+        _maximumZoomDownAngle = 70f,
+        _heightMultiplier = 1f,
+        _lerpBackZoomSpeed = 2.0f;
 
     #region Settings
     public float ZoomDownAngle
     {
         get { return _zoomDownAngle; }
         set { _zoomDownAngle = value; }
+    }
+    public float MaximumZoomDownAngle
+    {
+        get { return _maximumZoomDownAngle; }
+        set { _maximumZoomDownAngle = value; }
     }
     public float MinimumZoom
     {
@@ -230,11 +242,6 @@ public class SettingsCameraSettings
         get { return _minimumZoomRotation; }
         set { _minimumZoomRotation = value; }
     }
-    //public float MaximumZoomRotation
-    //{
-    //    get { return _maximumZoomRotation; }
-    //    set { _maximumZoomRotation = value; }
-    //}
     public float ZoomRotationSpeed
     {
         get { return _zoomRotationSpeed; }
@@ -269,6 +276,11 @@ public class SettingsCameraSettings
     {
         get { return _heightMultiplier; }
         set { _heightMultiplier = value; }
+    }
+    public float LerpBackZoomSpeed
+    {
+        get { return _lerpBackZoomSpeed; }
+        set { _lerpBackZoomSpeed = value; }
     }
     #endregion
 }
@@ -323,6 +335,8 @@ public class CameraController : MonoBehaviour
         get { return _cameraSettings; }
         set { _cameraSettings = value; }
     }
+
+    private Vector3 currentSelectedObjectPosition = new Vector3();
     #endregion
 
     private void HandleUserInput()
@@ -786,18 +800,51 @@ public class CameraController : MonoBehaviour
             transform.position = new Vector3(transform.position.x, CameraSettings.MinimumZoom, transform.position.z);
         }
 
-        if (CameraControlls.AllowZoomRation) SetCorrectCameraZoom();
+        if (CameraControlls.AllowZoomRation && !CameraControlls.CameraBaseView)
+        {
+            SetCorrectCameraZoom();
+        }
+        else if (transform.rotation.x < CameraSettings.ZoomDownAngle && !CameraControlls.CameraBaseView)
+        {
+            ZoomBackToDefault();
+        }
+        else if (CameraControlls.CameraBaseView && (transform.rotation.x < CameraSettings.MaximumZoomDownAngle || Vector3.Distance(transform.position, currentSelectedObjectPosition) > 0.01f))
+        {
+            LerpToSelectedObject();
+        }
     }
 
     private void SetCorrectCameraZoom()
     {
-        //print(Quaternion.AngleAxis(Mathf.PingPong(25, 40), Vector3.left));
-        float correctRotation = Mathf.Min(transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation, CameraSettings.ZoomDownAngle);
-        //transform.rotation = Quaternion.AngleAxis(correctRotation, Vector3.right);
-        transform.rotation = Quaternion.Euler(
-            correctRotation,
-            transform.rotation.eulerAngles.y,
-            0);
+        float currentRotation = transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation;
+        float correctRotation = 0;
+
+        if (transform.position.y > CameraSettings.MinimumZoom / 2)
+        {
+            correctRotation = Mathf.Min(CameraSettings.ZoomDownAngle + transform.position.y * CameraSettings.ZoomRotationSpeed / 2 - (CameraSettings.MinimumZoom / 2) * CameraSettings.ZoomRotationSpeed / 2, CameraSettings.MaximumZoomDownAngle);
+        }
+        else
+        {
+            correctRotation = Mathf.Min(transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation, CameraSettings.ZoomDownAngle);
+        }
+        transform.rotation = Quaternion.Lerp(transform.rotation,Quaternion.Euler(correctRotation, transform.rotation.eulerAngles.y, 0), Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+    }
+
+    private void ZoomBackToDefault()
+    {
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(CameraSettings.ZoomDownAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z), Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+    }
+
+    public void StartObjectView(Vector3 objectPosition)
+    {
+        CameraControlls.CameraBaseView = true;
+        currentSelectedObjectPosition = new Vector3(objectPosition.x, transform.position.y, objectPosition.z);
+    }
+
+    private void LerpToSelectedObject()
+    {
+        transform.position = Vector3.Lerp(transform.position, new Vector3(currentSelectedObjectPosition.x, transform.position.y, currentSelectedObjectPosition.z), Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(CameraSettings.MaximumZoomDownAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z), Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
     }
 
     #endregion

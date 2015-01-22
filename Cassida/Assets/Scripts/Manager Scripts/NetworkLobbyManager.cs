@@ -83,6 +83,7 @@ public class NetworkLobbyManager : MonoBehaviour
 
     private void OnJoinedLobby()
     {
+        print("asdf");
         var lobbyMenu = GameObject.FindGameObjectWithTag(Tags.MultiplayerLobbyMenu);
         if (lobbyMenu != null)
         {
