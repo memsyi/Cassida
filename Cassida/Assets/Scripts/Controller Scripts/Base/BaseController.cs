@@ -3,6 +3,17 @@ using System.Collections.Generic;
 
 public class BaseValues : IJSON
 {
+    public int HP { get; set; }
+    public int MeeleDefense { get; set; }
+    public int RangeDefense { get; set; }
+
+    public BaseValues(int hp, int meeleDefense, int rangeDefense)
+    {
+        HP = hp;
+        MeeleDefense = meeleDefense;
+        RangeDefense = rangeDefense;
+    }
+
     public BaseValues()
     {
 
@@ -34,12 +45,12 @@ public class Base : IJSON
 
     public bool AllowAddBuilding { get; private set; }
 
-    public Base(int id, int playerID, Position position, BaseValues baseValues)
+    public Base(int id, int playerID, Position position)
     {
         ID = id;
         PlayerID = playerID;
         Position = position;
-        BaseValues = baseValues;
+        BaseValues = new BaseValues(2, 0, 0);
 
         AllowAddBuilding = true;
 
@@ -49,6 +60,24 @@ public class Base : IJSON
     public Base()
     {
 
+    }
+
+    public void BecomeAttacked(int damage)
+    {
+        BaseValues.HP -= damage;
+
+        CheckWhetherBaseIsAlive();
+    }
+
+    private bool CheckWhetherBaseIsAlive()
+    {
+        if (BaseValues.HP > 0)
+        {
+            return true;
+        }
+
+        // TODO destroy...
+        return false;
     }
 
     private void InitiateValues()
@@ -148,6 +177,6 @@ public class BaseController : MonoBehaviour
 
     private void Update()
     {
-        
+
     }
 }

@@ -45,6 +45,9 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
         set { _baseSettings = value; }
     }
 
+    // Selection
+    private bool BaseSelected { get; set; }
+
     // Lists
     public List<Base> BaseList { get; private set; }
 
@@ -70,6 +73,27 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
         CheckForNewBase(photonPlayer);
     }
 
+    #region Base selection
+    public void SelectIfOwnBase(Base baseo)
+    {
+        if (baseo == null || baseo.PlayerID != PlayerManager.Get().Player.ID)
+        {
+            return;
+        }
+        BaseSelected = true;
+        print("Base selected");
+    }
+
+    public void DeselectBase()
+    {
+        if (!BaseSelected)
+        {
+            return;
+        }
+        print("Base deselected");
+    }
+    #endregion
+
     #region Add base
     private void CheckForNewBase(PhotonPlayer photonPlayer)
     {
@@ -80,14 +104,10 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         // TODO genügend Geld?
 
-        print("Check base");
-
         var tileList = TileManager.Get().TileList.FindAll(t => t.ObjectiveType == ObjectiveType.Base
             && !BaseList.Exists(b =>
                 b.Position == t.Position
                 || PlayerManager.Get().GetPlayer(b.PlayerID).PhotonPlayer == photonPlayer));
-
-        print(tileList.Count);
 
         if (tileList == null)
         {
@@ -125,7 +145,7 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         HighestBaseID = id;
 
-        BaseList.Add(new Base(id, playerID, position, new BaseValues()));
+        BaseList.Add(new Base(id, playerID, position));
     }
 
     public void InstantiateAllExistingBasesAtPlayer(PhotonPlayer photonPlayer)

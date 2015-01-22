@@ -49,11 +49,11 @@ public class Unit : IJSON
 
     public bool AllowAttack { get; set; }
 
-    public Unit(int fleetID, int position, UnitValues unitValues)
+    public Unit(int fleetID, int position, UnitType unitType, int strength)
     {
         FleetID = fleetID;
         Position = position;
-        UnitValues = unitValues;
+        UnitValues = new UnitValues(unitType, strength);
         AllowAttack = true;
 
         InitiateValues();

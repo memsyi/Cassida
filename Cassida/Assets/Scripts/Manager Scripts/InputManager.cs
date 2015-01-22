@@ -368,12 +368,11 @@ public class InputManager : Photon.MonoBehaviour
 
         if (enemyTile.FleetID > -1)
         {
-            ownFleet.AttackWithFleet(enemyTile.FleetID);
+            ownFleet.AttackFleetWithFleet(enemyTile.FleetID);
         }
         else if (enemyTile.BaseID > -1)
         {
-            // TODo attack enemy base
-            print("base attacked");
+            ownFleet.AttackBaseWithFleet(enemyTile.BaseID);
         }
 
         if (PlayerManager.Get().CurrentPlayer.PhotonPlayer == PhotonNetwork.player)
@@ -452,7 +451,7 @@ public class InputManager : Photon.MonoBehaviour
 
         var enemyObjectPosition = enemyFleet != null ? enemyFleet.FleetParent.position : enemyBase.BaseParent.position;
 
-        var distanceBetweenObjects = Vector3.Distance(ownFleet.FleetParent.position, enemyObjectPosition);
+        var distanceBetweenObjects = Vector3.Distance(TileManager.Get().GetTile(ownFleet.ID).TileParent.position, enemyObjectPosition);
 
         if (ownUnit.UnitValues.UnitType == UnitType.Meele
             && distanceBetweenObjects <= 2)

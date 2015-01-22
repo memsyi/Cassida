@@ -48,8 +48,6 @@ public class GameManager : Photon.MonoBehaviour, IJSON
 
     public void StartNewGame()
     {
-        print(PlayerManager.Get().PlayerList.Count);
-
         SetUpGameView();
         CheckOfflineMode();
 

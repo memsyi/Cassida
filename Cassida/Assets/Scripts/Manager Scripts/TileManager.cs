@@ -287,10 +287,7 @@ public class TileManager : MonoBehaviour, IJSON
             return;
         }
 
-        if (baseo != null)
-        {
-            // TODO select base
-        }
+        BaseManager.Get().SelectIfOwnBase(baseo);
 
         CurrentSelectedTile = tile;
         SetTileBorderColor(CurrentSelectedTile, TileColor.MouseOverSelectionColor);
@@ -482,6 +479,12 @@ public class TileManager : MonoBehaviour, IJSON
         {
             return;
         }
+
+        if (CurrentSelectedTile.BaseID >= 0)
+        {
+            BaseManager.Get().DeselectBase();
+        }
+
         SetTileBorderColor(CurrentSelectedTile, TileColor.DefaultColor);
         RemoveCurrentSelectionAnimation();
         CurrentSelectedTile = null;

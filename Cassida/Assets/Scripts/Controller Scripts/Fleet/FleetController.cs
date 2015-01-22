@@ -52,13 +52,13 @@ public class Fleet : IJSON
     public bool AllowMovement { get { return MovementPointsLeft > 0; } }
     public bool AllowRotation { get; private set; }
 
-    public Fleet(int id, int player, Position position, FleetValues fleetValues)
+    public Fleet(int id, int player, Position position, FleetType fleetType)
     {
         ID = id;
         PlayerID = player;
         Position = position;
         Rotation = 0;
-        FleetValues = fleetValues;
+        FleetValues = new FleetValues(fleetType);
 
         InitiateValues();
 
@@ -119,9 +119,9 @@ public class Fleet : IJSON
         return UnitList.Find(u => (u.Position + Rotation) % 6 == position);
     }
 
-    public void AttackWithFleet(int enemyFleetID)
+    public void AttackFleetWithFleet(int enemyFleetID)
     {
-        var enemyFleet = FleetManager.Get().FleetList.Find(f => f.ID == enemyFleetID);
+        var enemyFleet = FleetManager.Get().GetFleet(enemyFleetID);
 
         if (enemyFleet == null)
         {
@@ -173,6 +173,50 @@ public class Fleet : IJSON
         }
 
         fleet.BecomeAttacked(attackedUnit, strength);
+    }
+
+    public void AttackBaseWithFleet(int enemyBaseID)
+    {
+        var enemyBase = BaseManager.Get().BaseList.Find(b => b.ID == enemyBaseID);
+
+        if (enemyBase == null)
+        {
+            return;
+        }
+
+        var unitPosition = InputManager.Get().GetOwnUnitPosition(Position, enemyBase.Position);
+        var unit = FindUnit(unitPosition);
+
+        if (unit == null || !unit.AllowAttack)
+        {
+            return;
+        }
+
+        var ownUnitStrength = unit.UnitValues.Strength;
+        var enemyBaseMeeleDefense = enemyBase.BaseValues.MeeleDefense;
+        var enemyBaseRangeDefense = enemyBase.BaseValues.RangeDefense;
+
+        // damage to own unit
+        if (unit.UnitValues.UnitType == UnitType.Meele && enemyBaseMeeleDefense > 0)
+        {
+            AttackUnitOfFleet(this, unit, enemyBaseMeeleDefense);
+        }
+        else if (unit.UnitValues.UnitType == UnitType.Range && enemyBaseRangeDefense > 0)
+        {
+            AttackUnitOfFleet(this, unit, enemyBaseRangeDefense);
+        }
+
+        // damage to enemy base
+        AttackBase(enemyBase, ownUnitStrength);
+    }
+
+    private void AttackBase(Base baseo, int strength)
+    {
+        if (baseo == null)
+        {
+            return;
+        }
+        baseo.BecomeAttacked(strength);
     }
 
     public void BecomeAttacked(Unit attackedUnit, int damage)

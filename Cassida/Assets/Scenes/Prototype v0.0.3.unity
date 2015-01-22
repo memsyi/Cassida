@@ -1249,7 +1249,7 @@ RectTransform:
   m_Children:
   - {fileID: 250856718}
   m_Father: {fileID: 354227424}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 2566, y: -639}
@@ -1672,8 +1672,8 @@ RectTransform:
   - {fileID: 1803213301}
   - {fileID: 1231088067}
   - {fileID: 1962723986}
-  - {fileID: 288511579}
   - {fileID: 2047142081}
+  - {fileID: 288511579}
   - {fileID: 1488333859}
   m_Father: {fileID: 1494825447}
   m_RootOrder: 1
@@ -3937,7 +3937,7 @@ Transform:
   m_PrefabParentObject: {fileID: 400006, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
   m_PrefabInternal: {fileID: 1444095365}
   m_GameObject: {fileID: 999599555}
-  m_LocalRotation: {x: .342020124, y: 0, z: 0, w: .939692616}
+  m_LocalRotation: {x: .4226183, y: 0, z: 0, w: .906307817}
   m_LocalPosition: {x: 0, y: 1.79999995, z: -1.60800004}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -7058,6 +7058,14 @@ Prefab:
       propertyPath: _attackableTileObject
       value: 
       objectReference: {fileID: 400000, guid: 387969e5cc6b9834fa21a0e8e51658ba, type: 2}
+    - target: {fileID: 400006, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: .4226183
+      objectReference: {fileID: 0}
+    - target: {fileID: 400006, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: .906307817
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
   m_RootGameObject: {fileID: 1924779991}
@@ -10658,7 +10666,7 @@ RectTransform:
   m_Children:
   - {fileID: 1132232249}
   m_Father: {fileID: 354227424}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 950, y: -1591}
