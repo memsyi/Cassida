@@ -2731,6 +2731,7 @@ MonoBehaviour:
     _allowRotation: 1
     _allowUpDownRotation: 0
     _allowZoomRotation: 1
+    _zoomToMousePosition: 1
     _cameraBaseView: 0
   _cameraKeys:
     _ownForwardKey: w
@@ -2764,7 +2765,7 @@ MonoBehaviour:
     _zoomDownAngle: 40
     _maximumZoomDownAngle: 70
     _heightMultiplier: 1
-    _lerpBackZoomSpeed: 2
+    _lerpBackZoomSpeed: 3
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1

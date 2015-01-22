@@ -28,6 +28,7 @@ public class SettingsCameraControlls
         _allowRotation = true,
         _allowUpDownRotation = true,
         _allowZoomRotation = true,
+        _zoomToMousePosition = true,
         _cameraBaseView = false;
 
     #region Controlls
@@ -91,6 +92,11 @@ public class SettingsCameraControlls
     {
         get { return _allowZoomRotation; }
         set { _allowZoomRotation = value; }
+    }
+    public bool ZoomToMousePosition
+    {
+        get { return _zoomToMousePosition; }
+        set { _zoomToMousePosition = value; }
     }
     public bool CameraBaseView
     {
@@ -533,6 +539,8 @@ public class CameraController : MonoBehaviour
         }
 
         // Zoom
+        //if (Input.GetAxis("Mouse ScrollWheel") != 0) 
+
         Zoom(Input.GetAxis("Mouse ScrollWheel"));
 
         // Border Crossing
@@ -779,16 +787,53 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private void Zoom(float zoom)
     {
-        if (transform.rotation.eulerAngles.x > CameraSettings.ZoomDownAngle
-         && ((zoom > 0 && transform.position.y > CameraSettings.MaximumZoom)
-         || (zoom < 0 && transform.position.y < CameraSettings.MinimumZoom)))
+        if (CameraControlls.ZoomToMousePosition)
         {
-            transform.position += transform.forward * CameraSettings.ZoomSpeed * HeightMultiplier * zoom;
+            Vector3 zoomDirection = new Vector3();
+            if (zoom > 0 && transform.position.y > CameraSettings.MaximumZoom)
+            {
+                zoomDirection = new Vector3(MouseController.Get().MousePositionOnMap.x, 0, MouseController.Get().MousePositionOnMap.y);
+                print("down" + zoomDirection);
+                transform.position = Vector3.Lerp(transform.position, zoomDirection, Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+            }
+            else if (zoom < 0 && transform.position.y < CameraSettings.MinimumZoom)
+            {
+                zoomDirection = new Vector3(-MouseController.Get().MousePositionOnMap.x, Mathf.Max(transform.position.y + 5, transform.position.y * 2), -MouseController.Get().MousePositionOnMap.y);
+                print("up" + zoomDirection);
+                transform.position = Vector3.Lerp(transform.position, zoomDirection, Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+            }
         }
         else
         {
-            transform.position += Vector3.down * CameraSettings.ZoomSpeed * HeightMultiplier * zoom;
+            if (transform.rotation.eulerAngles.x > CameraSettings.ZoomDownAngle
+         && ((zoom > 0 && transform.position.y > CameraSettings.MaximumZoom)
+         || (zoom < 0 && transform.position.y < CameraSettings.MinimumZoom)))
+            {
+                transform.position += transform.forward * CameraSettings.ZoomSpeed * HeightMultiplier * zoom;
+                //transform.position += MouseController.Get().MousePositionOnMap;
+                print("forward: " + MouseController.Get().MousePositionOnMap);
+            }
+            else
+            {
+                transform.position += Vector3.down * CameraSettings.ZoomSpeed * HeightMultiplier * zoom;
+                print(Vector3.down + " : " + zoom);
+            }
         }
+
+        //Vector3 zoomDirection = new Vector3();
+
+        //if (zoom > 0 && transform.position.y > CameraSettings.MaximumZoom)
+        //{
+        //    zoomDirection = new Vector3(MouseController.Get().MousePositionOnMap.x, 0, MouseController.Get().MousePositionOnMap.y).normalized;
+        //    print("down" + zoomDirection);
+        //    transform.position = Vector3.Lerp(transform.position, zoomDirection, Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+        //}
+        //else if (zoom < 0 && transform.position.y < CameraSettings.MinimumZoom)
+        //{
+        //    zoomDirection = new Vector3(-MouseController.Get().MousePositionOnMap.x, CameraSettings.MinimumZoom, -MouseController.Get().MousePositionOnMap.y).normalized;
+        //    print("up" + zoomDirection);
+        //    transform.position = Vector3.Lerp(transform.position, transform.position + zoomDirection, Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+        //}
 
 
         if (transform.position.y < CameraSettings.MaximumZoom)
@@ -798,19 +843,6 @@ public class CameraController : MonoBehaviour
         else if (transform.position.y > CameraSettings.MinimumZoom)
         {
             transform.position = new Vector3(transform.position.x, CameraSettings.MinimumZoom, transform.position.z);
-        }
-
-        if (CameraControlls.AllowZoomRation && !CameraControlls.CameraBaseView)
-        {
-            SetCorrectCameraZoom();
-        }
-        else if (transform.rotation.x < CameraSettings.ZoomDownAngle && !CameraControlls.CameraBaseView)
-        {
-            ZoomBackToDefault();
-        }
-        else if (CameraControlls.CameraBaseView && (transform.rotation.x < CameraSettings.MaximumZoomDownAngle || Vector3.Distance(transform.position, currentSelectedObjectPosition) > 0.01f))
-        {
-            LerpToSelectedObject();
         }
     }
 
@@ -827,7 +859,24 @@ public class CameraController : MonoBehaviour
         {
             correctRotation = Mathf.Min(transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation, CameraSettings.ZoomDownAngle);
         }
-        transform.rotation = Quaternion.Lerp(transform.rotation,Quaternion.Euler(correctRotation, transform.rotation.eulerAngles.y, 0), Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(correctRotation, transform.rotation.eulerAngles.y, 0), Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+    }
+
+    private void SetCorrectCameraRotation()
+    {
+        if (CameraControlls.AllowZoomRation && !CameraControlls.CameraBaseView)
+        {
+            SetCorrectCameraZoom();
+
+        }
+        else if (transform.rotation.x < CameraSettings.ZoomDownAngle && !CameraControlls.CameraBaseView)
+        {
+            ZoomBackToDefault();
+        }
+        else if (CameraControlls.CameraBaseView && (transform.rotation.x < CameraSettings.MaximumZoomDownAngle || Vector3.Distance(transform.position, currentSelectedObjectPosition) > 0.01f))
+        {
+            LerpToSelectedObject();
+        }
     }
 
     private void ZoomBackToDefault()
@@ -878,6 +927,7 @@ public class CameraController : MonoBehaviour
     {
         HandleKeyboardInput();
         HandleMouseInput();
+        SetCorrectCameraRotation();
     }
 
     private static CameraController _instance = null;
