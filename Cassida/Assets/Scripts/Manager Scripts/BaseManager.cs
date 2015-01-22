@@ -7,11 +7,10 @@ public struct BaseSettings
     [SerializeField]
     private Transform
         _mainBuildingObject;
-
+        
     public Transform MainBuildingObject
     {
         get { return _mainBuildingObject; }
-        set { _mainBuildingObject = value; }
     }
 }
 
@@ -20,7 +19,22 @@ public struct BuildingSettings
 {
     [SerializeField]
     private Transform
-        _foo;
+        _baseDefense,
+        _engeneeringBay,
+        _commandCenter;
+
+    public Transform CommandCenter
+    {
+        get { return _commandCenter; }
+    }
+    public Transform EngeneeringBay
+    {
+        get { return _engeneeringBay; }
+    }
+    public Transform BaseDefense
+    {
+        get { return _baseDefense; }
+    }
 }
 
 [RequireComponent(typeof(PhotonView))]
@@ -36,20 +50,20 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
     public BuildingSettings BuildingSettings
     {
         get { return _buildingSettings; }
-        set { _buildingSettings = value; }
     }
 
     public BaseSettings BaseSettings
     {
         get { return _baseSettings; }
-        set { _baseSettings = value; }
     }
 
     // Selection
     private bool BaseSelected { get; set; }
 
+
     // Lists
     public List<Base> BaseList { get; private set; }
+    public Base OwnBase { get { return GetBase(PlayerManager.Get().Player.ID); } }
 
     // Base ID
     private int _highestBaseID = 0;
@@ -59,6 +73,25 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
         set { if (PhotonNetwork.isMasterClient) _highestBaseID = value; }
     }
     #endregion
+
+    public void AddNewBuilding(int buildingType)
+    {
+        if (!BaseSelected || !OwnBase.AllowAddBuilding)
+        {
+            return;
+        }
+
+        OwnBase.AddBuilding((BuildingType)buildingType);
+    }
+    public void AddNewFleet() // TODO add blueprint info
+    {
+        if (!BaseSelected)
+        {
+            return;
+        }
+
+        print("add fleet");
+    }
 
     public void InstantiateBasesForAllPlayer()
     {
@@ -76,7 +109,8 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
     #region Base selection
     public void SelectIfOwnBase(Base baseo)
     {
-        if (baseo == null || baseo.PlayerID != PlayerManager.Get().Player.ID)
+        print(baseo.ID +" " + OwnBase.ID);
+        if (baseo == null || baseo.ID != OwnBase.ID)
         {
             return;
         }
@@ -90,6 +124,7 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
         {
             return;
         }
+        BaseSelected = false;
         print("Base deselected");
     }
     #endregion
@@ -163,7 +198,12 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
     }
     #endregion
 
-    #region Destroy bases
+    #region Destroy and reset bases
+    public void ResetAlreadyBuildBuildingOfOwnBase()
+    {
+        OwnBase.ResetAlreadyBuildBuilding();
+    }
+
     public void DestroyBase(Base baseo)
     {
         Destroy(baseo.BaseParent.gameObject);
@@ -202,9 +242,29 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
         return BaseList.Find(b => b.Position == position);
     }
 
+    public void AddEndTurnEvents()
+    {
+        // Add events
+        PlayerManager.Get().EndTurnEvent += new EndTurnHandler(ResetAlreadyBuildBuildingOfOwnBase);
+    }
+
+    private void OnGUI()
+    {
+        if (!BaseSelected || !OwnBase.AllowAddBuilding)
+        {
+            return;
+        }
+
+        if(GUI.Button(new Rect(500, 100, 150, 150), "Add Building"))
+        {
+            AddNewBuilding(0);
+        }
+    }
+
     private void Init()
     {
         BaseList = new List<Base>();
+        AddEndTurnEvents();
     }
 
     private void Start()

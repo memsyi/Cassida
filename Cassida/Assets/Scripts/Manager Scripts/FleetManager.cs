@@ -306,11 +306,11 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         PlayerManager.Get().EndTurnEvent += new EndTurnHandler(ResetMovementOfAllFleets);
     }
 
-    public void RemoveEndTurnEvents()
-    {
-        // Remove events
-        PlayerManager.Get().EndTurnEvent -= new EndTurnHandler(ResetMovementOfAllFleets);
-    }
+    //public void RemoveEndTurnEvents()
+    //{
+    //    // Remove events
+    //    PlayerManager.Get().EndTurnEvent -= new EndTurnHandler(ResetMovementOfAllFleets);
+    //}
 
     private void Init()
     {

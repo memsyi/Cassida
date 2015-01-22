@@ -52,10 +52,10 @@ public class Fleet : IJSON
     public bool AllowMovement { get { return MovementPointsLeft > 0; } }
     public bool AllowRotation { get; private set; }
 
-    public Fleet(int id, int player, Position position, FleetType fleetType)
+    public Fleet(int id, int playerID, Position position, FleetType fleetType)
     {
         ID = id;
-        PlayerID = player;
+        PlayerID = playerID;
         Position = position;
         Rotation = 0;
         FleetValues = new FleetValues(fleetType);
@@ -290,7 +290,6 @@ public class FleetController : MonoBehaviour
     public static Transform InstatiateParentObject(Position position, int rotation, string playerName)
     {
         var fleetParent = new GameObject("Fleet of: " + playerName).transform;
-        fleetParent.position = TileManager.Get().TileList.Find(t => t.Position == position).TileParent.position;
         fleetParent.position = TileManager.Get().GetTile(position).TileParent.position;
         fleetParent.rotation = Quaternion.AngleAxis(rotation * 60f, Vector3.up);
         fleetParent.SetParent(GameObject.Find(Tags.Fleets).transform);

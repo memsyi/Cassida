@@ -28,7 +28,8 @@ public struct JSONs
 
     public const string BaseValues = "BaseValues";
     public const string Buildings = "Buildings";
-    public const string AllowAddBuilding = "AllowAddBuilding";
+    public const string BuildingType = "BuildingType";
+    public const string AlreadyBuildBuilding = "AlreadyBuildBuilding";
     
     public const string Fleets = "Fleets";
     public const string Position = "Position";

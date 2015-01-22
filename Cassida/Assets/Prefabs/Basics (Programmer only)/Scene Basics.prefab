@@ -92,6 +92,7 @@ GameObject:
   - 114: {fileID: 11400384}
   - 114: {fileID: 11400356}
   - 114: {fileID: 11400354}
+  - 114: {fileID: 11400352}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Manager
@@ -2064,7 +2065,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100006}
-  m_LocalRotation: {x: .342020124, y: 0, z: 0, w: .939692616}
+  m_LocalRotation: {x: .4226183, y: 0, z: 0, w: .906307817}
   m_LocalPosition: {x: 0, y: 1.79999995, z: -1.60800004}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -2181,7 +2182,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 4294967039
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -2710,7 +2711,8 @@ MonoBehaviour:
     _allowOwnKeys: 0
     _allowMovement: 1
     _allowRotation: 1
-    _allowUpDownRotation: 1
+    _allowUpDownRotation: 0
+    _allowZoomRotation: 1
   _cameraKeys:
     _ownForwardKey: w
     _ownLeftKey: a
@@ -2731,13 +2733,15 @@ MonoBehaviour:
       height: 100
     _borderStrength: 5
   _cameraSettings:
-    _movementSpeed: .200000003
-    _rotationSpeed: .5
-    _zoomSpeed: 1
-    _buttonSpeed: 1
-    _mouseButtonSpeed: 1
+    _movementSpeed: .5
+    _rotationSpeed: 1.29999995
+    _zoomSpeed: 3
+    _buttonSpeed: 1.29999995
+    _mouseButtonSpeed: 5
     _minimumZoom: 20
     _maximumZoom: .75
+    _minimumZoomRotation: -.75
+    _zoomRotationSpeed: 12
     _zoomDownAngle: 40
     _heightMultiplier: 1
 --- !u!114 &11400002
@@ -3041,6 +3045,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _moveableTileObject: {fileID: 400000, guid: 3ff84fa9b225f0440bfc136ded0e0a32, type: 2}
+  _attackableTileObject: {fileID: 400000, guid: 387969e5cc6b9834fa21a0e8e51658ba,
+    type: 2}
 --- !u!114 &11400034
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3102,7 +3108,9 @@ MonoBehaviour:
     _mainBuildingObject: {fileID: 400010, guid: b1f580a69da4d9245b21128dab4ca0c9,
       type: 2}
   _buildingSettings:
-    _foo: {fileID: 0}
+    _baseDefense: {fileID: 400002, guid: a214a8e0dc61e2f4c91cdc9d54e6d045, type: 2}
+    _engeneeringBay: {fileID: 0}
+    _commandCenter: {fileID: 0}
 --- !u!114 &11400042
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3779,7 +3787,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 11400022}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -4260,8 +4268,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: StartNewGame
+      - m_Target: {fileID: 11400354}
+        m_MethodName: StartGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4478,7 +4486,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 11400352}
         m_MethodName: DeletSelectedProfile
         m_Mode: 1
         m_Arguments:
@@ -4931,7 +4939,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 11400022}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5175,7 +5183,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 11400022}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5392,7 +5400,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 11400022}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -5996,7 +6004,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 11400352}
         m_MethodName: GetProfileName
         m_Mode: 2
         m_Arguments:
@@ -6177,7 +6185,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 11400022}
         m_MethodName: ShowMenu
         m_Mode: 2
         m_Arguments:
@@ -6960,6 +6968,21 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &11400352
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad3beecfacf693b44a940334b5172a79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  errorMassage: {fileID: 11400080}
+  profileStyle: {fileID: 11400002, guid: 276ea4075da0d8b4786ee1ead72eb334, type: 2}
+  profilesPosition: {fileID: 22400032}
+  deleteProfileButton: {fileID: 11400152}
 --- !u!114 &11400354
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -8062,10 +8085,10 @@ RectTransform:
   - {fileID: 22400086}
   - {fileID: 22400156}
   - {fileID: 22400134}
+  - {fileID: 22400194}
   - {fileID: 22400144}
   - {fileID: 22400050}
   - {fileID: 22400136}
-  - {fileID: 22400194}
   m_Father: {fileID: 400018}
   m_RootOrder: 1
   m_AnchorMin: {x: 0, y: 0}
@@ -8302,7 +8325,7 @@ RectTransform:
   m_Children:
   - {fileID: 22400016}
   m_Father: {fileID: 22400024}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 2566, y: -639}
@@ -9076,7 +9099,7 @@ RectTransform:
   m_Children:
   - {fileID: 22400124}
   m_Father: {fileID: 22400024}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 2562, y: -1596}
@@ -9148,7 +9171,7 @@ RectTransform:
   m_Children:
   - {fileID: 22400122}
   m_Father: {fileID: 22400024}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 950, y: -1591}
@@ -9585,13 +9608,13 @@ RectTransform:
   m_GameObject: {fileID: 100216}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: .999980032, y: .999980032, z: .999980032}
+  m_LocalScale: {x: .999980092, y: .999980092, z: .999980092}
   m_Children:
   - {fileID: 22400198}
   - {fileID: 22400126}
   - {fileID: 22400158}
   m_Father: {fileID: 22400024}
-  m_RootOrder: 8
+  m_RootOrder: 5
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -648, y: -2535}

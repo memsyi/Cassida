@@ -7066,6 +7066,10 @@ Prefab:
       propertyPath: m_LocalRotation.w
       value: .906307817
       objectReference: {fileID: 0}
+    - target: {fileID: 11400040, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _buildingSettings._baseDefense
+      value: 
+      objectReference: {fileID: 400002, guid: a214a8e0dc61e2f4c91cdc9d54e6d045, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
   m_RootGameObject: {fileID: 1924779991}
@@ -7643,7 +7647,9 @@ MonoBehaviour:
     _mainBuildingObject: {fileID: 400010, guid: b1f580a69da4d9245b21128dab4ca0c9,
       type: 2}
   _buildingSettings:
-    _foo: {fileID: 0}
+    _baseDefense: {fileID: 400002, guid: a214a8e0dc61e2f4c91cdc9d54e6d045, type: 2}
+    _engeneeringBay: {fileID: 0}
+    _commandCenter: {fileID: 0}
 --- !u!114 &1583209385
 MonoBehaviour:
   m_ObjectHideFlags: 0

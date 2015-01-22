@@ -34,7 +34,7 @@ public class BaseValues : IJSON
 
 public class Base : IJSON
 {
-    public int ID { get; private set; }
+    public int ID { get; protected set; }
     public int PlayerID { get; private set; }
     public Position Position { get; private set; }
     public BaseValues BaseValues { get; private set; }
@@ -42,8 +42,12 @@ public class Base : IJSON
 
     public Transform BaseParent { get; protected set; }
     public BaseController BaseController { get; protected set; }
+    private List<Transform> ModulPositions { get; set; }
 
-    public bool AllowAddBuilding { get; private set; }
+    private bool AlreadyBuildBuilding { get; set; }
+    public bool AllowAddBuilding { get { return !AlreadyBuildBuilding && BuildingList.Count < ModulPositions.Count; } }
+
+    public int GoldPerRound { get { return 0; } }
 
     public Base(int id, int playerID, Position position)
     {
@@ -52,7 +56,7 @@ public class Base : IJSON
         Position = position;
         BaseValues = new BaseValues(2, 0, 0);
 
-        AllowAddBuilding = true;
+        AlreadyBuildBuilding = false;
 
         InitiateValues();
     }
@@ -60,6 +64,42 @@ public class Base : IJSON
     public Base()
     {
 
+    }
+
+    public void AddBuilding(BuildingType buildingType)
+    {
+        if (!AllowAddBuilding)
+        {
+            return;
+        }
+
+        BuildingList.Add(new Building(PlayerID, buildingType));
+        AlreadyBuildBuilding = true;
+    }
+
+    public Transform GetFreeModulPosition()
+    {
+        if (!AllowAddBuilding)
+        {
+            return null;
+        }
+
+        Transform modulPosition = null;
+        while (modulPosition == null)
+        {
+            var randomModulPosition = Random.Range(0, ModulPositions.Count);
+            if (ModulPositions[randomModulPosition].childCount == 0)
+            {
+                modulPosition = ModulPositions[randomModulPosition];
+            }
+        }
+
+        return modulPosition;
+    }
+
+    public void ResetAlreadyBuildBuilding()
+    {
+        AlreadyBuildBuilding = false;
     }
 
     public void BecomeAttacked(int damage)
@@ -87,7 +127,10 @@ public class Base : IJSON
         BaseController = BaseParent.gameObject.AddComponent<BaseController>();
         BuildingList = new List<Building>();
 
-        BaseController.InstantiateBase(player.Name, player.Color);
+        BaseController.InstantiateBase(player.Color);
+
+        ModulPositions = new List<Transform>(BaseParent.GetComponentsInChildren<Transform>()).FindAll(t => t.parent.tag == Tags.ModulPositionObjects);
+        Debug.Log(ModulPositions.Count);
     }
 
     public JSONObject ToJSON()
@@ -98,7 +141,7 @@ public class Base : IJSON
         jsonObject[JSONs.Position] = Position.ToJSON();
         jsonObject[JSONs.BaseValues] = BaseValues.ToJSON();
         jsonObject[JSONs.Buildings] = JSONObject.CreateList(BuildingList);
-        jsonObject[JSONs.AllowAddBuilding] = new JSONObject(AllowAddBuilding);
+        jsonObject[JSONs.AlreadyBuildBuilding] = new JSONObject(AllowAddBuilding);
         return jsonObject;
     }
 
@@ -109,7 +152,7 @@ public class Base : IJSON
         Position = new Position(jsonObject[JSONs.Position]);
         BaseValues = new BaseValues();
         BaseValues.FromJSON(jsonObject[JSONs.FleetValues]);
-        AllowAddBuilding = (bool)jsonObject[JSONs.AllowAddBuilding];
+        AlreadyBuildBuilding = (bool)jsonObject[JSONs.AlreadyBuildBuilding];
 
         InitiateValues();
         BaseManager.Get().BaseList.Add(this);
@@ -133,19 +176,19 @@ public class BaseController : MonoBehaviour
         return fleetParent;
     }
 
-    public void InstantiateBase(string playerName, Color color)
+    public void InstantiateBase(Color color)
     {
-        InstantiateBaseObject(BaseManager.Get().BaseSettings.MainBuildingObject, playerName);
+        InstantiateBaseObject(BaseManager.Get().BaseSettings.MainBuildingObject);
 
         Color = color;
     }
 
-    private void InstantiateBaseObject(Transform model, string playerName)
+    private void InstantiateBaseObject(Transform model)
     {
         // Instantiate base
         BaseObject = Instantiate(model, transform.position, transform.rotation) as Transform;
 
-        BaseObject.name = "Base Object: " + playerName;
+        BaseObject.name = "Base Object";
         BaseObject.SetParent(transform);
     }
     private void SetColorOfBase(Color color)
