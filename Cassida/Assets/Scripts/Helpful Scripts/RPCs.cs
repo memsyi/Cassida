@@ -12,6 +12,7 @@ public struct RPCs
     public const string SetPlayerInformation = "SetPlayerInformation";
     public const string SetPlayerColor = "SetPlayerColor";
 
+    public const string StartGame = "StartGame";
     public const string AskMasterToJoinGame = "AskMasterToJoinGame";
     public const string AskMasterToChangeColor = "AskMasterToChangeColor"; 
 
@@ -26,8 +27,8 @@ public struct RPCs
     public const string MoveFleet = "MoveFleet";
     public const string AskForRotateFleet = "AskForRotateFleet";
     public const string RotateFleet = "RotateFleet";
-    public const string AskForAttackFleet = "AskForAttackFleet";
-    public const string AttackFleet = "AttackFleet";
+    public const string AskForAttack = "AskForAttack";
+    public const string AttackEnemy = "AttackEnemy";
 
     public const string ClearAndDestroyAllOfDisconnectedPlayer = "ClearAndDestroyAllOfDisconnectedPlayer";
 }

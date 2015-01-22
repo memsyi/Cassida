@@ -25,6 +25,11 @@ public struct JSONs
     public const string Tiles = "Tiles";
     public const string TerrainType = "TerrainType";
     public const string ObjectiveType = "ObjectiveType";
+
+    public const string BaseValues = "BaseValues";
+    public const string Buildings = "Buildings";
+    public const string BuildingType = "BuildingType";
+    public const string AlreadyBuildBuilding = "AlreadyBuildBuilding";
     
     public const string Fleets = "Fleets";
     public const string Position = "Position";

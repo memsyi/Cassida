@@ -132,6 +132,7 @@ public class GameManager : Photon.MonoBehaviour, IJSON
         }
 
         FleetManager.Get().DestroyAllFleetsOfPlayer(playerID);
+        InputManager.Get().CheckShowActionArea();
     }
     #endregion
 
@@ -157,7 +158,11 @@ public class GameManager : Photon.MonoBehaviour, IJSON
 
     private void SetUpGameView()
     {
-        GameObject.FindGameObjectWithTag(Tags.Menu).SetActive(false);
+        var menu = GameObject.FindGameObjectWithTag(Tags.Menu);
+        if (menu != null)
+        {
+            menu.SetActive(false);
+        }
         CameraController.Get().enabled = true;
     }
 
@@ -174,7 +179,7 @@ public class GameManager : Photon.MonoBehaviour, IJSON
         }
         if (PhotonNetwork.player == PlayerManager.Get().CurrentPlayer.PhotonPlayer)
         {
-            if (GUI.Button(new Rect(100, 0, 100, 20), "EndTurn"))
+            if (GUI.Button(new Rect(0, 0, 100, 20), "EndTurn"))
             {
                 PlayerManager.Get().EndTurn();
             }

@@ -41,7 +41,11 @@ public class MenuManager : MonoBehaviour
 
     private void Init()
     {
-        ChangeMenu(GameObject.FindGameObjectWithTag(Tags.MainMenu).GetComponent<MenuController>());
+        var mainMenu = GameObject.FindGameObjectWithTag(Tags.MainMenu);
+        if (mainMenu != null)
+        {
+            ChangeMenu(mainMenu.GetComponent<MenuController>());
+        }
         CameraController.Get().enabled = false;
     }
 

@@ -7,11 +7,10 @@ public struct BaseSettings
     [SerializeField]
     private Transform
         _mainBuildingObject;
-
+        
     public Transform MainBuildingObject
     {
         get { return _mainBuildingObject; }
-        set { _mainBuildingObject = value; }
     }
 }
 
@@ -20,7 +19,22 @@ public struct BuildingSettings
 {
     [SerializeField]
     private Transform
-        _foo;
+        _baseDefense,
+        _engeneeringBay,
+        _commandCenter;
+
+    public Transform CommandCenter
+    {
+        get { return _commandCenter; }
+    }
+    public Transform EngeneeringBay
+    {
+        get { return _engeneeringBay; }
+    }
+    public Transform BaseDefense
+    {
+        get { return _baseDefense; }
+    }
 }
 
 [RequireComponent(typeof(PhotonView))]
@@ -36,17 +50,20 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
     public BuildingSettings BuildingSettings
     {
         get { return _buildingSettings; }
-        set { _buildingSettings = value; }
     }
 
     public BaseSettings BaseSettings
     {
         get { return _baseSettings; }
-        set { _baseSettings = value; }
     }
+
+    // Selection
+    private bool BaseSelected { get; set; }
+
 
     // Lists
     public List<Base> BaseList { get; private set; }
+    public Base OwnBase { get { return GetBase(PlayerManager.Get().Player.ID); } }
 
     // Base ID
     private int _highestBaseID = 0;
@@ -56,6 +73,25 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
         set { if (PhotonNetwork.isMasterClient) _highestBaseID = value; }
     }
     #endregion
+
+    public void AddNewBuilding(int buildingType)
+    {
+        if (!BaseSelected || !OwnBase.AllowAddBuilding)
+        {
+            return;
+        }
+
+        OwnBase.AddBuilding((BuildingType)buildingType);
+    }
+    public void AddNewFleet() // TODO add blueprint info
+    {
+        if (!BaseSelected)
+        {
+            return;
+        }
+
+        print("add fleet");
+    }
 
     public void InstantiateBasesForAllPlayer()
     {
@@ -70,7 +106,30 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
         CheckForNewBase(photonPlayer);
     }
 
-    #region Add fleet
+    #region Base selection
+    public void SelectIfOwnBase(Base baseo)
+    {
+        print(baseo.ID +" " + OwnBase.ID);
+        if (baseo == null || baseo.ID != OwnBase.ID)
+        {
+            return;
+        }
+        BaseSelected = true;
+        print("Base selected");
+    }
+
+    public void DeselectBase()
+    {
+        if (!BaseSelected)
+        {
+            return;
+        }
+        BaseSelected = false;
+        print("Base deselected");
+    }
+    #endregion
+
+    #region Add base
     private void CheckForNewBase(PhotonPlayer photonPlayer)
     {
         if (!PhotonNetwork.isMasterClient)
@@ -80,10 +139,10 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         // TODO genügend Geld?
 
-        var tileList = TileManager.Get().TileList.FindAll(t => t.ObjectiveType == ObjectiveType.Base 
-            && !BaseList.Exists(b => 
+        var tileList = TileManager.Get().TileList.FindAll(t => t.ObjectiveType == ObjectiveType.Base
+            && !BaseList.Exists(b =>
                 b.Position == t.Position
-                && b.Player.PhotonPlayer == photonPlayer));
+                || PlayerManager.Get().GetPlayer(b.PlayerID).PhotonPlayer == photonPlayer));
 
         if (tileList == null)
         {
@@ -97,6 +156,8 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
+        var player = PlayerManager.Get().GetPlayer(photonPlayer);
+
         HighestBaseID++;
 
         if (BaseList.Exists(f => f.ID == HighestBaseID))
@@ -104,11 +165,11 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        photonView.RPC(RPCs.AddNewBase, PhotonTargets.All, HighestBaseID, photonPlayer, tile.Position.X, tile.Position.Y);
+        photonView.RPC(RPCs.AddNewBase, PhotonTargets.All, HighestBaseID, player.ID, tile.Position.X, tile.Position.Y);
     }
 
     [RPC]
-    private void AddNewBase(int ID, PhotonPlayer photonPlayer, int positionX, int positionY, PhotonMessageInfo info)
+    private void AddNewBase(int id, int playerID, int positionX, int positionY, PhotonMessageInfo info)
     {
         if (!info.sender.isMasterClient)
         {
@@ -117,11 +178,9 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
 
         var position = new Position(positionX, positionY);
 
-        HighestBaseID = ID;
+        HighestBaseID = id;
 
-        var player = PlayerManager.Get().GetPlayer(photonPlayer);
-
-        BaseList.Add(new Base(ID, player, position, new BaseValues()));
+        BaseList.Add(new Base(id, playerID, position));
     }
 
     public void InstantiateAllExistingBasesAtPlayer(PhotonPlayer photonPlayer)
@@ -130,17 +189,82 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
         {
             return;
         }
-        
-        for(int i = BaseList.Count -1; i > 0; i--)
+
+        for (int i = BaseList.Count - 1; i > 0; i--)
         {
-            photonView.RPC(RPCs.AddNewBase, photonPlayer, BaseList[i].ID, BaseList[i].Player.PhotonPlayer, BaseList[i].Position.X, BaseList[i].Position.Y);
+            var baseo = BaseList[i];
+            photonView.RPC(RPCs.AddNewBase, photonPlayer, baseo.ID, baseo.PlayerID, baseo.Position.X, baseo.Position.Y);
         }
     }
     #endregion
 
+    #region Destroy and reset bases
+    public void ResetAlreadyBuildBuildingOfOwnBase()
+    {
+        OwnBase.ResetAlreadyBuildBuilding();
+    }
+
+    public void DestroyBase(Base baseo)
+    {
+        Destroy(baseo.BaseParent.gameObject);
+
+        TileManager.Get().ResetHighlightedTile();
+
+        BaseList.Remove(baseo);
+    }
+
+    public void DestroyBaseOfPlayer(int playerID)
+    {
+        var baseo = GetBase(playerID);
+        if (baseo == null)
+        {
+            return;
+        }
+
+        DestroyBase(baseo);
+    }
+    public void DestroyAllBases()
+    {
+        foreach (var baseo in BaseList)
+        {
+            DestroyBase(baseo);
+        }
+        BaseList.Clear();
+    }
+    #endregion
+
+    public Base GetBase(int playerID)
+    {
+        return BaseList.Find(b => b.PlayerID == playerID);
+    }
+    public Base GetBase(Position position)
+    {
+        return BaseList.Find(b => b.Position == position);
+    }
+
+    public void AddEndTurnEvents()
+    {
+        // Add events
+        PlayerManager.Get().EndTurnEvent += new EndTurnHandler(ResetAlreadyBuildBuildingOfOwnBase);
+    }
+
+    private void OnGUI()
+    {
+        if (!BaseSelected || !OwnBase.AllowAddBuilding)
+        {
+            return;
+        }
+
+        if(GUI.Button(new Rect(500, 100, 150, 150), "Add Building"))
+        {
+            AddNewBuilding(0);
+        }
+    }
+
     private void Init()
     {
         BaseList = new List<Base>();
+        AddEndTurnEvents();
     }
 
     private void Start()
@@ -182,17 +306,14 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-        var baseObjects = JSONObject.arr;
-        foreach (var baseo in BaseList)
-        {
-            baseObjects.Add(baseo.ToJSON());
-        }
-        jsonObject[JSONs.Fleets] = baseObjects;
+        jsonObject[JSONs.Bases] = JSONObject.CreateList(BaseList);
         return jsonObject;
     }
 
-    public void FromJSON(JSONObject o)
+    public void FromJSON(JSONObject jsonObject)
     {
-        throw new System.NotImplementedException();
+        DestroyAllBases();
+
+        JSONObject.ReadList<Fleet>(jsonObject[JSONs.Bases]);
     }
 }

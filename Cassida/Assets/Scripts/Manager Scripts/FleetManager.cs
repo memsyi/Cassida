@@ -165,7 +165,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         var position = new Position(positionX, positionY);
         var player = PlayerManager.Get().GetPlayer(playerID);
 
-        AddFleet(new Fleet(id, player.ID, position, new FleetValues((FleetType)fleetType)));
+        AddFleet(new Fleet(id, player.ID, position, (FleetType)fleetType));
     }
 
     public void AddFleet(Fleet fleet)
@@ -240,7 +240,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        fleet.UnitList.Add(new Unit(fleet.ID, position, new UnitValues((UnitType)unitType, strength)));
+        fleet.UnitList.Add(new Unit(fleet.ID, position, (UnitType)unitType, strength));
     }
     #endregion
 
@@ -306,11 +306,11 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         PlayerManager.Get().EndTurnEvent += new EndTurnHandler(ResetMovementOfAllFleets);
     }
 
-    public void RemoveEndTurnEvents()
-    {
-        // Remove events
-        PlayerManager.Get().EndTurnEvent -= new EndTurnHandler(ResetMovementOfAllFleets);
-    }
+    //public void RemoveEndTurnEvents()
+    //{
+    //    // Remove events
+    //    PlayerManager.Get().EndTurnEvent -= new EndTurnHandler(ResetMovementOfAllFleets);
+    //}
 
     private void Init()
     {

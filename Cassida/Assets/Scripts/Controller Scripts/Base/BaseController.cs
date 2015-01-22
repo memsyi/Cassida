@@ -3,6 +3,17 @@ using System.Collections.Generic;
 
 public class BaseValues : IJSON
 {
+    public int HP { get; set; }
+    public int MeeleDefense { get; set; }
+    public int RangeDefense { get; set; }
+
+    public BaseValues(int hp, int meeleDefense, int rangeDefense)
+    {
+        HP = hp;
+        MeeleDefense = meeleDefense;
+        RangeDefense = rangeDefense;
+    }
+
     public BaseValues()
     {
 
@@ -15,7 +26,7 @@ public class BaseValues : IJSON
         return jsonObject;
     }
 
-    public void FromJSON(JSONObject o)
+    public void FromJSON(JSONObject jsonObject)
     {
         throw new System.NotImplementedException();
     }
@@ -23,44 +34,130 @@ public class BaseValues : IJSON
 
 public class Base : IJSON
 {
-    public int ID { get; private set; }
-    public Player Player { get; private set; }
+    public int ID { get; protected set; }
+    public int PlayerID { get; private set; }
     public Position Position { get; private set; }
     public BaseValues BaseValues { get; private set; }
-    private Building[] Buildings { get; set; }
+    private List<Building> BuildingList { get; set; }
 
     public Transform BaseParent { get; protected set; }
     public BaseController BaseController { get; protected set; }
+    private List<Transform> ModulPositions { get; set; }
 
-    public bool AllowAddBuilding { get; private set; }
+    private bool AlreadyBuildBuilding { get; set; }
+    public bool AllowAddBuilding { get { return !AlreadyBuildBuilding && BuildingList.Count < ModulPositions.Count; } }
 
-    public Base(int id, Player player, Position position, BaseValues baseValues)
+    public int GoldPerRound { get { return 0; } }
+
+    public Base(int id, int playerID, Position position)
     {
-        // Parent object and controller must be first!
-        BaseParent = BaseController.InstatiateParentObject(position, player.Name);
-        BaseController = BaseParent.gameObject.AddComponent<BaseController>();
-        Buildings = new Building[10];
-
         ID = id;
-        Player = player;
+        PlayerID = playerID;
         Position = position;
-        BaseValues = baseValues;
+        BaseValues = new BaseValues(2, 0, 0);
 
-        AllowAddBuilding = true;
+        AlreadyBuildBuilding = false;
 
-        BaseController.InstantiateBase(player.Name, player.Color);
+        InitiateValues();
+    }
+
+    public Base()
+    {
+
+    }
+
+    public void AddBuilding(BuildingType buildingType)
+    {
+        if (!AllowAddBuilding)
+        {
+            return;
+        }
+
+        BuildingList.Add(new Building(PlayerID, buildingType));
+        AlreadyBuildBuilding = true;
+    }
+
+    public Transform GetFreeModulPosition()
+    {
+        if (!AllowAddBuilding)
+        {
+            return null;
+        }
+
+        Transform modulPosition = null;
+        while (modulPosition == null)
+        {
+            var randomModulPosition = Random.Range(0, ModulPositions.Count);
+            if (ModulPositions[randomModulPosition].childCount == 0)
+            {
+                modulPosition = ModulPositions[randomModulPosition];
+            }
+        }
+
+        return modulPosition;
+    }
+
+    public void ResetAlreadyBuildBuilding()
+    {
+        AlreadyBuildBuilding = false;
+    }
+
+    public void BecomeAttacked(int damage)
+    {
+        BaseValues.HP -= damage;
+
+        CheckWhetherBaseIsAlive();
+    }
+
+    private bool CheckWhetherBaseIsAlive()
+    {
+        if (BaseValues.HP > 0)
+        {
+            return true;
+        }
+
+        // TODO destroy...
+        return false;
+    }
+
+    private void InitiateValues()
+    {
+        var player = PlayerManager.Get().GetPlayer(PlayerID);
+        BaseParent = BaseController.InstatiateParentObject(Position, player.Name);
+        BaseController = BaseParent.gameObject.AddComponent<BaseController>();
+        BuildingList = new List<Building>();
+
+        BaseController.InstantiateBase(player.Color);
+
+        ModulPositions = new List<Transform>(BaseParent.GetComponentsInChildren<Transform>()).FindAll(t => t.parent.tag == Tags.ModulPositionObjects);
+        Debug.Log(ModulPositions.Count);
     }
 
     public JSONObject ToJSON()
     {
         var jsonObject = JSONObject.obj;
-
+        jsonObject[JSONs.ID] = new JSONObject(ID);
+        jsonObject[JSONs.PlayerID] = new JSONObject(PlayerID);
+        jsonObject[JSONs.Position] = Position.ToJSON();
+        jsonObject[JSONs.BaseValues] = BaseValues.ToJSON();
+        jsonObject[JSONs.Buildings] = JSONObject.CreateList(BuildingList);
+        jsonObject[JSONs.AlreadyBuildBuilding] = new JSONObject(AllowAddBuilding);
         return jsonObject;
     }
 
-    public void FromJSON(JSONObject o)
+    public void FromJSON(JSONObject jsonObject)
     {
-        throw new System.NotImplementedException();
+        ID = (int)jsonObject[JSONs.ID];
+        PlayerID = (int)jsonObject[JSONs.PlayerID];
+        Position = new Position(jsonObject[JSONs.Position]);
+        BaseValues = new BaseValues();
+        BaseValues.FromJSON(jsonObject[JSONs.FleetValues]);
+        AlreadyBuildBuilding = (bool)jsonObject[JSONs.AlreadyBuildBuilding];
+
+        InitiateValues();
+        BaseManager.Get().BaseList.Add(this);
+
+        BuildingList = JSONObject.ReadList<Building>(jsonObject[JSONs.Buildings]);
     }
 }
 
@@ -79,19 +176,19 @@ public class BaseController : MonoBehaviour
         return fleetParent;
     }
 
-    public void InstantiateBase(string playerName, Color color)
+    public void InstantiateBase(Color color)
     {
-        InstantiateBaseObject(BaseManager.Get().BaseSettings.MainBuildingObject, playerName);
+        InstantiateBaseObject(BaseManager.Get().BaseSettings.MainBuildingObject);
 
         Color = color;
     }
 
-    private void InstantiateBaseObject(Transform model, string playerName)
+    private void InstantiateBaseObject(Transform model)
     {
         // Instantiate base
         BaseObject = Instantiate(model, transform.position, transform.rotation) as Transform;
 
-        BaseObject.name = "Base Object: " + playerName;
+        BaseObject.name = "Base Object";
         BaseObject.SetParent(transform);
     }
     private void SetColorOfBase(Color color)
@@ -103,6 +200,7 @@ public class BaseController : MonoBehaviour
             colorObject.renderer.material.color = color;
         }
     }
+
     #endregion
 
     private void Init()
@@ -122,6 +220,6 @@ public class BaseController : MonoBehaviour
 
     private void Update()
     {
-        
+
     }
 }

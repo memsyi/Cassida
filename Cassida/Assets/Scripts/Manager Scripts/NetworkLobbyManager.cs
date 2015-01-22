@@ -67,13 +67,11 @@ public class NetworkLobbyManager : MonoBehaviour
 
     public void LeaveRoom()
     {
-        print("leav room");
         PhotonNetwork.LeaveRoom();
     }
 
     private void OnDisconnectedFromPhoton()
     {
-        print("disconnect");
         var mainMenu = GameObject.FindGameObjectWithTag(Tags.MainMenu);
         if (mainMenu != null)
         {
