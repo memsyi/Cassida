@@ -109,7 +109,6 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
     #region Base selection
     public void SelectIfOwnBase(Base baseo)
     {
-        print(baseo.ID +" " + OwnBase.ID);
         if (baseo == null || baseo.ID != OwnBase.ID)
         {
             return;

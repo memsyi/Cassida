@@ -64,6 +64,7 @@ GameObject:
   - 114: {fileID: 11400012}
   - 114: {fileID: 11400014}
   - 114: {fileID: 11400016}
+  - 114: {fileID: 11400390}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2185,7 +2186,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 4294966527
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -3067,6 +3068,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _moveableTileObject: {fileID: 400000, guid: 3ff84fa9b225f0440bfc136ded0e0a32, type: 2}
+  _attackableTileObject: {fileID: 400000, guid: 387969e5cc6b9834fa21a0e8e51658ba,
+    type: 2}
 --- !u!114 &11400034
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3128,7 +3131,9 @@ MonoBehaviour:
     _mainBuildingObject: {fileID: 400010, guid: b1f580a69da4d9245b21128dab4ca0c9,
       type: 2}
   _buildingSettings:
-    _foo: {fileID: 0}
+    _baseDefense: {fileID: 400002, guid: a214a8e0dc61e2f4c91cdc9d54e6d045, type: 2}
+    _engeneeringBay: {fileID: 0}
+    _commandCenter: {fileID: 0}
 --- !u!114 &11400042
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7419,6 +7424,30 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &11400390
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 572890063, guid: a79dd19afd572c64cace28b3ef8e490a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noGarbageBlurShader: {fileID: 4800000, guid: 08541fc9424999e4e9c33f3abde31695, type: 3}
+  blurShader: {fileID: 4800000, guid: 1855d9636fad3914bacc4a543165c974, type: 3}
+  compositeShader: {fileID: 4800000, guid: 86db892f77f2e234fa73ba9c18757385, type: 3}
+  glowRenderShader: {fileID: 4800000, guid: c04b7cae8accdfb4e9c2648823ff39d7, type: 3}
+  fSDSShader: {fileID: 4800000, guid: b14b79b8936134d3f8238f0c2d40d634, type: 3}
+  glowType: 0
+  glowQuality: 1
+  fullScreenGlowTint: {r: 1, g: 1, b: 1, a: 0}
+  blurSpread: .25
+  blurIterations: 5
+  glowIntensity: .300000012
+  blurOffset: .25
+  samples: 4
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1
