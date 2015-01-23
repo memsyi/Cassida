@@ -146,6 +146,10 @@ public class GameManager : Photon.MonoBehaviour, IJSON
 
         // Instantiate bases at player
         BaseManager.Get().InstantiateAllExistingBasesAtPlayer(photonPlayer);
+
+        // Set Camera
+        CameraController.Get().SetCameraToBasePositionAtPlayer(photonPlayer);
+
     }
 
     public void SetUpGameToAllPlayer()
@@ -203,7 +207,7 @@ public class GameManager : Photon.MonoBehaviour, IJSON
 
     private void Init()
     {
-        Game = new Game(EdgeLength.Seven, MapForms.Hexagon);
+        Game = new Game(EdgeLength.Fife, MapForms.Hexagon);
     }
 
     private void Start()

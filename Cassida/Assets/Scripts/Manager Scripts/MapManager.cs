@@ -15,6 +15,7 @@ public class MapManager : MonoBehaviour
     {
         GenerateMap(bottomEdgeLength, mapForm);
         AddBasesToMap();
+        AddStartFleets();
     }
 
     private void GenerateMap(EdgeLength bottomEdgeLength, MapForms mapForm)
@@ -37,7 +38,17 @@ public class MapManager : MonoBehaviour
         BaseManager.Get().InstantiateBasesForAllPlayer();
     }
 
+    private void AddStartFleets()
+    {
+        FleetManager.Get().AddStartFleets();
+    }
+
     private Tile FindNearestTileToMousePosition()
+    {
+        return FindNearestTileToPosition(MouseController.Get().MousePositionOnMap);
+    }
+
+    public Tile FindNearestTileToPosition(Vector3 position)
     {
         if (TileList == null || TileList.Count == 0)
         {
@@ -49,7 +60,7 @@ public class MapManager : MonoBehaviour
 
         foreach (var tile in TileList)
         {
-            var distance = Vector2.Distance(MouseController.Get().MousePositionOnMap, new Vector2(tile.TileParent.position.x, tile.TileParent.position.z));
+            var distance = Vector2.Distance(position, new Vector2(tile.TileParent.position.x, tile.TileParent.position.z));
 
             if (distance < shortestDistance)
             {

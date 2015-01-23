@@ -14,7 +14,8 @@ public struct RPCs
 
     public const string StartGame = "StartGame";
     public const string AskMasterToJoinGame = "AskMasterToJoinGame";
-    public const string AskMasterToChangeColor = "AskMasterToChangeColor"; 
+    public const string AskMasterToChangeColor = "AskMasterToChangeColor";
+    public const string SetCameraToBasePosition = "SetCameraToBasePosition";
 
     public const string AskForEndTurn = "AskForEndTurn";
     public const string SetCurrentPlayer = "SetCurrentPlayer";

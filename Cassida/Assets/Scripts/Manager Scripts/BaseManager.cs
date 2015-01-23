@@ -114,6 +114,7 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
             return;
         }
         BaseSelected = true;
+        CameraController.Get().SetCameraToBasePosition(true);
         print("Base selected");
     }
 
@@ -200,6 +201,11 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
     #region Destroy and reset bases
     public void ResetAlreadyBuildBuildingOfOwnBase()
     {
+        if (OwnBase == null)
+        {
+            return;
+        }
+
         OwnBase.ResetAlreadyBuildBuilding();
     }
 
@@ -257,6 +263,15 @@ public class BaseManager : Photon.MonoBehaviour, IJSON
         if(GUI.Button(new Rect(500, 100, 150, 150), "Add Building"))
         {
             AddNewBuilding(0);
+        }
+        if (GUI.Button(new Rect(200, 0, 100, 20), "Add Fleet"))
+        {
+            var testUnits = new UnitValues[] { new UnitValues(UnitType.Meele, 2), new UnitValues(UnitType.Range, 1), null, null, null, null };
+
+            var playerBase = BaseManager.Get().GetBase(PlayerManager.Get().Player.ID);
+            var fleetPosition = MapManager.Get().FindNearestTileToPosition(Vector3.MoveTowards(playerBase.BaseParent.position, Vector3.zero, 1.5f)).Position;
+
+            FleetManager.Get().InstantiateNewFleet(fleetPosition, FleetType.Slow, testUnits);
         }
     }
 

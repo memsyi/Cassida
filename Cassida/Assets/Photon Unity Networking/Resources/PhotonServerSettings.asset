@@ -54,4 +54,5 @@ MonoBehaviour:
   - StartGame
   - AskForAttack
   - AttackEnemy
+  - SetCameraToBasePosition
   DisableAutoOpenWizard: 0

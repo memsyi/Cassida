@@ -1426,6 +1426,22 @@ Prefab:
       propertyPath: instantiationId
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._heightMultiplier
+      value: 1.20000005
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._minimumZoom
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._movementSpeed
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
+      propertyPath: _cameraSettings._zoomDownAngle
+      value: 50
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ac3904c2974a4074387896e8725ecd4c, type: 2}
   m_RootGameObject: {fileID: 1924779991}
@@ -4057,6 +4073,7 @@ GameObject:
   - 114: {fileID: 999599558}
   - 114: {fileID: 999599557}
   - 114: {fileID: 999599567}
+  - 114: {fileID: 999599568}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4230,19 +4247,19 @@ MonoBehaviour:
       height: 100
     _borderStrength: 5
   _cameraSettings:
-    _movementSpeed: .5
+    _movementSpeed: 1.5
     _rotationSpeed: 1.5
     _zoomSpeed: 3
     _buttonSpeed: 1
     _mouseButtonSpeed: 1.5
-    _minimumZoom: 20
+    _minimumZoom: 16
     _maximumZoom: .75
     _minimumZoomRotation: -.75
     _zoomRotationSpeed: 12
-    _zoomDownAngle: 40
+    _zoomDownAngle: 50
     _maximumZoomDownAngle: 70
-    _heightMultiplier: 1
-    _lerpBackZoomSpeed: 3
+    _heightMultiplier: 1.20000005
+    _lerpSpeed: 2
 --- !u!81 &999599563
 AudioListener:
   m_ObjectHideFlags: 0
@@ -4325,6 +4342,30 @@ MonoBehaviour:
   glowIntensity: .300000012
   blurOffset: .25
   samples: 4
+--- !u!114 &999599568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 999599555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ownerId: 0
+  group: 0
+  prefixBackup: -1
+  observed: {fileID: 0}
+  synchronization: 0
+  onSerializeTransformOption: 3
+  onSerializeRigidBodyOption: 2
+  ownershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 0}
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 4
+  instantiationId: 4
 --- !u!1 &1017875499
 GameObject:
   m_ObjectHideFlags: 0

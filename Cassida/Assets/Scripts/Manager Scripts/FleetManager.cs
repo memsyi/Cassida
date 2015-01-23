@@ -139,7 +139,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         var tile = TileManager.Get().GetTile(position);
 
-        if (tile == null || tile.FleetID > -1)
+        if (tile == null || tile.FleetID > -1 || tile.BaseID > -1)
         {
             return;
         }
@@ -163,6 +163,14 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         }
 
         var position = new Position(positionX, positionY);
+
+        var tile = TileManager.Get().GetTile(position);
+
+        if (tile == null || tile.FleetID > -1 || tile.BaseID > -1)
+        {
+            return;
+        }
+
         var player = PlayerManager.Get().GetPlayer(playerID);
 
         AddFleet(new Fleet(id, player.ID, position, (FleetType)fleetType));
@@ -291,12 +299,20 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
         return FleetList.Find(f => f.Position == position);
     }
 
-    private void OnGUI()
+    public void AddStartFleets()
     {
-        if (GUI.Button(new Rect(200, 0, 100, 20), "Add Fleet"))
+        if (!PhotonNetwork.isMasterClient)
         {
-            var testUnits = new UnitValues[] { new UnitValues(UnitType.Meele, 2), new UnitValues(UnitType.Range, 1), null, null, null, null };
-            InstantiateNewFleet(new Position(0, 0), FleetType.Slow, testUnits);
+            return;
+        }
+
+        foreach (var player in PlayerManager.Get().PlayerList)
+        {
+            HighestFleetID++;
+            var playerBase = BaseManager.Get().GetBase(player.ID);
+            var fleetPosition = MapManager.Get().FindNearestTileToPosition(Vector3.MoveTowards(playerBase.BaseParent.position, Vector3.zero, 1.5f)).Position;
+            photonView.RPC(RPCs.AddNewFleet, PhotonTargets.All, HighestFleetID, player.ID, fleetPosition.X, fleetPosition.Y, (int)FleetType.Slow);
+            photonView.RPC(RPCs.AddNewUnit, PhotonTargets.MasterClient, HighestFleetID, 1, (int)UnitType.Meele, 1);
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public enum BorderCrossingActions { Nothing, Movement, Rotation, Mixed }
 public enum KeyPressedActions { Nothing, Movement, Rotation }
@@ -88,7 +89,7 @@ public class SettingsCameraControlls
         get { return _allowUpDownRotation; }
         set { _allowUpDownRotation = value; }
     }
-    public bool AllowZoomRation
+    public bool AllowZoomRotation
     {
         get { return _allowZoomRotation; }
         set { _allowZoomRotation = value; }
@@ -220,7 +221,7 @@ public class SettingsCameraSettings
         _zoomDownAngle = 50f,
         _maximumZoomDownAngle = 70f,
         _heightMultiplier = 1f,
-        _lerpBackZoomSpeed = 2.0f;
+        _lerpSpeed = 2.0f;
 
     #region Settings
     public float ZoomDownAngle
@@ -283,15 +284,16 @@ public class SettingsCameraSettings
         get { return _heightMultiplier; }
         set { _heightMultiplier = value; }
     }
-    public float LerpBackZoomSpeed
+    public float LerpSpeed
     {
-        get { return _lerpBackZoomSpeed; }
-        set { _lerpBackZoomSpeed = value; }
+        get { return _lerpSpeed; }
+        set { _lerpSpeed = value; }
     }
     #endregion
 }
 
-public class CameraController : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class CameraController : Photon.MonoBehaviour
 {
     #region Variables
     [SerializeField]
@@ -341,8 +343,6 @@ public class CameraController : MonoBehaviour
         get { return _cameraSettings; }
         set { _cameraSettings = value; }
     }
-
-    private Vector3 currentSelectedObjectPosition = new Vector3();
     #endregion
 
     private void HandleUserInput()
@@ -539,9 +539,8 @@ public class CameraController : MonoBehaviour
         }
 
         // Zoom
-        //if (Input.GetAxis("Mouse ScrollWheel") != 0) 
-
         Zoom(Input.GetAxis("Mouse ScrollWheel"));
+        CorrectCameraRotationToCurve();
 
         // Border Crossing
         HandleBorderCrossing();
@@ -692,10 +691,46 @@ public class CameraController : MonoBehaviour
     #endregion
     #endregion
 
-    public void SetCameraPositionAndRotation(Vector3 position, Vector3 rotation)
+    public void SetCameraPosition(Vector3 position)
     {
-        transform.position = position;
-        transform.eulerAngles = rotation;
+        transform.position = CalculatePositionToLookAtPosition(position) + Vector3.up * transform.position.y;
+    }
+
+    public void SetCameraToBasePosition(bool lerp)
+    {
+        var basePosition = BaseManager.Get().OwnBase.BaseParent.position;
+        basePosition += Vector3.up * transform.position.y;
+
+        if (!lerp)
+        {
+            transform.position = basePosition;
+            transform.LookAt(Vector3.zero);
+            SetCameraPosition(basePosition);
+            return;
+        }
+
+        MoveToPosition(basePosition);
+    }
+
+    [RPC]
+    private void SetCameraToBasePosition(PhotonMessageInfo info)
+    {
+        if (!info.sender.isMasterClient)
+        {
+            return;
+        }
+
+        SetCameraToBasePosition(false);
+    }
+
+    public void SetCameraToBasePositionAtPlayer(PhotonPlayer photonPlayer)
+    {
+        if (!PhotonNetwork.isMasterClient)
+        {
+            return;
+        }
+
+        photonView.RPC(RPCs.SetCameraToBasePosition, photonPlayer);
     }
 
     private void CorrectPositionToMovementArea()
@@ -719,6 +754,86 @@ public class CameraController : MonoBehaviour
         {
             transform.position = new Vector3(CameraExtras.MovementArea.x + CameraExtras.MovementArea.width, transform.position.y, transform.position.z);
         }
+    }
+
+    private void CorrectCameraRotationToCurve()
+    {
+        if (!CameraControlls.AllowZoomRotation || CameraControlls.CameraBaseView)
+        {
+            return;
+        }
+        //    SetCorrectCameraRotation();
+        //}
+        ////else if (transform.rotation.x < CameraSettings.ZoomDownAngle && !CameraControlls.CameraBaseView)
+        ////{
+        ////    RotateToDefault();
+        ////}
+        //else if (CameraControlls.CameraBaseView && (transform.rotation.x < CameraSettings.MaximumZoomDownAngle || Vector3.Distance(transform.position, currentSelectedObjectPosition) > 0.01f))
+        //{
+        //    MoveToSelectedObject();
+        //}
+        //}
+
+        //private void SetCorrectCameraRotation()
+        //{
+        //float currentRotation = transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation;
+        float correctRotation = 0;
+
+        if (transform.position.y > CameraSettings.MinimumZoom / 2)
+        {
+            correctRotation = Mathf.Min(CameraSettings.ZoomDownAngle + transform.position.y * CameraSettings.ZoomRotationSpeed / 2 - (CameraSettings.MinimumZoom / 2) * CameraSettings.ZoomRotationSpeed / 2, CameraSettings.MaximumZoomDownAngle);
+        }
+        else
+        {
+            correctRotation = Mathf.Min(transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation, CameraSettings.ZoomDownAngle);
+        }
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(correctRotation, transform.rotation.eulerAngles.y, 0), Time.deltaTime * CameraSettings.LerpSpeed);
+    }
+
+    //private void RotateToDefault()
+    //{
+    //    transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(CameraSettings.ZoomDownAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z), Time.deltaTime * CameraSettings.LerpSpeed);
+    //}
+
+    //public void StartObjectView(Vector3 objectPosition)
+    //{
+    //    CameraControlls.CameraBaseView = true;
+    //    currentSelectedObjectPosition = new Vector3(objectPosition.x, transform.position.y, objectPosition.z);
+    //}
+
+    public void MoveToPosition(Vector3 target)
+    {
+        StartCoroutine(MoveToTarget(target));
+        //transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(CameraSettings.MaximumZoomDownAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z), Time.deltaTime * CameraSettings.LerpSpeed);
+    }
+
+    private IEnumerator MoveToTarget(Vector3 target)
+    {
+        var correctTarget = CalculatePositionToLookAtPosition(target);
+
+        var finalTarget = new Vector3(correctTarget.x, transform.position.y, correctTarget.z);
+
+        while (Vector3.Distance(transform.position, finalTarget) > 0.1f)
+        {
+            transform.position = Vector3.Lerp(transform.position, finalTarget, Time.deltaTime * 3 * CameraSettings.LerpSpeed);
+            yield return null;
+        }
+    }
+
+    private Vector3 CalculatePositionToLookAtPosition(Vector3 position)
+    {
+        var ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        RaycastHit hitInfo;
+
+        var isRaycastColliding = MouseController.Get().Map.collider.Raycast(ray, out hitInfo, 100f);
+
+        if (!isRaycastColliding)
+        {
+            return position;
+        }
+
+        //var cameraLookAtPosition = hitInfo.point - transform.position;
+        return position - hitInfo.point + transform.position;
     }
 
     #region Controlls
@@ -789,18 +904,16 @@ public class CameraController : MonoBehaviour
     {
         if (CameraControlls.ZoomToMousePosition)
         {
-            Vector3 zoomDirection = new Vector3();
-            if (zoom > 0 && transform.position.y > CameraSettings.MaximumZoom)
+            if (zoom > 0 && transform.position.y > CameraSettings.MaximumZoom + 1)
             {
-                zoomDirection = new Vector3(MouseController.Get().MousePositionOnMap.x, 0, MouseController.Get().MousePositionOnMap.y);
-                print("down" + zoomDirection);
-                transform.position = Vector3.Lerp(transform.position, zoomDirection, Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+                var mousePositionOnMap = MouseController.Get().MousePositionOnMap;
+                var zoomToPosition = new Vector3(mousePositionOnMap.x, CameraSettings.MaximumZoom, mousePositionOnMap.y);
+                var zoomDirection = (transform.position - zoomToPosition).normalized;
+                transform.position -= zoomDirection * CameraSettings.ZoomSpeed * HeightMultiplier * zoom;
             }
             else if (zoom < 0 && transform.position.y < CameraSettings.MinimumZoom)
             {
-                zoomDirection = new Vector3(-MouseController.Get().MousePositionOnMap.x, Mathf.Max(transform.position.y + 5, transform.position.y * 2), -MouseController.Get().MousePositionOnMap.y);
-                print("up" + zoomDirection);
-                transform.position = Vector3.Lerp(transform.position, zoomDirection, Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
+                transform.position += transform.forward * CameraSettings.ZoomSpeed * HeightMultiplier * zoom;
             }
         }
         else
@@ -810,31 +923,12 @@ public class CameraController : MonoBehaviour
          || (zoom < 0 && transform.position.y < CameraSettings.MinimumZoom)))
             {
                 transform.position += transform.forward * CameraSettings.ZoomSpeed * HeightMultiplier * zoom;
-                //transform.position += MouseController.Get().MousePositionOnMap;
-                print("forward: " + MouseController.Get().MousePositionOnMap);
             }
             else
             {
                 transform.position += Vector3.down * CameraSettings.ZoomSpeed * HeightMultiplier * zoom;
-                print(Vector3.down + " : " + zoom);
             }
         }
-
-        //Vector3 zoomDirection = new Vector3();
-
-        //if (zoom > 0 && transform.position.y > CameraSettings.MaximumZoom)
-        //{
-        //    zoomDirection = new Vector3(MouseController.Get().MousePositionOnMap.x, 0, MouseController.Get().MousePositionOnMap.y).normalized;
-        //    print("down" + zoomDirection);
-        //    transform.position = Vector3.Lerp(transform.position, zoomDirection, Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
-        //}
-        //else if (zoom < 0 && transform.position.y < CameraSettings.MinimumZoom)
-        //{
-        //    zoomDirection = new Vector3(-MouseController.Get().MousePositionOnMap.x, CameraSettings.MinimumZoom, -MouseController.Get().MousePositionOnMap.y).normalized;
-        //    print("up" + zoomDirection);
-        //    transform.position = Vector3.Lerp(transform.position, transform.position + zoomDirection, Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
-        //}
-
 
         if (transform.position.y < CameraSettings.MaximumZoom)
         {
@@ -845,57 +939,6 @@ public class CameraController : MonoBehaviour
             transform.position = new Vector3(transform.position.x, CameraSettings.MinimumZoom, transform.position.z);
         }
     }
-
-    private void SetCorrectCameraZoom()
-    {
-        float currentRotation = transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation;
-        float correctRotation = 0;
-
-        if (transform.position.y > CameraSettings.MinimumZoom / 2)
-        {
-            correctRotation = Mathf.Min(CameraSettings.ZoomDownAngle + transform.position.y * CameraSettings.ZoomRotationSpeed / 2 - (CameraSettings.MinimumZoom / 2) * CameraSettings.ZoomRotationSpeed / 2, CameraSettings.MaximumZoomDownAngle);
-        }
-        else
-        {
-            correctRotation = Mathf.Min(transform.position.y * CameraSettings.ZoomRotationSpeed + CameraSettings.MinimumZoomRotation, CameraSettings.ZoomDownAngle);
-        }
-        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(correctRotation, transform.rotation.eulerAngles.y, 0), Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
-    }
-
-    private void SetCorrectCameraRotation()
-    {
-        if (CameraControlls.AllowZoomRation && !CameraControlls.CameraBaseView)
-        {
-            SetCorrectCameraZoom();
-
-        }
-        else if (transform.rotation.x < CameraSettings.ZoomDownAngle && !CameraControlls.CameraBaseView)
-        {
-            ZoomBackToDefault();
-        }
-        else if (CameraControlls.CameraBaseView && (transform.rotation.x < CameraSettings.MaximumZoomDownAngle || Vector3.Distance(transform.position, currentSelectedObjectPosition) > 0.01f))
-        {
-            LerpToSelectedObject();
-        }
-    }
-
-    private void ZoomBackToDefault()
-    {
-        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(CameraSettings.ZoomDownAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z), Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
-    }
-
-    public void StartObjectView(Vector3 objectPosition)
-    {
-        CameraControlls.CameraBaseView = true;
-        currentSelectedObjectPosition = new Vector3(objectPosition.x, transform.position.y, objectPosition.z);
-    }
-
-    private void LerpToSelectedObject()
-    {
-        transform.position = Vector3.Lerp(transform.position, new Vector3(currentSelectedObjectPosition.x, transform.position.y, currentSelectedObjectPosition.z), Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
-        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(CameraSettings.MaximumZoomDownAngle, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z), Time.deltaTime * CameraSettings.LerpBackZoomSpeed);
-    }
-
     #endregion
 
     private void Init()
@@ -927,7 +970,6 @@ public class CameraController : MonoBehaviour
     {
         HandleKeyboardInput();
         HandleMouseInput();
-        SetCorrectCameraRotation();
     }
 
     private static CameraController _instance = null;

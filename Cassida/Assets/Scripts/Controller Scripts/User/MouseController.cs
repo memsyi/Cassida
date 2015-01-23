@@ -30,7 +30,7 @@ public class MouseController : MonoBehaviour
 
     public Vector2 MousePositionOnMap { get { return GetMousePositionOnMap(); } }
 
-    private Transform Map { get; set; }
+    public Transform Map { get; set; }
 
     private MouseclickInformation _mouseclickInformation = new MouseclickInformation();
     #endregion
