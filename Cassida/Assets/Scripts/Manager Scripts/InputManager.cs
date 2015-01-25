@@ -13,12 +13,10 @@ public class InputManager : Photon.MonoBehaviour
     public Transform AttackableTileObject
     {
         get { return _attackableTileObject; }
-        private set { _attackableTileObject = value; }
     }
     public Transform MoveableTileObject
     {
         get { return _moveableTileObject; }
-        private set { _moveableTileObject = value; }
     }
 
     // Tiles
@@ -26,7 +24,6 @@ public class InputManager : Photon.MonoBehaviour
     private Tile CurrentSelectedTile { get { return TileManager.Get().CurrentSelectedTile; } }
 
     // Lists
-    //private List<Tile> MoveableTileList { get; set; }
     private List<Transform> MoveableTileObjectList { get; set; }
     private List<Transform> AttackableTileObjectList { get; set; }
     #endregion
@@ -281,17 +278,11 @@ public class InputManager : Photon.MonoBehaviour
 
         ResetActionArea();
 
-        if (CurrentSelectedTile == null)
-        {
-            return;
-        }
+        if (CurrentSelectedTile == null) { return; }
 
         var fleet = FleetManager.Get().GetFleet(CurrentSelectedTile.FleetID);
 
-        if (fleet == null)
-        {
-            return;
-        }
+        if (fleet == null) { return; }
 
         if (fleet.AllowMovement)
         {
@@ -309,9 +300,7 @@ public class InputManager : Photon.MonoBehaviour
         {
             var tile = moveableTileList[i];
             var tileObject = MoveableTileObjectList[i];
-            tileObject.position = tile.TileParent.position;
-            tileObject.rotation = tile.TileParent.rotation;
-            tileObject.gameObject.SetActive(true);
+            SetTileAndActivate(tile, tileObject);
         }
     }
 
@@ -323,10 +312,15 @@ public class InputManager : Photon.MonoBehaviour
         {
             var tile = attackableTileList[i];
             var tileObject = AttackableTileObjectList[i];
-            tileObject.position = tile.TileParent.position;
-            tileObject.rotation = tile.TileParent.rotation;
-            tileObject.gameObject.SetActive(true);
+            SetTileAndActivate(tile, tileObject);
         }
+    }
+
+    private void SetTileAndActivate(Tile tile, Transform tileObject)
+    {
+        tileObject.position = tile.TileParent.position;
+        tileObject.rotation = tile.TileParent.rotation;
+        tileObject.gameObject.SetActive(true);
     }
 
     public void ResetActionArea()
@@ -406,8 +400,6 @@ public class InputManager : Photon.MonoBehaviour
             return;
         }
 
-        // Achtung keine Überprüfung ob jetzt alle gleich syncronisiert sind!
-
         AttackEnemy(ownFleetID, enemyPositionX, enemyPositionY);
     }
     #region Check attack
@@ -423,9 +415,12 @@ public class InputManager : Photon.MonoBehaviour
         var enemyFleet = FleetManager.Get().GetFleet(enemyPosition);
         var enemyBase = BaseManager.Get().GetBase(enemyPosition);
 
-        if ((ownFleet == null || ownFleet.PlayerID != PlayerManager.Get().CurrentPlayer.ID)
-            || (enemyFleet == null || enemyFleet.PlayerID == PlayerManager.Get().CurrentPlayer.ID)
-            && (enemyBase == null || enemyBase.PlayerID == PlayerManager.Get().CurrentPlayer.ID))
+        // check player id
+        var currentPlayerID = PlayerManager.Get().CurrentPlayer.ID;
+        if ((ownFleet == null || ownFleet.PlayerID != currentPlayerID)
+
+            || (enemyFleet == null || enemyFleet.PlayerID == currentPlayerID)
+            && (enemyBase == null || enemyBase.PlayerID == currentPlayerID))
         {
             return false;
         }
@@ -437,17 +432,10 @@ public class InputManager : Photon.MonoBehaviour
             return false;
         }
 
+        // check own unit, enemy object and attack parameters
         var ownUnit = ownFleet.UnitList.Find(u => (u.Position + ownFleet.Rotation) % 6 == unitDirection); ;
 
-        if (ownUnit == null)
-        {
-            return false;
-        }
-
-        if (ownUnit.UnitController == null || ownUnit.AllowAttack == false)
-        {
-            return false;
-        }
+        if (ownUnit == null || ownUnit.UnitController == null || ownUnit.AllowAttack == false) { return false; }
 
         var enemyObjectPosition = enemyFleet != null ? enemyFleet.FleetParent.position : enemyBase.BaseParent.position;
 
@@ -471,20 +459,12 @@ public class InputManager : Photon.MonoBehaviour
     {
         if (enemyFleetPosition.X == ownFleetPosition.X)
         {
-            if (enemyFleetPosition.Y > ownFleetPosition.Y)
-            {
-                return 0;
-            }
-
+            if (enemyFleetPosition.Y > ownFleetPosition.Y) { return 0; }
             return 3;
         }
         else if (enemyFleetPosition.Y == ownFleetPosition.Y)
         {
-            if (enemyFleetPosition.X > ownFleetPosition.X)
-            {
-                return 1;
-            }
-
+            if (enemyFleetPosition.X > ownFleetPosition.X) { return 1; }
             return 4;
         }
         else if (enemyFleetPosition.X + enemyFleetPosition.Y == ownFleetPosition.X + ownFleetPosition.Y)
@@ -527,22 +507,26 @@ public class InputManager : Photon.MonoBehaviour
         PlayerManager.Get().EndTurnEvent += new EndTurnHandler(RemoveMouseEvents);
     }
 
+    private Transform InstantiateTileObject(Object tileObject)
+    {
+        var tileInstance = Instantiate(MoveableTileObject, Vector3.zero, Quaternion.identity) as Transform;
+        tileInstance.parent = GameObject.FindGameObjectWithTag(Tags.Map).transform;
+        tileInstance.gameObject.SetActive(false);
+        return tileInstance;
+    }
+
     private void Init()
     {
         MoveableTileObjectList = new List<Transform>();
         for (int i = 0; i < 6; i++)
         {
-            var tileObject = Instantiate(MoveableTileObject, Vector3.zero, Quaternion.identity) as Transform;
-            tileObject.parent = GameObject.FindGameObjectWithTag(Tags.Map).transform;
-            tileObject.gameObject.SetActive(false);
+            var tileObject = InstantiateTileObject(MoveableTileObject);
             MoveableTileObjectList.Add(tileObject);
         }
         AttackableTileObjectList = new List<Transform>();
         for (int i = 0; i < 12; i++)
         {
-            var tileObject = Instantiate(AttackableTileObject, Vector3.zero, Quaternion.identity) as Transform;
-            tileObject.parent = GameObject.FindGameObjectWithTag(Tags.Map).transform;
-            tileObject.gameObject.SetActive(false);
+            var tileObject = InstantiateTileObject(AttackableTileObject);
             AttackableTileObjectList.Add(tileObject);
         }
 

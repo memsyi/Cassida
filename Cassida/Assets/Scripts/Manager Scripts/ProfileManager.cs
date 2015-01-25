@@ -84,7 +84,7 @@ public class ProfileManager : MonoBehaviour, IJSON
 
     public void StartNewProfile()
     {
-        ProfileInputField.text = "";
+        ProfileInputField.text.text = "";
         //ProfileInputField.Select();
         //if (ProfileInputField.isFocused) print("omg wtf");
         //EventSystemManager.currentSystem.SetSelectedGameObject(ProfileInputField, null);

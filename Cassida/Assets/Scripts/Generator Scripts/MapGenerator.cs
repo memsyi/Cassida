@@ -9,41 +9,22 @@ public enum MapForms { Hexagon, CuttedDiamond, Diamond }
 public class MapGenerator : Photon.MonoBehaviour
 {
     #region Variables
-    //[SerializeField]
-    //private EdgeLength _bottomEdgeLength = EdgeLength.Fife;
-
-    //[SerializeField]
-    //private MapForms _mapForm = MapForms.Hexagon;
-
-    [SerializeField] // TODO struct !! [Serialize..]
+    [SerializeField] // TODO outsource as struct
     private Transform
         _tileObject = null,
         _asteroidsTerrainObject = null;
 
-    #region Terrains
     public Transform TileObject
     {
         get { return _tileObject; }
-        //private set { _tileParentObject = value; }
     }
+
+    #region Terrains
     public Transform AsteroidsTerrainObject
     {
         get { return _asteroidsTerrainObject; }
-        //private set { _asteroidsTerrainObject = value; }
     }
     #endregion
-
-    //private MapForms MapForm
-    //{
-    //    get { return _mapForm; }
-    //    set { _mapForm = value; }
-    //}
-
-    //private int BottomEdgeLength
-    //{
-    //    get { return (int)_bottomEdgeLength; }
-    //    set { _bottomEdgeLength = (EdgeLength)value; }
-    //}
 
     // Lists
     List<Tile> TileList { get { return TileManager.Get().TileList; } }
@@ -52,7 +33,8 @@ public class MapGenerator : Photon.MonoBehaviour
     public static Transform InstatiateTile(Position position)
     {
         var tileParent = new GameObject(position.ToString()).transform;
-        tileParent.position = new Vector3(position.X * 1.75f + position.Y * 0.875f, 0, position.Y * 1.515f);
+        var positionInWorld = new Vector3(position.X * 1.75f + position.Y * 0.875f, 0, position.Y * 1.515f);
+        tileParent.position = positionInWorld;
         tileParent.SetParent(MapGenerator.Get().transform);
         return tileParent;
     }
@@ -83,8 +65,10 @@ public class MapGenerator : Photon.MonoBehaviour
                  || mapForm == MapForms.Diamond)
                 {
                     var position = new Position(x, y);
+                    // Only set terrain on tiles without an objective
                     var objectiveType = CalculateObjectiveType(position);
                     var terrainType = objectiveType == ObjectiveType.Empty ? (int)CalculateTerrainType(position) : (int)TerrainType.Empty;
+
                     photonView.RPC(RPCs.AddTile, PhotonTargets.All, x, y, (int)objectiveType, (int)terrainType);
                 }
             }
@@ -128,7 +112,7 @@ public class MapGenerator : Photon.MonoBehaviour
 
     private TerrainType CalculateTerrainType(Position position)
     {
-        // TODO not mirrowed!!!!!
+        // TODO complete calculation
         int _randomValue = Random.Range(0, 4);
         if (_randomValue == 0)
         {
@@ -140,8 +124,9 @@ public class MapGenerator : Photon.MonoBehaviour
 
     private ObjectiveType CalculateObjectiveType(Position position)
     {
-        if (position == new Position(3, 0) || position == new Position(-3, 0)) return ObjectiveType.Base;
-        return ObjectiveType.Empty; // TODO calculate tiles where bases can be place
+        // TODO complete calculation
+        if (position == new Position(3, 0) || position == new Position(-3, 0)) return ObjectiveType.Base; // TODO calculate tiles for bases
+        return ObjectiveType.Empty;
     }
 
     private void Init()
@@ -179,15 +164,7 @@ public class MapGenerator : Photon.MonoBehaviour
         if (_instance == null)
         {
             GameObject obj = GameObject.FindGameObjectWithTag(Tags.Map);
-
-            if (obj.GetComponent<MapGenerator>() == null)
-            {
-                _instance = obj.AddComponent<MapGenerator>();
-            }
-            else
-            {
-                _instance = obj.GetComponent<MapGenerator>();
-            }
+            _instance = obj.AddComponent<MapGenerator>();
         }
 
         return _instance;

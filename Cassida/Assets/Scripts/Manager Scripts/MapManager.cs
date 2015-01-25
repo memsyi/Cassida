@@ -113,3 +113,7 @@ public class MapManager : MonoBehaviour
         return _instance;
     }
 }
+
+
+// https://github.com/ChristophPech/servertest/blob/master/src/gamesrv/techtree.cfg
+// https://github.com/omegasrevenge/Project4/blob/master/Assets/Scripts/GameManager.cs

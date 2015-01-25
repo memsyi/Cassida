@@ -12,13 +12,11 @@ public struct FleetSettings
     public Transform SlowFleetObject
     {
         get { return _slowFleetObject; }
-        private set { _slowFleetObject = value; }
     }
 
     public Transform FastFleetObject
     {
         get { return _fastFleetObject; }
-        set { _fastFleetObject = value; }
     }
 }
 
@@ -38,19 +36,16 @@ public struct UnitSettings
     public Transform MeeleUnitThreeObject
     {
         get { return _meeleUnitThreeObject; }
-        set { _meeleUnitThreeObject = value; }
     }
 
     public Transform MeeleUnitTwoObject
     {
         get { return _meeleUnitTwoObject; }
-        set { _meeleUnitTwoObject = value; }
     }
 
     public Transform MeeleUnitOneObject
     {
         get { return _meeleUnitOneObject; }
-        private set { _meeleUnitOneObject = value; }
     }
     #endregion
 
@@ -58,19 +53,16 @@ public struct UnitSettings
     public Transform RangeUnitThreeObject
     {
         get { return _rangeUnitThreeObject; }
-        set { _rangeUnitThreeObject = value; }
     }
 
     public Transform RangeUnitTwoObject
     {
         get { return _rangeUnitTwoObject; }
-        set { _rangeUnitTwoObject = value; }
     }
 
     public Transform RangeUnitOneObject
     {
         get { return _rangeUnitOneObject; }
-        private set { _rangeUnitOneObject = value; }
     }
     #endregion
 }
@@ -88,13 +80,11 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     public UnitSettings UnitSettings
     {
         get { return _unitSettgins; }
-        set { _unitSettgins = value; }
     }
 
     public FleetSettings FleetSettings
     {
         get { return _fleetSettings; }
-        set { _fleetSettings = value; }
     }
 
     // Lists
@@ -105,13 +95,13 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     private int HighestFleetID
     {
         get { return _highestFleetID; }
-        set { if (PhotonNetwork.isMasterClient) _highestFleetID = value; }
+        set { if (value > _highestFleetID) _highestFleetID = value; }
     }
     #endregion
 
     public void InstantiateNewFleet(Position position, FleetType fleetType, UnitValues[] unitValues)
     {
-        photonView.RPC(RPCs.AskForNewFleet, PhotonTargets.MasterClient, position.X, position.Y, (int)fleetType);
+        photonView.RPC(RPCs.AskForNewFleet, PhotonTargets.MasterClient, position.X, position.Y, (int)fleetType); // TODO ?? Network code with json ??
 
         for (int i = 0; i < unitValues.Length; i++)
         {
@@ -133,13 +123,9 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        // TODO genügend Geld?
+        // TODO enough money...?
 
-        var position = new Position(positionX, positionY);
-
-        var tile = TileManager.Get().GetTile(position);
-
-        if (tile == null || tile.FleetID > -1 || tile.BaseID > -1)
+        if(!IsTileFree(positionX, positionY))
         {
             return;
         }
@@ -162,18 +148,28 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        var position = new Position(positionX, positionY);
-
-        var tile = TileManager.Get().GetTile(position);
-
-        if (tile == null || tile.FleetID > -1 || tile.BaseID > -1)
+        if (!IsTileFree(positionX, positionY))
         {
             return;
         }
 
         var player = PlayerManager.Get().GetPlayer(playerID);
 
-        AddFleet(new Fleet(id, player.ID, position, (FleetType)fleetType));
+        AddFleet(new Fleet(id, player.ID, new Position(positionX, positionY), (FleetType)fleetType));
+    }
+
+    private bool IsTileFree(int positionX, int positionY)
+    {
+        var position = new Position(positionX, positionY);
+
+        var tile = TileManager.Get().GetTile(position);
+
+        if (tile == null || tile.FleetID > -1 || tile.BaseID > -1)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public void AddFleet(Fleet fleet)
@@ -239,7 +235,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             return;
         }
 
-        // TODO genügend Geld?
+        // TODO enough money...?
 
         var fleet = GetFleet(fleetID);
 
@@ -252,13 +248,12 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     }
     #endregion
 
-    // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! by event?!?!?!
     #region Destroy or reset fleets
     public void ResetMovementOfAllFleets()
     {
         foreach (var fleet in FleetList)
         {
-            fleet.ResetMovementRotationAndAttack();
+            fleet.ResetFleetActions();
         }
     }
 
@@ -283,9 +278,9 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
     }
     public void DestroyAllFleets()
     {
-        foreach (var player in PlayerManager.Get().PlayerList)
+        foreach(var fleet in FleetList)
         {
-            DestroyAllFleetsOfPlayer(player.ID);
+            DestroyFleet(fleet);
         }
     }
     #endregion
@@ -311,6 +306,7 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
             HighestFleetID++;
             var playerBase = BaseManager.Get().GetBase(player.ID);
             var fleetPosition = MapManager.Get().FindNearestTileToPosition(Vector3.MoveTowards(playerBase.BaseParent.position, Vector3.zero, 1.5f)).Position;
+
             photonView.RPC(RPCs.AddNewFleet, PhotonTargets.All, HighestFleetID, player.ID, fleetPosition.X, fleetPosition.Y, (int)FleetType.Slow);
             photonView.RPC(RPCs.AddNewUnit, PhotonTargets.MasterClient, HighestFleetID, 1, (int)UnitType.Meele, 1);
         }
@@ -383,7 +379,4 @@ public class FleetManager : Photon.MonoBehaviour, IJSON
 
         JSONObject.ReadList<Fleet>(jsonObject[JSONs.Fleets]);
     }
-
-    // https://github.com/ChristophPech/servertest/blob/master/src/gamesrv/techtree.cfg
-    // https://github.com/omegasrevenge/Project4/blob/master/Assets/Scripts/GameManager.cs
 }

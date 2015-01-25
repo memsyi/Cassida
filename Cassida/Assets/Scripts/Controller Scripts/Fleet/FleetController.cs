@@ -62,7 +62,7 @@ public class Fleet : IJSON
 
         InitiateValues();
 
-        ResetMovementRotationAndAttack();
+        ResetFleetActions();
         AllowRotation = true;
     }
 
@@ -100,17 +100,14 @@ public class Fleet : IJSON
         Rotation = rotationTarget % 6;
     }
 
-    public void ResetMovementRotationAndAttack() // TODO add as event (set private)
+    public void ResetFleetActions()
     {
         MovementPointsLeft = (int)FleetValues.FleetType;
         AllowRotation = true;
 
         foreach (var unit in UnitList)
         {
-            if (unit != null)
-            {
-                unit.AllowAttack = true;
-            }
+            if (unit != null) { unit.AllowAttack = true; }
         }
     }
 
@@ -119,6 +116,7 @@ public class Fleet : IJSON
         return UnitList.Find(u => (u.Position + Rotation) % 6 == position);
     }
 
+    #region Fight
     public void AttackFleetWithFleet(int enemyFleetID)
     {
         var enemyFleet = FleetManager.Get().GetFleet(enemyFleetID);
@@ -143,26 +141,26 @@ public class Fleet : IJSON
         AllowRotation = false;
         unit.AllowAttack = false;
 
-        // damage to all enemy units
+        // damage to all enemy units (ambush attack)
         if (enemyUnit == null)
         {
             for (int i = enemyFleet.UnitList.Count - 1; i >= 0; i--)
             {
                 AttackUnitOfFleet(enemyFleet, enemyFleet.UnitList[i], unit.UnitValues.Strength);
             }
-        }
-        else
-        {
-            var ownStrength = unit.UnitValues.Strength;
-            // damage to own unit
-            if (unit.UnitValues.UnitType == enemyUnit.UnitValues.UnitType)
-            {
-                AttackUnitOfFleet(this, unit, enemyUnit.UnitValues.Strength);
-            }
 
-            // damage to enemy unit
-            AttackUnitOfFleet(enemyFleet, enemyUnit, ownStrength);
+            return;
         }
+
+        var ownStrength = unit.UnitValues.Strength;
+        // damage to own unit
+        if (unit.UnitValues.UnitType == enemyUnit.UnitValues.UnitType)
+        {
+            AttackUnitOfFleet(this, unit, enemyUnit.UnitValues.Strength);
+        }
+
+        // damage to enemy unit
+        AttackUnitOfFleet(enemyFleet, enemyUnit, ownStrength);
     }
 
     private void AttackUnitOfFleet(Fleet fleet, Unit attackedUnit, int strength)
@@ -236,6 +234,7 @@ public class Fleet : IJSON
             return;
         }
     }
+    #endregion
 
     private bool CheckWhetherFleetIsAlive()
     {
@@ -332,6 +331,7 @@ public class FleetController : MonoBehaviour
 
     private void SetColorOfFleet(Color color)
     {
+        // Find all objects of fleet need to be colored
         var colorComponentList = new List<Renderer>(FleetObject.GetComponentsInChildren<Renderer>());
         var colorObjectList = new List<Renderer>(colorComponentList.FindAll(t => t.transform.parent.tag == Tags.PlayerColorObjects));
         foreach (var colorObject in colorObjectList)
@@ -345,15 +345,11 @@ public class FleetController : MonoBehaviour
     private Vector3 MovementTarget { get; set; }
     private Quaternion RotationTarget { get; set; }
 
-    private bool Move { get; set; }
-    private bool Rotate { get; set; }
-
     public void MoveFleet(Position target)
     {
         MovementTarget = TileManager.Get().GetTile(target).TileParent.position;
-        if (!Move)
+        if (Vector3.Distance(transform.position, MovementTarget) < 0.001f)
         {
-            Move = true;
             StartCoroutine(MoveToTarget());
         }
     }
@@ -361,33 +357,30 @@ public class FleetController : MonoBehaviour
     public void RotateFleet(int rotationTarget)
     {
         RotationTarget = Quaternion.AngleAxis(rotationTarget * 60f, Vector3.up);
-        if (!Rotate)
+        if (Quaternion.Angle(transform.rotation, RotationTarget) < 0.001f)
         {
-            Rotate = true;
             StartCoroutine(RotateToTarget());
         }
     }
 
     private IEnumerator MoveToTarget()
     {
-        while (Vector3.Distance(transform.position, MovementTarget) > 0.001f)
+        while (Vector3.Distance(transform.position, MovementTarget) >= 0.001f)
         {
             transform.position = Vector3.Lerp(transform.position, MovementTarget, Time.deltaTime * 3);
             yield return null;
         }
         transform.position = MovementTarget;
-        Move = false;
     }
 
     private IEnumerator RotateToTarget()
     {
-        while (Quaternion.Angle(transform.rotation, RotationTarget) > 0.001f)
+        while (Quaternion.Angle(transform.rotation, RotationTarget) >= 0.001f)
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, RotationTarget, Time.deltaTime * 3);
             yield return null;
         }
         transform.rotation = RotationTarget;
-        Rotate = false;
     }
     #endregion
 
